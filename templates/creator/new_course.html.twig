@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create New Course{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="color: var(--text-main);">Propose New Course</h1>
+        <a href="{{ path('app_student_courses') }}" class="btn secondary" style="padding: 10px 20px; text-decoration: none;">Cancel</a>
+    </div>
+
+    <div class="card" style="padding: 2.5rem; background: var(--bg-card); border-radius: 12px; box-shadow: var(--shadow-lg);">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div style="margin-bottom: 2rem;">
+                {{ form_label(form.title, 'Course Title', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.75rem; color: var(--text-main);'}}) }}
+                {{ form_widget(form.title, {'attr': {
+                    'class': 'form-control', 
+                    'style': 'width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main);',
+                    'placeholder': 'e.g. Advanced Python Masterclass'
+                }}) }}
+                {{ form_errors(form.title) }}
+            </div>
+
+            {% if form.matiere_name is defined %}
+            <div style="margin-bottom: 2rem;">
+                {{ form_label(form.matiere_name, 'Category / Subject', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.75rem; color: var(--text-main);'}}) }}
+                {{ form_widget(form.matiere_name, {'attr': {
+                    'class': 'form-control', 
+                    'style': 'width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main);',
+                    'placeholder': 'e.g. Computer Science'
+                }}) }}
+                {{ form_errors(form.matiere_name) }}
+            </div>
+            {% endif %}
+
+            <div style="margin-bottom: 2rem;">
+                {{ form_label(form.description, 'Short Description', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.75rem; color: var(--text-main);'}}) }}
+                {{ form_widget(form.description, {'attr': {
+                    'class': 'form-control', 
+                    'style': 'width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main); min-height: 120px;',
+                    'placeholder': 'Describe what students will learn in this course...'
+                }}) }}
+                {{ form_errors(form.description) }}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    {{ form_label(form.level, 'Difficulty Level', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.75rem; color: var(--text-main);'}}) }}
+                    {{ form_widget(form.level, {'attr': {
+                        'class': 'form-control', 
+                        'style': 'width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main);'
+                    }}) }}
+                </div>
+                <div>
+                    {{ form_label(form.xp, 'Bonus XP', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.75rem; color: var(--text-main);'}}) }}
+                    {{ form_widget(form.xp, {'attr': {
+                        'class': 'form-control', 
+                        'style': 'width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main);',
+                        'placeholder': '100'
+                    }}) }}
+                </div>
+            </div>
+
+
+            <button type="submit" class="btn" style="width: 100%; padding: 14px; background: var(--brand-gradient); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: var(--shadow-neon);">
+                Propose Course & Continue
+            </button>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    
+    <!-- Header -->
+    <div style="margin-bottom: 2rem;">
+        <h1 style="margin: 0; font-size: 2rem; background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Content Moderation</h1>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Review and approve pending content from creators.</p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% for message in app.flashes('success') %}
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); padding:  10px; border-radius: 6px; margin-bottom: 1rem;">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <!-- Tabs -->
+    <div style="display: flex; gap: 2rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border);">
+        <button class="tab-btn active" onclick="switchTab('categories')" style="padding: 10px 0; background: none; border: none; border-bottom: 3px solid transparent; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; font-weight: 600; transition: all 0.2s;">
+            Categories <span class="badge" style="background: var(--warning); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 5px;">{{ pendingMatieres|length }}</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('courses')" style="padding: 10px 0; background: none; border: none; border-bottom: 3px solid transparent; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; font-weight: 600; transition: all 0.2s;">
+            Courses <span class="badge" style="background: var(--warning); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 5px;">{{ pendingCours|length }}</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('resources')" style="padding: 10px 0; background: none; border: none; border-bottom: 3px solid transparent; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; font-weight: 600; transition: all 0.2s;">
+            Resources <span class="badge" style="background: var(--warning); color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-left: 5px;">{{ pendingResources|length }}</span>
+        </button>
+    </div>
+
+    <!-- TAB 1: PENDING CATEGORIES -->
+    <section id="categories" class="tab-content">
+        <div class="card-pro">
+            <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                <i class="ri-folder-add-line" style="color: var(--warning);"></i> 
+                Pending Categories
+            </h3>
+            {% if pendingMatieres is empty %}
+                <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    <i class="ri-inbox-line" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
+                    No pending categories.
+                </div>
+            {% else %}
+                <div class="table-container">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Proposed By</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for matiere in pendingMatieres %}
+                            <tr>
+                                <td style="font-weight: 600;">{{ matiere.name }}</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--brand-gradient); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem;">
+                                            {{ (matiere.creator ? matiere.creator.fullName : 'U')|slice(0, 1) }}
+                                        </div>
+                                        {{ matiere.creator ? matiere.creator.fullName : 'Unknown' }}
+                                    </div>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                        <form method="post" action="{{ path('app_admin_matiere_approve', {'id': matiere.id}) }}">
+                                            <button type="submit" class="btn success" style="padding: 6px 16px;">Approve</button>
+                                        </form>
+                                        <form method="post" action="{{ path('app_admin_matiere_reject', {'id': matiere.id}) }}" onsubmit="return confirm('Are you sure?');">
+                                            <button type="submit" class="btn danger" style="padding: 6px 16px;">Reject</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- TAB 2: PENDING COURSES -->
+    <section id="courses" class="tab-content" style="display: none;">
+        <div class="card-pro">
+            <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                <i class="ri-book-mark-line" style="color: var(--info);"></i>
+                Pending Courses
+            </h3>
+            {% if pendingCours is empty %}
+                <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    <i class="ri-inbox-line" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
+                    No pending courses.
+                </div>
+            {% else %}
+                <div class="table-container">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>XP</th>
+                                <th>Author</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cours in pendingCours %}
+                            <tr>
+                                <td style="font-weight: 600;">{{ cours.title }}</td>
+                                <td><span class="badge" style="background: rgba(91, 42, 110, 0.1); color: var(--brand-main);">{{ cours.matiere.name }}</span></td>
+                                <td style="font-weight: 600; color: var(--success);">+{{ cours.xp }} XP</td>
+                                <td>{{ cours.author ? cours.author.fullName : 'Unknown' }}</td>
+                                <td style="text-align: right;">
+                                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                        <form method="post" action="{{ path('app_admin_cours_approve', {'id': cours.id}) }}">
+                                            <button type="submit" class="btn success" style="padding: 6px 16px;">Approve</button>
+                                        </form>
+                                        <form method="post" action="{{ path('app_admin_cours_reject', {'id': cours.id}) }}" onsubmit="return confirm('Are you sure?');">
+                                            <button type="submit" class="btn danger" style="padding: 6px 16px;">Reject</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- TAB 3: PENDING RESOURCES -->
+    <section id="resources" class="tab-content" style="display: none;">
+        <div class="card-pro">
+            <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                <i class="ri-attachment-line" style="color: var(--brand-accent);"></i>
+                Pending Resources
+            </h3>
+            {% if pendingResources is empty %}
+                <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    <i class="ri-inbox-line" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
+                    No pending resources.
+                </div>
+            {% else %}
+                <div class="table-container">
+                    <table class="pro-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Course</th>
+                                <th>Author</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for resource in pendingResources %}
+                            <tr>
+                                <td style="font-weight: 600;">
+                                    {{ resource.title ?? resource.url|slice(0, 30) ~ '...' }}
+                                </td>
+                                <td><span class="badge" style="background: var(--info); color: white;">{{ resource.type }}</span></td>
+                                <td>{{ resource.cours.title }}</td>
+                                <td>{{ resource.author ? resource.author.fullName : 'Unknown' }}</td>
+                                <td style="text-align: right;">
+                                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                        <a href="{{ resource.url }}" target="_blank" class="btn secondary" style="padding: 6px 12px;" title="Preview Resource">
+                                            <i class="ri-eye-line"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_admin_resource_approve', {'id': resource.id}) }}">
+                                            <button type="submit" class="btn success" style="padding: 6px 16px;">Approve</button>
+                                        </form>
+                                        <form method="post" action="{{ path('app_admin_resource_reject', {'id': resource.id}) }}" onsubmit="return confirm('Are you sure?');">
+                                            <button type="submit" class="btn danger" style="padding: 6px 16px;">Reject</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+</div>
+
+<script>
+    function switchTab(id) {
+        // Hide all sections
+        document.querySelectorAll('.tab-content').forEach(s => s.style.display = 'none');
+        // Show target
+        document.getElementById(id).style.display = 'block';
+        
+        // Update button styles
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('active');
+            b.style.color = 'var(--text-muted)';
+            b.style.borderBottomColor = 'transparent';
+        });
+        
+        // Activate clicked button
+        const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(id));
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.style.color = 'var(--text-main)';
+            activeBtn.style.borderBottomColor = 'var(--brand-main)';
+        }
+    }
+
+    // Initialize first tab
+    document.addEventListener('DOMContentLoaded', () => {
+        const hash = window.location.hash.substring(1);
+        if (hash && ['categories', 'courses', 'resources'].includes(hash)) {
+            switchTab(hash);
+        } else {
+            switchTab('categories');
+        }
+    });
+</script>
+
+<style>
+    .tab-btn:hover {
+        color: var(--brand-main) !important;
+    }
+</style>
+{% endblock %}

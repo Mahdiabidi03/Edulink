@@ -1,0 +1,186 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}AI Study Companion - EduLink{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar / Tools Selection -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <h2 class="mb-4" style="color: var(--brand-main); display: flex; align-items: center; gap: 10px;"><i data-lucide="bot"></i> AI Tools</h2>
+            
+            <div class="tool-selector">
+                <div class="tool-option active" onclick="selectTool('summary', this)" style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-weight: 600; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="file-text" style="color: var(--info); width: 20px; height: 20px;"></i> Summarize PDF
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0;">Get a quick bullet-point summary of your lecture notes.</p>
+                </div>
+
+                <div class="tool-option" onclick="selectTool('quiz', this)" style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-weight: 600; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="help-circle" style="color: var(--brand-accent); width: 20px; height: 20px;"></i> Generate Quiz
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0;">Test your knowledge with AI-generated questions.</p>
+                </div>
+
+                <div class="tool-option" onclick="selectTool('video_script', this)" style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-weight: 600; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="video" style="color: var(--success); width: 20px; height: 20px;"></i> Explain Like a Video
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0;">Get a script/explanation style as if watching a YouTube video.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content / Result Area -->
+    <div class="col-md-8 mb-4">
+        <div class="card h-100">
+            <h2 id="toolTitle">Upload PDF</h2>
+            
+            <div id="uploadSection" style="border: 2px dashed var(--border); padding: 2rem; border-radius: 12px; text-align: center; margin-bottom: 2rem;">
+                <input type="file" id="pdfInput" accept="application/pdf" style="display: none;" onchange="handleFileSelect(this)">
+                <label for="pdfInput" class="btn secondary" style="cursor: pointer;">
+                    <i data-lucide="upload-cloud"></i> Select PDF File
+                </label>
+                <div id="fileName" style="margin-top: 1rem; color: var(--text-secondary);"></div>
+            </div>
+
+            <button id="generateBtn" class="btn" style="width: 100%; display: none;" onclick="processPdf()">
+                <i data-lucide="zap"></i> Generate Magic
+            </button>
+
+            <!-- Loading State -->
+            <div id="loadingState" style="display: none; text-align: center; margin-top: 2rem;">
+                <div class="spinner" style="width: 40px; height: 40px; border: 4px solid rgba(139, 92, 246, 0.1); border-top: 4px solid var(--brand-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                <p>AI is analyzing your document...</p>
+            </div>
+
+            <!-- Results -->
+            <div id="resultSection" style="display: none; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+                <h3>Result</h3>
+                <div id="resultContent" style="background: var(--bg-main); padding: 1.5rem; border-radius: 8px; white-space: pre-wrap; line-height: 1.6;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentTool = 'summary';
+
+function selectTool(tool, element) {
+    currentTool = tool;
+    
+    // Update basic UI
+    document.querySelectorAll('.tool-option').forEach(el => {
+        el.style.borderColor = 'var(--border)';
+        el.style.background = 'transparent';
+    });
+    element.style.borderColor = 'var(--brand-main)';
+    element.style.background = 'rgba(139, 92, 246, 0.05)';
+    
+    document.getElementById('toolTitle').innerText = element.querySelector('div').innerText;
+}
+
+function handleFileSelect(input) {
+    if (input.files && input.files[0]) {
+        document.getElementById('fileName').innerText = "Selected: " + input.files[0].name;
+        document.getElementById('generateBtn').style.display = 'block';
+    }
+}
+
+async function processPdf() {
+    const fileInput = document.getElementById('pdfInput');
+    if (!fileInput.files[0]) return;
+
+    const formData = new FormData();
+    formData.append('pdf_file', fileInput.files[0]);
+    formData.append('type', currentTool);
+
+    // GUI update
+    document.getElementById('uploadSection').style.display = 'none';
+    document.getElementById('generateBtn').style.display = 'none';
+    document.getElementById('loadingState').style.display = 'block';
+    document.getElementById('resultSection').style.display = 'none';
+
+    try {
+        const response = await fetch('{{ path('api_ai_process_pdf') }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('loadingState').style.display = 'none';
+        
+        if (data.success) {
+            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('uploadSection').style.display = 'block'; // Show upload again for next time
+            
+            // Format result if it's JSON (quiz)
+            if (currentTool === 'quiz' && typeof data.result === 'string' && (data.result.trim().startsWith('[') || data.result.trim().startsWith('{'))) {
+                try {
+                    const quizData = JSON.parse(data.result);
+                    renderQuiz(quizData);
+                } catch(e) {
+                     document.getElementById('resultContent').innerText = data.result;
+                }
+            } else {
+                document.getElementById('resultContent').innerHTML = marked.parse(data.result); // Use marked.js if available, or just text
+            }
+
+            // Fallback if marked is not defined
+            if (typeof marked === 'undefined') {
+                 document.getElementById('resultContent').innerText = data.result;
+            }
+
+        } else {
+            alert('Error: ' + data.error);
+            document.getElementById('uploadSection').style.display = 'block';
+            document.getElementById('generateBtn').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An unexpected error occurred.');
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('uploadSection').style.display = 'block';
+    }
+}
+
+function renderQuiz(questions) {
+    let html = '';
+    // Handle if it's wrapped in an object or just array
+    const qArray = Array.isArray(questions) ? questions : (questions.questions || []);
+    
+    qArray.forEach((q, index) => {
+        html += `<div class="quiz-question" style="margin-bottom: 2rem;">
+            <p><strong>Q${index + 1}: ${q.question}</strong></p>
+            <ul style="list-style: none; padding-left: 0;">`;
+        
+        q.options.forEach((opt, optIndex) => {
+             html += `<li style="margin-bottom: 0.5rem; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">${opt}</li>`;
+        });
+        
+        html += `</ul>
+            <details style="margin-top: 0.5rem; color: var(--success); cursor: pointer;">
+                <summary>Show Answer</summary>
+                <p>Answer: Option ${q.answer + 1} (${q.options[q.answer]})</p>
+            </details>
+        </div>`;
+    });
+    
+    document.getElementById('resultContent').innerHTML = html;
+}
+
+// Initialize simple styling for first tool
+selectTool('summary', document.querySelector('.tool-option'));
+</script>
+
+<!-- Simple CSS for spinner animation -->
+<style>
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+<!-- Markdown parser from CDN for nicer output -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% endblock %}

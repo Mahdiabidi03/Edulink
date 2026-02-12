@@ -1,0 +1,407 @@
+{% extends 'auth_base.html.twig' %}
+
+{% block title %}EduLink - Future of Learning{% endblock %}
+
+{% block content %}
+<style>
+    /* Unique Landing Page Styles */
+    .landing-hero {
+        min-height: 100vh;
+        background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #020617 100%);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 3D Grid Animation Background */
+    .grid-3d {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        top: -50%;
+        left: -50%;
+        background-image: 
+            linear-gradient(rgba(99, 102, 241, 0.3) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(99, 102, 241, 0.3) 1px, transparent 1px);
+        background-size: 50px 50px;
+        transform: perspective(500px) rotateX(60deg);
+        animation: gridMove 20s linear infinite;
+        opacity: 0.2;
+        pointer-events: none;
+    }
+
+    @keyframes gridMove {
+        0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+        100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+    }
+
+    /* Navbar */
+    .landing-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem 5%;
+        z-index: 10;
+        backdrop-filter: blur(5px);
+    }
+
+    .landing-logo {
+        font-size: 1.8rem;
+        font-weight: 800;
+        background: var(--brand-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* Hero Text */
+    .hero-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0 5%;
+        z-index: 10;
+        max-width: 800px;
+    }
+
+    .hero-title {
+        font-size: 5rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        background: white;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .hero-highlight {
+        background: var(--brand-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        margin-bottom: 3rem;
+        max-width: 600px;
+        line-height: 1.6;
+    }
+
+    /* Floating 3D Elements (CSS only simulation) */
+    .floating-card {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .c1 { top: 20%; right: 10%; width: 200px; height: 120px; animation-delay: 0s; }
+    .c2 { bottom: 15%; right: 20%; width: 180px; height: 180px; animation-delay: 2s; }
+    .c3 { top: 30%; right: 35%; width: 140px; height: 140px; animation-delay: 4s; opacity: 0.7; }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    /* Stats Section */
+    .stats-section {
+        display: flex;
+        justify-content: space-around;
+        padding: 5rem 5%;
+        background: #020617;
+        position: relative;
+        z-index: 10;
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+    .stat-num {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: var(--brand-main);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    /* Features Section */
+    .features-section {
+        padding: 5rem 5%;
+        background: #0f172a;
+    }
+    
+    .section-title {
+        text-align: center;
+        font-size: 3rem;
+        margin-bottom: 4rem;
+    }
+
+    /* Testimonials Scroll */
+    .reviews-section {
+        padding: 5rem 0;
+        background: #020617;
+        overflow: hidden;
+    }
+    
+    .scroll-container {
+        display: flex;
+        gap: 2rem;
+        width: max-content;
+        animation: scrollLeft 20s linear infinite;
+    }
+    
+    .review-card {
+        width: 300px;
+        background: rgba(255,255,255,0.05);
+        padding: 2rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    @keyframes scrollLeft {
+        to { transform: translateX(-50%); }
+    }
+
+    /* Buttons */
+    .btn-landing {
+        padding: 15px 40px;
+        font-size: 1.2rem;
+        border-radius: 30px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.3s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+    
+    .btn-primary {
+        background: var(--brand-gradient);
+        color: white;
+        box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+    }
+    .btn-primary:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 50px rgba(139, 92, 246, 0.6);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 2px solid white;
+        color: white;
+        margin-left: 1rem;
+    }
+    .btn-outline:hover {
+        background: white;
+        color: black;
+    }
+
+</style>
+
+<!-- Hero Section -->
+<div class="landing-hero">
+    <div class="grid-3d"></div>
+    
+    <!-- Navbar -->
+    <nav class="landing-nav">
+        <div class="landing-logo">
+            <img src="{{ asset('assets/images/logo.png') }}" style="width: 40px;">
+            EduLink
+        </div>
+        <div>
+            <a href="#features" style="color: white; text-decoration: none; margin-right: 20px; font-weight: 500;">Features</a>
+            <a href="#pricing" style="color: white; text-decoration: none; margin-right: 20px; font-weight: 500;">Pricing</a>
+            <a href="{{ path('login') }}" class="btn-landing btn-primary" style="padding: 10px 25px; font-size: 1rem;">Sign In</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="hero-content">
+        <h1 class="hero-title" data-aos="fade-up">Master Any Skill with <br> <span class="hero-highlight">AI-Powered</span> Learning</h1>
+        <p class="hero-subtitle" data-aos="fade-up" data-aos-delay="200">
+            Join the next generation of education. Learn with interactive courses, earn crypto-points, and host your own hackathons.
+        </p>
+        <div data-aos="fade-up" data-aos-delay="400">
+            <a href="{{ path('register') }}" class="btn-landing btn-primary">Get Started <i data-lucide="arrow-right"></i></a>
+            <a href="#demo" class="btn-landing btn-outline">Watch Demo</a>
+        </div>
+    </div>
+
+    <!-- 3D Abstract Elements -->
+    <div class="floating-card c1">
+        <div style="font-weight: 700; font-size: 1.5rem; color: var(--success);">+1250 XP</div>
+        <div style="font-size: 0.9rem; color: #cbd5e1;">Project Completed</div>
+    </div>
+    <div class="floating-card c2">
+         <div style="width: 50px; height: 50px; background: var(--brand-main); border-radius: 50%; display: grid; place-items: center; margin-bottom: 10px;">
+             <i data-lucide="bot" style="color: white; width: 24px; height: 24px;"></i>
+         </div>
+         <div style="font-size: 1.1rem; font-weight: 600;">AI Companion</div>
+         <div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 5px;">Analyzing your resume...</div>
+    </div>
+    <div class="floating-card c3">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 10px; height: 10px; background: #22c55e; border-radius: 50%;"></div>
+            <span>Online Event</span>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+    <div class="stat-item" data-aos="fade-up">
+        <span class="stat-num" id="count1">10k+</span>
+        <span style="color: var(--text-muted);">Active Students</span>
+    </div>
+    <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
+        <span class="stat-num" id="count2">500+</span>
+        <span style="color: var(--text-muted);">Courses Available</span>
+    </div>
+    <div class="stat-item" data-aos="fade-up" data-aos-delay="200">
+        <span class="stat-num" id="count3">1M+</span>
+        <span style="color: var(--text-muted);">Points Earned</span>
+    </div>
+</div>
+
+<!-- Why Choose Us -->
+<div class="features-section">
+    <h2 class="section-title" data-aos="fade-up">Why Choose EduLink?</h2>
+    
+    <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 3rem;">
+        <div class="card" data-aos="fade-up" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+            <i data-lucide="trophy" style="width: 48px; height: 48px; color: var(--warning); margin-bottom: 1.5rem;"></i>
+            <h3>Gamified Learning</h3>
+            <p style="color: var(--text-secondary);">Earn points, unlock badges, and climb the leaderboard while you learn.</p>
+        </div>
+        <div class="card" data-aos="fade-up" data-aos-delay="100" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+            <i data-lucide="zap" style="width: 48px; height: 48px; color: var(--brand-accent); margin-bottom: 1.5rem;"></i>
+            <h3>AI Integration</h3>
+            <p style="color: var(--text-secondary);">Upload docs and let our Gemini AI generate quizzes, summaries, and videos instantly.</p>
+        </div>
+        <div class="card" data-aos="fade-up" data-aos-delay="200" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);">
+            <i data-lucide="users" style="width: 48px; height: 48px; color: var(--success); margin-bottom: 1.5rem;"></i>
+            <h3>Community First</h3>
+            <p style="color: var(--text-secondary);">Host events, share journals, and collaborate with students worldwide.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Testimonials -->
+<div class="reviews-section">
+    <h2 class="section-title" style="margin-bottom: 3rem;" data-aos="fade-up">What Students Say</h2>
+    <div class="scroll-container">
+        <!-- Review 1 -->
+        <div class="review-card">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <img src="https://ui-avatars.com/api/?name=Alex&background=random" style="width: 40px; height: 40px; border-radius: 50%;">
+                <div>
+                    <div style="font-weight: 600;">Alex M.</div>
+                    <div style="color: var(--warning);">★★★★★</div>
+                </div>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem;">"The gamification makes learning so addictive. I've already earned enough points to host my first hackathon!"</p>
+        </div>
+         <!-- Review 2 -->
+        <div class="review-card">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <img src="https://ui-avatars.com/api/?name=Sarah&background=random" style="width: 40px; height: 40px; border-radius: 50%;">
+                <div>
+                    <div style="font-weight: 600;">Sarah L.</div>
+                    <div style="color: var(--warning);">★★★★★</div>
+                </div>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem;">"The AI tools are a game changer. I uploaded my biology notes and it created a perfect quiz for me."</p>
+        </div>
+         <!-- Review 3 -->
+        <div class="review-card">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <img src="https://ui-avatars.com/api/?name=John&background=random" style="width: 40px; height: 40px; border-radius: 50%;">
+                <div>
+                    <div style="font-weight: 600;">John D.</div>
+                    <div style="color: var(--warning);">★★★★☆</div>
+                </div>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem;">"Love the community events. It feels like a real campus but online."</p>
+        </div>
+         <!-- Review 4 (Duplicate for seamless scroll illusion) -->
+        <div class="review-card">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <img src="https://ui-avatars.com/api/?name=Emily&background=random" style="width: 40px; height: 40px; border-radius: 50%;">
+                <div>
+                    <div style="font-weight: 600;">Emily R.</div>
+                    <div style="color: var(--warning);">★★★★★</div>
+                </div>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem;">"Best platform for learning coding. The projects are actually relevant."</p>
+        </div>
+         <!-- Review 5 -->
+        <div class="review-card">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <img src="https://ui-avatars.com/api/?name=Mike&background=random" style="width: 40px; height: 40px; border-radius: 50%;">
+                <div>
+                    <div style="font-weight: 600;">Mike T.</div>
+                    <div style="color: var(--warning);">★★★★★</div>
+                </div>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.9rem;">"I use the Journal feature every day to track my progress. Highly recommend!"</p>
+        </div>
+</div>
+</div>
+
+<!-- Tech Stack / APIs Section -->
+<div style="padding: 5rem 5%; background: var(--bg-card); border-top: 1px solid var(--border);">
+    <h2 class="section-title" data-aos="fade-up" style="margin-bottom: 2rem; color: white; text-align: center;">Integrated Intelligence</h2>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 4rem;">EduLink leverages cutting-edge APIs to provide a seamless learning experience.</p>
+    
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; opacity: 0.7;">
+        <div style="text-align: center; width: 150px;">
+            <i data-lucide="bot" style="width: 40px; height: 40px; color: var(--brand-accent); margin-bottom: 1rem; margin-inline: auto;"></i>
+            <div style="font-weight: 600; color: white;">Google Gemini</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">AI Processing</div>
+        </div>
+        <div style="text-align: center; width: 150px;">
+            <i data-lucide="scan-face" style="width: 40px; height: 40px; color: var(--success); margin-bottom: 1rem; margin-inline: auto;"></i>
+            <div style="font-weight: 600; color: white;">Face-ID</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Biometric Security</div>
+        </div>
+        <div style="text-align: center; width: 150px;">
+            <i data-lucide="image" style="width: 40px; height: 40px; color: #3b82f6; margin-bottom: 1rem; margin-inline: auto;"></i>
+            <div style="font-weight: 600; color: white;">Unsplash API</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Dynamic Visuals</div>
+        </div>
+        <div style="text-align: center; width: 150px;">
+            <i data-lucide="bell" style="width: 40px; height: 40px; color: #f59e0b; margin-bottom: 1rem; margin-inline: auto;"></i>
+            <div style="font-weight: 600; color: white;">SweetAlert2</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Real-time Feedback</div>
+        </div>
+        <div style="text-align: center; width: 150px;">
+            <i data-lucide="party-popper" style="width: 40px; height: 40px; color: #ec4899; margin-bottom: 1rem; margin-inline: auto;"></i>
+            <div style="font-weight: 600; color: white;">Confetti API</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Success Celebration</div>
+        </div>
+        <div style="text-align: center; width: 150px;">
+            <i data-lucide="layers" style="width: 40px; height: 40px; color: #a855f7; margin-bottom: 1rem; margin-inline: auto;"></i>
+            <div style="font-weight: 600; color: white;">Lucide Icons</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Vector Graphics</div>
+        </div>
+    </div>
+</div>
+
+<footer style="padding: 3rem; text-align: center; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.9rem;">
+    &copy; 2026 EduLink. All rights reserved. Powered by Advanced Agentic AI.
+</footer>
+
+{% endblock %}

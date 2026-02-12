@@ -1,0 +1,419 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Command Center - Admin Pro{% endblock %}
+
+{% block content %}
+<style>
+    /* Dashboard specific max-design styles */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 3fr 1fr;
+        gap: var(--space-xl);
+        padding-bottom: var(--space-2xl);
+    }
+
+    /* Advanced Hero Stats */
+    .hero-monitor {
+        background: var(--bg-card);
+        background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 60%);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: var(--space-xl);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(20px);
+        box-shadow: var(--shadow-xl);
+        margin-bottom: var(--space-xl);
+    }
+    
+    .monitor-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-lg);
+        position: relative;
+        z-index: 10;
+    }
+
+    .stat-module {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+
+    .stat-label {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+        line-height: 1;
+    }
+
+    .stat-delta {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .delta-up { color: var(--success); }
+    .delta-down { color: var(--error); }
+
+    /* Decorative Graph Lines (CSS Only) */
+    .mini-chart {
+        height: 40px;
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        margin-top: 10px;
+        opacity: 0.5;
+    }
+    .bar { width: 6px; background: currentColor; border-radius: 2px; }
+
+    /* SYSTEM HEALTH WIDGET */
+    .health-widget {
+        background: rgba(0,0,0,0.3);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: var(--space-md);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-lg);
+    }
+
+    /* CSS CIRCULAR CHART */
+    .circular-chart {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: conic-gradient(var(--brand-accent) 0% 75%, rgba(255,255,255,0.1) 75% 100%);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .circular-chart::after {
+        content: '';
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background: var(--bg-deep); /* Match container bg */
+        border-radius: 50%;
+    }
+    .chart-label {
+        position: absolute;
+        z-index: 10;
+        font-family: 'Fira Code', monospace;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    /* ACTIVITY FEED */
+    .feed-item {
+        display: flex;
+        gap: var(--space-md);
+        padding: var(--space-md);
+        border-bottom: 1px solid var(--border-light);
+        transition: background 0.2s;
+    }
+    .feed-item:hover {
+        background: rgba(255,255,255,0.02);
+    }
+    .feed-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.05);
+        color: var(--brand-accent);
+    }
+
+    /* QUICK ACTIONS */
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md);
+    }
+    .action-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border);
+        padding: var(--space-md);
+        border-radius: 12px;
+        text-align: center;
+        transition: transform 0.2s, border-color 0.2s;
+        cursor: pointer;
+    }
+    .action-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--brand-main);
+        background: rgba(99, 102, 241, 0.1);
+    }
+</style>
+
+<!-- Welcome Header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-xl);">
+    <div>
+        <h1 style="margin: 0; font-size: 2rem;">System Overview</h1>
+        <p style="color: var(--text-secondary); font-family: 'Fira Code', monospace; margin-top: 5px;">Server Time: {{ "now"|date("H:i:s") }} UTC</p>
+    </div>
+    <div style="display: flex; gap: var(--space-md);">
+        <button class="btn secondary" onclick="testNotification()"><i data-lucide="zap" style="width: 18px; height: 18px; margin-right: 5px;"></i> Test Alerts</button>
+        <button class="btn secondary"><i data-lucide="download-cloud" style="width: 18px; height: 18px; margin-right: 5px;"></i> Export Report</button>
+        <button class="btn" style="background: var(--brand-accent); color: var(--bg-main); border: none;"><i data-lucide="settings" style="width: 18px; height: 18px; margin-right: 5px;"></i> Configure</button>
+    </div>
+</div>
+
+<!-- HERO MONITOR -->
+<div class="hero-monitor">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--brand-accent), transparent);"></div>
+    
+    <div class="monitor-grid">
+        <!-- Metric 1 -->
+        <div class="stat-module">
+            <span class="stat-label">Total Uses</span>
+            <span class="stat-value">12,450</span>
+            <span class="stat-delta delta-up"><i class="ri-arrow-up-line"></i> 12% vs last week</span>
+            <div class="mini-chart" style="color: var(--success);">
+                <div class="bar" style="height: 40%"></div>
+                <div class="bar" style="height: 60%"></div>
+                <div class="bar" style="height: 30%"></div>
+                <div class="bar" style="height: 80%"></div>
+                <div class="bar" style="height: 50%"></div>
+                <div class="bar" style="height: 90%"></div>
+            </div>
+        </div>
+
+        <!-- Metric 2 -->
+        <div class="stat-module" style="border-left: 1px solid var(--border); padding-left: var(--space-lg);">
+            <span class="stat-label">Active Sessions</span>
+            <span class="stat-value">843</span>
+            <span class="stat-delta delta-up" style="color: var(--brand-accent);"><i data-lucide="activity" style="width: 14px; height: 14px; margin-right: 4px;"></i> Live</span>
+             <div class="mini-chart" style="color: var(--brand-accent);">
+                <div class="bar" style="height: 60%"></div>
+                <div class="bar" style="height: 70%"></div>
+                <div class="bar" style="height: 50%"></div>
+                <div class="bar" style="height: 90%"></div>
+                <div class="bar" style="height: 80%"></div>
+                <div class="bar" style="height: 95%"></div>
+            </div>
+        </div>
+
+        <!-- Metric 3 -->
+        <div class="stat-module" style="border-left: 1px solid var(--border); padding-left: var(--space-lg);">
+            <span class="stat-label">System Load</span>
+            <span class="stat-value">34%</span>
+            <span class="stat-delta" style="color: var(--info);"><i class="ri-cpu-line"></i> Optimal</span>
+             <div class="mini-chart" style="color: var(--info);">
+                <div class="bar" style="height: 20%"></div>
+                <div class="bar" style="height: 25%"></div>
+                <div class="bar" style="height: 30%"></div>
+                <div class="bar" style="height: 35%"></div>
+                <div class="bar" style="height: 30%"></div>
+                <div class="bar" style="height: 34%"></div>
+            </div>
+        </div>
+
+        <!-- Metric 4 -->
+        <div class="stat-module" style="border-left: 1px solid var(--border); padding-left: var(--space-lg);">
+            <span class="stat-label">Revenue (YTD)</span>
+            <span class="stat-value">$142k</span>
+            <span class="stat-delta delta-up"><i class="ri-arrow-up-line"></i> 5%</span>
+             <div class="mini-chart" style="color: #FCD34D;">
+                <div class="bar" style="height: 50%"></div>
+                <div class="bar" style="height: 60%"></div>
+                <div class="bar" style="height: 55%"></div>
+                <div class="bar" style="height: 70%"></div>
+                <div class="bar" style="height: 85%"></div>
+                <div class="bar" style="height: 90%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    
+    <!-- LEFT COLUMN: CHARTS & TABLES -->
+    <div style="display: flex; flex-direction: column; gap: var(--space-xl);">
+        
+        <!-- Activity Graph Mockup -->
+        <div class="card" style="min-height: 300px; padding: var(--space-lg); position: relative;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-lg);">
+                <h3 style="margin: 0;">User Acquisition</h3>
+                <div style="display: flex; gap: 10px;">
+                    <span style="font-size: 0.8rem; padding: 4px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; cursor: pointer;">Day</span>
+                    <span style="font-size: 0.8rem; padding: 4px 8px; background: var(--brand-main); border-radius: 4px; cursor: pointer;">Week</span>
+                    <span style="font-size: 0.8rem; padding: 4px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; cursor: pointer;">Month</span>
+                </div>
+            </div>
+            
+            <!-- CSS Grid Chart Mockup -->
+            <div style="flex: 1; display: flex; align-items: flex-end; gap: 2%; height: 200px; padding-bottom: 20px; border-bottom: 1px solid var(--border); padding-left: 40px; position: relative;">
+               <!-- Y-Axis Labels -->
+               <div style="position: absolute; left: 0; bottom: 20px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted);">
+                   <span>1000</span><span>750</span><span>500</span><span>250</span><span>0</span>
+               </div>
+
+               <!-- Bars -->
+               <div style="height: 40%; width: 10%; background: var(--brand-gradient); border-radius: 4px 4px 0 0; opacity: 0.5;"></div>
+               <div style="height: 55%; width: 10%; background: var(--brand-gradient); border-radius: 4px 4px 0 0; opacity: 0.6;"></div>
+               <div style="height: 45%; width: 10%; background: var(--brand-gradient); border-radius: 4px 4px 0 0; opacity: 0.5;"></div>
+               <div style="height: 70%; width: 10%; background: var(--brand-gradient); border-radius: 4px 4px 0 0; opacity: 0.7;"></div>
+               <div style="height: 60%; width: 10%; background: var(--brand-gradient); border-radius: 4px 4px 0 0; opacity: 0.6;"></div>
+               <div style="height: 85%; width: 10%; background: var(--brand-gradient); border-radius: 4px 4px 0 0; opacity: 0.8;"></div>
+               <div style="height: 75%; width: 10%; background: var(--brand-gradient); border-radius: 4px 4px 0 0; opacity: 0.7;"></div>
+               <div style="height: 95%; width: 10%; background: var(--brand-gradient); border-radius: 4px 4px 0 0; box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-left: 40px; margin-top: 10px; font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--text-muted);">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span><span>Today</span>
+            </div>
+        </div>
+
+        <!-- Recent Logs Table -->
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div style="padding: var(--space-lg); border-bottom: 1px solid var(--border);">
+                <h3 style="margin: 0;">Security Audit Logs</h3>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead style="background: rgba(0,0,0,0.2); font-family: 'Fira Code', monospace; color: var(--text-muted);">
+                    <tr>
+                        <th style="text-align: left; padding: 12px 24px;">EVENT ID</th>
+                        <th style="text-align: left; padding: 12px 24px;">USER</th>
+                        <th style="text-align: left; padding: 12px 24px;">ACTION</th>
+                        <th style="text-align: right; padding: 12px 24px;">STATUS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border-light);">
+                        <td style="padding: 16px 24px; font-family: 'Fira Code', monospace;">#LOG-9281</td>
+                        <td style="padding: 16px 24px; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 24px; height: 24px; background: var(--brand-main); border-radius: 50%;"></div> Admin
+                        </td>
+                        <td style="padding: 16px 24px;">Updated global variables</td>
+                        <td style="padding: 16px 24px; text-align: right;"><span style="color: var(--success);">Success</span></td>
+                    </tr>
+                     <tr style="border-bottom: 1px solid var(--border-light);">
+                        <td style="padding: 16px 24px; font-family: 'Fira Code', monospace;">#LOG-9280</td>
+                         <td style="padding: 16px 24px; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 24px; height: 24px; background: var(--text-muted); border-radius: 50%;"></div> User_88
+                        </td>
+                        <td style="padding: 16px 24px;">Failed login attempt</td>
+                        <td style="padding: 16px 24px; text-align: right;"><span style="color: var(--warning);">Warning</span></td>
+                    </tr>
+                     <tr>
+                        <td style="padding: 16px 24px; font-family: 'Fira Code', monospace;">#LOG-9279</td>
+                         <td style="padding: 16px 24px; display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 24px; height: 24px; background: var(--info); border-radius: 50%;"></div> System
+                        </td>
+                        <td style="padding: 16px 24px;">Daily backup completed</td>
+                        <td style="padding: 16px 24px; text-align: right;"><span style="color: var(--success);">Success</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: WIDGETS -->
+    <div style="display: flex; flex-direction: column; gap: var(--space-xl);">
+        
+        <!-- Health Widget -->
+        <div class="health-widget">
+            <div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">STORAGE</div>
+                <div style="font-family: 'Fira Sans', sans-serif; font-weight: 700; font-size: 1.2rem;">850 GB <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">/ 1TB</span></div>
+            </div>
+            <div class="circular-chart">
+                <span class="chart-label">85%</span>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <h4 style="margin: 0; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Quick Actions</h4>
+        <div class="action-grid">
+            <div class="action-card">
+                <i class="ri-user-add-line" style="font-size: 1.5rem; color: var(--info); margin-bottom: 8px; display: block;"></i>
+                <span style="font-size: 0.85rem;">Add User</span>
+            </div>
+            <div class="action-card">
+                <i class="ri-file-add-line" style="font-size: 1.5rem; color: var(--success); margin-bottom: 8px; display: block;"></i>
+                <span style="font-size: 0.85rem;">New Post</span>
+            </div>
+            <div class="action-card">
+                <i class="ri-database-2-line" style="font-size: 1.5rem; color: var(--warning); margin-bottom: 8px; display: block;"></i>
+                <span style="font-size: 0.85rem;">Backup</span>
+            </div>
+            <div class="action-card">
+                <i class="ri-shut-down-line" style="font-size: 1.5rem; color: var(--error); margin-bottom: 8px; display: block;"></i>
+                <span style="font-size: 0.85rem;">Restart</span>
+            </div>
+        </div>
+
+        <!-- Live Feed -->
+        <h4 style="margin: var(--space-lg) 0 0; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;">Live Activity</h4>
+        <div class="card" style="padding: 0; max-height: 400px; overflow-y: auto;">
+            
+            <div class="feed-item">
+                <div class="feed-icon"><i class="ri-money-dollar-circle-line"></i></div>
+                <div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Payment Received</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Student #442 purchased "Pro Data"</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">2 mins ago</div>
+                </div>
+            </div>
+
+            <div class="feed-item">
+                <div class="feed-icon" style="color: var(--success);"><i class="ri-check-double-line"></i></div>
+                <div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">Course Completed</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Alex M. finished "React Basics"</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">15 mins ago</div>
+                </div>
+            </div>
+
+            <div class="feed-item">
+                 <div class="feed-icon" style="color: var(--info);"><i class="ri-user-follow-line"></i></div>
+                <div>
+                    <div style="font-size: 0.9rem; font-weight: 600;">New Registration</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Sarah K. joined the platform</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 4px;">1 hour ago</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+function testNotification() {
+    Swal.fire({
+        title: 'API Test Active!',
+        text: 'EduLink Integration Suite is fully operational.',
+        icon: 'success',
+        background: 'var(--bg-card)',
+        color: 'var(--text-main)',
+        iconColor: '#8b5cf6',
+        confirmButtonColor: '#8b5cf6',
+        didOpen: () => {
+             confetti({
+                particleCount: 150,
+                spread: 100,
+                origin: { y: 0.6 },
+                colors: ['#8b5cf6', '#d946ef', '#3b82f6']
+            });
+        }
+    });
+}
+</script>
+{% endblock %}

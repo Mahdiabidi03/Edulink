@@ -1,0 +1,69 @@
+{% extends 'auth_base.html.twig' %}
+
+{% block title %}Register - EduLink{% endblock %}
+
+{% block content %}
+<!-- 3D Background -->
+<div class="auth-scene">
+    <div class="cube-container">
+        <div class="cube"></div>
+        <div class="cube"></div>
+        <div class="cube"></div>
+        <div class="cube"></div>
+        <div class="cube"></div>
+    </div>
+</div>
+
+<div class="login-container" data-aos="zoom-in" data-aos-duration="1000">
+  
+  <div class="login-card" style="width: 450px;">
+    <img src="{{ asset('assets/images/logo.png') }}" class="login-logo">
+    <h2>Create Account</h2>
+    <p class="subtitle">Join the future of education today</p>
+
+    {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+        {% if form_errors(registrationForm) %}
+            <div class="alert alert-danger" style="color: #ef4444; margin-bottom: 1rem;">
+                {{ form_errors(registrationForm) }}
+            </div>
+        {% endif %}
+
+      <div class="input-group">
+        {{ form_widget(registrationForm.fullName) }}
+        <i data-lucide="user" class="input-icon"></i>
+      </div>
+      <div style="color: #ef4444; font-size: 0.8rem; margin-top: -10px; margin-bottom: 10px;">{{ form_errors(registrationForm.fullName) }}</div>
+
+      <div class="input-group">
+        {{ form_widget(registrationForm.email) }}
+        <i data-lucide="mail" class="input-icon"></i>
+      </div>
+       <div style="color: #ef4444; font-size: 0.8rem; margin-top: -10px; margin-bottom: 10px;">{{ form_errors(registrationForm.email) }}</div>
+
+      <div class="input-group">
+        {{ form_widget(registrationForm.plainPassword.first) }}
+        <i data-lucide="lock" class="input-icon"></i>
+      </div>
+
+      <div class="input-group">
+        {{ form_widget(registrationForm.plainPassword.second) }}
+        <i data-lucide="shield-check" class="input-icon"></i>
+      </div>
+       <div style="color: #ef4444; font-size: 0.8rem; margin-top: -10px; margin-bottom: 10px;">{{ form_errors(registrationForm.plainPassword.first) }}</div>
+
+       <div class="input-group" style="display: flex; gap: 10px; align-items: center;">
+            {{ form_widget(registrationForm.agreeTerms, {'attr': {'style': 'width: auto; margin: 0;'}}) }}
+            <label for="{{ registrationForm.agreeTerms.vars.id }}" style="color: var(--text-secondary); font-size: 0.9rem;">I agree to the <a href="#" style="color: var(--brand-accent);">Terms & Conditions</a></label>
+       </div>
+       <div style="color: #ef4444; font-size: 0.8rem; margin-top: -10px; margin-bottom: 10px;">{{ form_errors(registrationForm.agreeTerms) }}</div>
+
+      <button type="submit" class="btn login-btn">Create Account <i data-lucide="rocket" style="margin-left: 5px;"></i></button>
+    {{ form_end(registrationForm) }}
+
+    <p class="register-link">
+      Already have an account? <a href="{{ path('login') }}">Sign In</a>
+    </p>
+  </div>
+
+</div>
+{% endblock %}

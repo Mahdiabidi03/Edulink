@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Propose New Category{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto; padding: 2rem;">
+    <h1>Propose New Category</h1>
+    <p style="color: #666; margin-bottom: 2rem;">Suggest a new topic for the platform. It will be reviewed by an admin.</p>
+    
+    <div class="card" style="padding: 2.5rem; background: var(--bg-card); border-radius: 12px; box-shadow: var(--shadow-lg);">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div style="margin-bottom: 2rem;">
+                {{ form_label(form.name, 'Category Name', {'label_attr': {'style': 'display: block; margin-bottom: 0.75rem; font-weight: 600; color: var(--text-main);'}}) }}
+                {{ form_widget(form.name, {'attr': {
+                    'class': 'form-control', 
+                    'style': 'width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-main);',
+                    'placeholder': 'e.g. Artificial Intelligence'
+                }}) }}
+                {{ form_errors(form.name) }}
+            </div>
+
+            <div style="margin-bottom: 2.5rem;">
+                <label style="display: block; margin-bottom: 0.75rem; font-weight: 600; color: var(--text-main);">Category Image</label>
+                <div class="file-upload-wrapper" style="border: 2px dashed var(--border); padding: 2rem; border-radius: 12px; text-align: center; transition: all 0.3s; cursor: pointer;" onmouseover="this.style.borderColor='var(--brand-main)'; this.style.background='rgba(91, 42, 110, 0.05)'" onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent'">
+                    <label for="{{ form.imageFile.vars.id }}" style="cursor: pointer; display: block; width: 100%;">
+                        <i class="ri-image-add-line" style="font-size: 2.5rem; color: var(--brand-main); display: block; margin-bottom: 1rem;"></i>
+                        <span id="file-name-display" style="color: var(--text-secondary); font-weight: 500;">Click to upload category image</span>
+                    </label>
+                    {{ form_widget(form.imageFile, {'attr': {'style': 'display: none;', 'onchange': 'updateFileName(this)'}}) }}
+                    {{ form_errors(form.imageFile) }}
+                </div>
+            </div>
+            
+            <button type="submit" class="btn" style="width: 100%; padding: 14px; background: var(--brand-gradient); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 1.1rem; cursor: pointer; box-shadow: var(--shadow-neon);">Submit Proposal</button>
+            <a href="{{ path('app_student_courses') }}" class="btn secondary" style="width: 100%; margin-top: 1rem; text-decoration: none; justify-content: center; padding: 12px; font-weight: 500;">Cancel</a>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<script>
+function updateFileName(input) {
+    const display = document.getElementById('file-name-display');
+    if (input.files && input.files[0]) {
+        display.textContent = input.files[0].name;
+    } else {
+        display.textContent = "Click to upload category image";
+    }
+}
+</script>
+{% endblock %}

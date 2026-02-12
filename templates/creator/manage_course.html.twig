@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Manage Course: {{ cours.title }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 2rem auto; padding: 0 1rem;">
+    <div class="header-flex" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem;">
+        <div>
+            <h1 style="margin: 0; font-size: 2.2rem; background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Course Management</h1>
+            <p style="margin: 0.5rem 0 0; color: var(--text-secondary); font-size: 1.1rem;">Managing: <strong style="color: var(--text-main);">{{ cours.title }}</strong></p>
+        </div>
+        <div style="display: flex; gap: 12px;">
+             <a href="{{ path('app_student_courses', {'tab': 'creator-studio'}) }}" class="btn secondary" style="padding: 10px 20px; text-decoration: none; font-weight: 500;">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card" style="padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.5rem; color: var(--text-main);"><i class="ri-stack-line" style="color: var(--brand-main); margin-right: 10px;"></i>Resources</h2>
+            <a href="{{ path('app_creator_resource_new', {'id': cours.id}) }}" class="btn" style="background: var(--brand-gradient); color: white; padding: 10px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: var(--shadow-neon);">+ Add Resource</a>
+        </div>
+        
+        <div style="background: var(--bg-card); border-radius: 12px; overflow: hidden;">
+            <div style="display: grid; gap: 1rem;">
+            {% for resource in cours.resources %}
+                <div style="display: flex; align-items: center; padding: 1.25rem; background: var(--bg-main); border-radius: 12px; border: 1px solid var(--border); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--brand-main)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border)'; this.style.transform='translateY(0)'">
+                    <div style="width: 48px; height: 48px; border-radius: 10px; background: {{ resource.type == 'VIDEO' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)' }}; display: flex; align-items: center; justify-content: center; margin-right: 1.5rem;">
+                        <i class="{{ resource.type == 'VIDEO' ? 'ri-youtube-line' : 'ri-file-text-line' }}" style="font-size: 1.5rem; color: {{ resource.type == 'VIDEO' ? '#ef4444' : '#3b82f6' }};"></i>
+                    </div>
+                    <div style="flex: 1;">
+                         <div style="font-weight: 600; color: var(--text-main); font-size: 1.05rem; margin-bottom: 0.25rem;">{{ resource.title ?? 'Untitled Resource' }}</div>
+                         <a href="{{ resource.url }}" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; display: flex; align-items: center;">
+                            <i class="ri-link" style="margin-right: 5px;"></i> {{ resource.url|slice(0, 60) }}{{ resource.url|length > 60 ? '...' : '' }}
+                         </a>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <span class="badge" style="background: var(--bg-card); color: var(--text-secondary); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;">{{ resource.type }}</span>
+                    </div>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 4rem; color: var(--text-muted); border: 2px dashed var(--border); border-radius: 12px;">
+                    <i class="ri-inbox-line" style="font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">No resources have been added to this course yet.</p>
+                    <a href="{{ path('app_creator_resource_new', {'id': cours.id}) }}" class="btn brand" style="padding: 10px 24px; text-decoration: none;">Add Your First Resource</a>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

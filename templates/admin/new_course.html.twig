@@ -1,0 +1,59 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Create Official Course{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 2rem auto; padding: 0 1rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="color: #2c3e50; margin:0;">Create Official Course</h1>
+            <p style="color: #7f8c8d; margin-top: 5px;">Add a new course to the platform curriculum.</p>
+        </div>
+        <a href="{{ path('app_admin_courses') }}" class="btn secondary" style="background: #ecf0f1; color: #7f8c8d; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500;">Cancel</a>
+    </div>
+
+    <div class="card" style="background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e1e8ed;">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <!-- Title Section -->
+            <div style="margin-bottom: 2rem;">
+                {{ form_label(form.title, 'Course Title', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.5rem; color: #34495e;'}}) }}
+                {{ form_widget(form.title, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 1rem;', 'placeholder': 'e.g., Introduction to Neural Networks'}}) }}
+                {{ form_errors(form.title) }}
+            </div>
+
+            <!-- Category Section -->
+            <div style="margin-bottom: 2rem;">
+                {{ form_label(form.matiere_name, 'Category / Subject', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.5rem; color: #34495e;'}}) }}
+                {{ form_widget(form.matiere_name, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 1rem; background-color: #fff;'}}) }}
+                {{ form_errors(form.matiere_name) }}
+            </div>
+
+            <!-- Description Section -->
+            <div style="margin-bottom: 2rem;">
+                {{ form_label(form.description, 'Description', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.5rem; color: #34495e;'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 1rem; min-height: 120px; resize: vertical;', 'placeholder': 'Describe what students will learn...'}}) }}
+                {{ form_errors(form.description) }}
+            </div>
+
+            <!-- Grid for Level & Price -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <div>
+                    {{ form_label(form.level, 'Difficulty Level', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.5rem; color: #34495e;'}}) }}
+                    {{ form_widget(form.level, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 1rem; background-color: #fff;'}}) }}
+                </div>
+                <div>
+                    {{ form_label(form.pricePoints, 'Price (Points)', {'label_attr': {'style': 'font-weight: 600; display: block; margin-bottom: 0.5rem; color: #34495e;'}}) }}
+                    {{ form_widget(form.pricePoints, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 12px; border: 1px solid #bdc3c7; border-radius: 6px; font-size: 1rem;', 'placeholder': '0'}}) }}
+                </div>
+            </div>
+
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn" style="width: 100%; background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); color: white; padding: 14px; border: none; border-radius: 6px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(108, 92, 231, 0.2);">
+                <i class="ri-add-circle-line" style="vertical-align: middle; margin-right: 5px;"></i> Create Course & Add Chapters
+            </button>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

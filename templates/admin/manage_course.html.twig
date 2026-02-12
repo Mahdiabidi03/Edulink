@@ -1,0 +1,45 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block content %}
+<div class="header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 style="margin: 0;">Managing: {{ cours.title }}</h1>
+    <div style="display: flex; gap: 10px;">
+        <a href="{{ path('app_admin_category_manage', {'id': cours.matiere.id}) }}" class="btn secondary">Back to Category</a>
+    </div>
+</div>
+
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2 style="margin: 0; font-size: 1.5rem; color: var(--text-main);"><i class="ri-book-open-line" style="color: var(--brand-main); margin-right: 10px;"></i>Course Resources</h2>
+        <a href="{{ path('app_admin_resource_new', {'id': cours.id}) }}" class="btn success">+ Add Resource</a>
+    </div>
+    
+    <div style="background: var(--bg-card); border-radius: 6px; overflow: hidden;">
+        <ul style="list-style: none; padding: 0; margin: 0;">
+        {% for resource in cours.resources %}
+            <li style="display: flex; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-light);">
+                <span class="badge" style="background: var(--info); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; margin-right: 15px; min-width: 60px; text-align: center; font-weight: bold;">{{ resource.type }}</span>
+                <div style="flex: 1;">
+                     <div style="font-weight: 500; font-size: 1.05rem; margin-bottom: 4px;">
+                        {{ resource.title ?? 'Untitled' }}
+                     </div>
+                     <a href="{{ resource.url }}" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;">{{ resource.url|slice(0, 60) }}...</a>
+                </div>
+                {% if resource.status == 'PENDING' %}
+                    <span class="badge" style="background: var(--warning); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px;">Pending Approval</span>
+                {% endif %}
+                <div style="display: flex; gap: 8px;">
+                    <a href="{{ resource.url }}" target="_blank" class="btn secondary" style="padding: 6px 12px;"><i class="ri-eye-line"></i></a>
+                    <a href="{{ path('app_admin_resource_edit', {'id': resource.id}) }}" class="btn secondary" style="padding: 6px 12px;"><i class="ri-edit-line"></i></a>
+                </div>
+            </li>
+        {% else %}
+            <li style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <p style="margin-bottom: 1rem; font-size: 1.1rem;">No resources added yet.</p>
+                <a href="{{ path('app_admin_resource_new', {'id': cours.id}) }}" class="btn">Add your first resource</a>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

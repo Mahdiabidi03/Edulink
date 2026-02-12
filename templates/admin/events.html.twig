@@ -1,0 +1,283 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Event Management - Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Event Page Layout */
+    .events-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: var(--space-lg);
+        height: calc(100vh - 140px);
+    }
+
+    /* Tabs Styling */
+    .event-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: var(--space-lg);
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 0.5rem;
+    }
+
+    .tab-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-family: 'Fira Sans', sans-serif;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        position: relative;
+        transition: 0.3s;
+    }
+
+    .tab-btn.active {
+        color: var(--brand-main);
+    }
+
+    .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -0.6rem;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--brand-main);
+        border-radius: 3px 3px 0 0;
+    }
+
+    /* Event Card (Admin Version) */
+    .event-card-admin {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .event-card-admin:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--brand-light);
+    }
+
+    .event-info h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--text-main);
+    }
+
+    .event-meta {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        display: flex;
+        gap: 15px;
+        margin-top: 5px;
+    }
+
+    .event-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    
+    .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+    .status-approved { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.2); }
+
+    /* Right Panel: Create/Edit Form */
+    .event-editor {
+        background: var(--bg-card);
+        border-left: 1px solid var(--border);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    .form-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+        display: block;
+    }
+    .form-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border);
+        background: var(--bg-main);
+        color: var(--text-main);
+        border-radius: 8px;
+    }
+    .form-input:focus {
+        outline: none;
+        border-color: var(--brand-main);
+    }
+
+</style>
+
+<!-- Header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-xl);">
+    <div>
+        <h1 style="margin: 0; font-size: 2rem;">Event Control</h1>
+        <p style="color: var(--text-muted); font-family: 'Fira Code', monospace; margin-top: 5px;">Manage platform listings & approvals</p>
+    </div>
+    <button onclick="createNewEvent()" class="btn btn-primary"><i class="ri-add-circle-line"></i> Create Global Event</button>
+</div>
+
+<div class="events-layout">
+    
+    <!-- LEFT: Event Lists -->
+    <div>
+        <div class="event-tabs">
+            <button class="tab-btn active" onclick="switchTab('pending')">Pending Approval <span style="background: var(--warning); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem;">3</span></button>
+            <button class="tab-btn" onclick="switchTab('live')">Live Events</button>
+            <button class="tab-btn" onclick="switchTab('past')">Past History</button>
+        </div>
+
+        <!-- Pending List -->
+        <div id="pendingWaitlist">
+            <div class="event-card-admin">
+                <div class="event-info">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h3>React Native Hackathon</h3>
+                        <span class="event-badge status-pending">User Event</span>
+                    </div>
+                    <div class="event-meta">
+                        <span><i class="ri-user-line"></i> Host: Alex Morgan (Student)</span>
+                        <span><i class="ri-calendar-line"></i> Feb 22, 2026</span>
+                    </div>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 8px 0 0;">
+                        "A 24-hour hackathon for building mobile apps with Expo. Requesting 500 points for prize pool."
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                     <button class="icon-btn" style="color: var(--success); background: rgba(34, 197, 94, 0.1);" title="Approve"><i class="ri-check-line"></i></button>
+                     <button class="icon-btn" style="color: var(--error); background: rgba(239, 68, 68, 0.1);" title="Reject"><i class="ri-close-line"></i></button>
+                </div>
+            </div>
+
+            <div class="event-card-admin">
+                 <div class="event-info">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h3>Study Group: Data Structures</h3>
+                        <span class="event-badge status-pending">User Event</span>
+                    </div>
+                    <div class="event-meta">
+                        <span><i class="ri-user-line"></i> Host: Sarah Smith (Tutor)</span>
+                        <span><i class="ri-calendar-line"></i> Feb 15, 2026</span>
+                    </div>
+                </div>
+                 <div style="display: flex; gap: 8px;">
+                     <button class="icon-btn" style="color: var(--success); background: rgba(34, 197, 94, 0.1);" title="Approve"><i class="ri-check-line"></i></button>
+                     <button class="icon-btn" style="color: var(--error); background: rgba(239, 68, 68, 0.1);" title="Reject"><i class="ri-close-line"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live List (Hidden by default in this mockup logic) -->
+        <div id="liveList" style="display: none;">
+             <div class="event-card-admin" style="border-left: 4px solid var(--brand-main);">
+                <div class="event-info">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h3>Global AI Summit</h3>
+                        <span class="event-badge status-approved">Official</span>
+                    </div>
+                     <div class="event-meta">
+                        <span><i class="ri-map-pin-line"></i> Main Hall A</span>
+                        <span><i class="ri-time-line"></i> Live Now</span>
+                    </div>
+                </div>
+                 <div style="display: flex; gap: 8px;">
+                     <button class="btn secondary" style="font-size: 0.8rem; padding: 5px 10px;" onclick="loadEventToEdit('Global AI Summit')">Modify</button>
+                     <button class="icon-btn" style="color: var(--error);" title="Cancel Event"><i class="ri-delete-bin-line"></i></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT: Editor Panel -->
+    <div class="event-editor">
+        <h3 id="formTitle" style="margin-top: 0; margin-bottom: 1.5rem;">Create New Event</h3>
+        
+        <form>
+            <div class="form-group">
+                <label class="form-label">Event Title</label>
+                <input type="text" class="form-input" placeholder="Ex. Spring Coding Bootcamp">
+            </div>
+
+            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                     <label class="form-label">Date</label>
+                     <input type="date" class="form-input">
+                </div>
+                <div>
+                     <label class="form-label">Time</label>
+                     <input type="time" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-input" rows="4" style="resize: none;" placeholder="Event details..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Entry Fee (Points)</label>
+                <input type="number" class="form-input" value="0">
+            </div>
+             <div class="form-group">
+                <label class="form-label">Max Participants</label>
+                <input type="number" class="form-input" value="100">
+            </div>
+
+            <div style="margin-top: auto; display: flex; gap: 10px;">
+                <button type="button" class="btn secondary" style="flex: 1;">Reset</button>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Publish Event</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Simple DOM toggle for demo purposes
+        const btns = document.querySelectorAll('.tab-btn');
+        btns.forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if(tabName === 'live') {
+            document.getElementById('pendingWaitlist').style.display = 'none';
+            document.getElementById('liveList').style.display = 'block';
+        } else {
+            document.getElementById('pendingWaitlist').style.display = 'block';
+             document.getElementById('liveList').style.display = 'none';
+        }
+    }
+
+    function createNewEvent() {
+        document.getElementById('formTitle').innerText = "Create New Event";
+        // Reset form logic here
+    }
+
+    function loadEventToEdit(title) {
+        document.getElementById('formTitle').innerText = "Edit: " + title;
+        // Pre-fill form logic here
+    }
+</script>
+{% endblock %}

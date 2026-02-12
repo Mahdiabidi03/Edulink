@@ -1,0 +1,187 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<style>
+    .users-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: var(--space-lg);
+        align-items: start;
+    }
+
+    /* User Avatar */
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--brand-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    /* Role Badges */
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .role-admin { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .role-tutor { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .role-student { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+    /* Floating Action Panel */
+    .user-detail-panel {
+        position: sticky;
+        top: 2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .pro-table tr { cursor: pointer; }
+    .pro-table tr.active td {
+        background: rgba(91, 42, 110, 0.05);
+        border-bottom-color: rgba(91, 42, 110, 0.1);
+    }
+</style>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">User Database</h1>
+        <p class="page-subtitle">Manage system users, roles, and accounts</p>
+    </div>
+    <a href="{{ path('app_admin_user_new') }}" class="btn">
+        <i class="ri-add-line"></i> Create New User
+    </a>
+</div>
+
+<div class="users-grid">
+    <div class="table-container">
+        <table class="pro-table">
+            <thead>
+                <tr>
+                    <th>Identity</th>
+                    <th>Role</th>
+                    <th>Wallet</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                {% set role = 'student' %}
+                {% if 'ROLE_ADMIN' in user.roles %}
+                    {% set role = 'admin' %}
+                {% elseif 'ROLE_TUTOR' in user.roles %}
+                    {% set role = 'tutor' %}
+                {% endif %}
+                
+                <tr onclick="selectUser(this, '{{ user.email }}', '{{ user.email }}', '{{ role }}', '{{ user.xp }}', {{ user.id }})">
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="user-avatar" style="background: linear-gradient(135deg, hsl({{ (user.id * 50) % 360 }}, 70%, 60%), hsl({{ (user.id * 50 + 40) % 360 }}, 70%, 50%))">
+                                {{ user.email|slice(0, 2)|upper }}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">{{ user.email }}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">ID: #{{ user.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="role-badge role-{{ role }}">
+                            <i class="ri-{{ role == 'admin' ? 'shield-star' : (role == 'tutor' ? 'pencil' : 'user') }}-line"></i>
+                            {{ role }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; color: var(--success);">{{ user.xp }} XP</div>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{{ path('app_admin_user_edit', {'id': user.id}) }}" class="icon-btn" title="Edit">
+                                <i class="ri-pencil-line"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 2rem;">No users found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- User Detail Panel -->
+    <div class="user-detail-panel">
+        <div id="detailAvatar" class="user-avatar" style="width: 80px; height: 80px; margin: 0 auto 1.5rem; font-size: 1.5rem; box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);">?</div>
+        
+        <h2 id="detailName" style="margin: 0; font-size: 1.5rem;">Select User</h2>
+        <p id="detailEmail" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">...</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">XP Balance</div>
+                <div id="detailWallet" style="font-size: 1.2rem; font-weight: 700; color: var(--brand-accent);">-</div>
+            </div>
+             <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Role</div>
+                <div id="detailRole" style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">-</div>
+            </div>
+        </div>
+
+        <a id="detailEditBtn" href="#" class="btn" style="width: 100%; border: 1px solid var(--border); background: transparent; margin-bottom: 10px; pointer-events: none; opacity: 0.5;">Edit Profile</a>
+        
+        <form id="detailDeleteForm" method="post" action="#" onsubmit="return confirm('Are you sure you want to delete this user?');" style="display: block;">
+            <input type="hidden" name="_token" value=""> 
+            <!-- Note: CSRF token handling in JS for delete is tricky, strictly we should use generated forms or fetch. 
+                 For simplicity in this panel, we might disable delete or use the table button. 
+                 Let's keep the Delete button in the table for functionality, and make this a 'Suspend' placeholder or link to delete route if possible.
+            -->
+            <button type="button" class="btn" style="width: 100%; border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; background: rgba(239, 68, 68, 0.1); cursor: not-allowed;" disabled>Suspend User</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function selectUser(row, name, email, role, wallet, id) {
+        // Highlight Row
+        document.querySelectorAll('.pro-table tr').forEach(tr => tr.classList.remove('active'));
+        row.classList.add('active');
+
+        // Update Panel
+        document.getElementById('detailName').innerText = name.split('@')[0]; // Use part of email as name for now
+        document.getElementById('detailEmail').innerText = email;
+        document.getElementById('detailRole').innerText = role.toUpperCase();
+        document.getElementById('detailWallet').innerText = wallet + ' XP';
+        
+        const avatar = document.getElementById('detailAvatar');
+        avatar.innerText = email.substring(0, 2).toUpperCase();
+        
+        // Dynamic Avatar Color
+        const hue = (id * 50) % 360;
+        avatar.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 60%), hsl(${hue+40}, 70%, 50%))`;
+
+        // Update Buttons
+        const editBtn = document.getElementById('detailEditBtn');
+        editBtn.href = "/admin/users/" + id + "/edit";
+        editBtn.style.pointerEvents = 'auto';
+        editBtn.style.opacity = '1';
+    }
+</script>
+{% endblock %}

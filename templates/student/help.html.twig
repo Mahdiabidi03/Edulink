@@ -1,0 +1,243 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Help & Community - EduLink{% endblock %}
+
+{% block content %}
+<div class="help-container" style="max-height: 90vh; display: flex; flex-direction: column;">
+
+    <!-- Header -->
+    <div style="margin-bottom: 2rem;">
+        <h1 class="page-title" style="margin: 0; font-size: 2rem; background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Help Center</h1>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Get support from the admin or ask the community.</p>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs" style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1px;">
+        <button class="tab-btn active" onclick="switchTab('contact-admin')" style="background: none; border: none; padding: 10px 20px; color: var(--brand-main); border-bottom: 2px solid var(--brand-main); font-weight: 600; cursor: pointer;">Contact Support</button>
+        <button class="tab-btn" onclick="switchTab('community-feed')" style="background: none; border: none; padding: 10px 20px; color: var(--text-muted); cursor: pointer; transition: 0.3s;">Community Feed</button>
+    </div>
+
+    <!-- TAB 1: CONTACT SUPPORT -->
+    <section id="contact-admin" class="tab-content">
+        <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem;">
+            
+            <!-- Contact Form -->
+            <div class="card">
+                <h3 style="margin-top: 0; margin-bottom: 1.5rem;"><i class="ri-customer-service-2-line" style="color: var(--brand-accent);"></i> Send a Request</h3>
+                
+                <form onsubmit="event.preventDefault(); alert('Message sent to admin!');">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Subject</label>
+                        <input type="text" placeholder="e.g. Issue with Wallet" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: white;">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                             <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Category</label>
+                             <select style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: white;">
+                                 <option>Technical Issue</option>
+                                 <option>Billing / Wallet</option>
+                                 <option>Course Content</option>
+                                 <option>Other</option>
+                             </select>
+                        </div>
+                        <div>
+                             <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Urgency</label>
+                             <select style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: white;">
+                                 <option>Normal</option>
+                                 <option>High</option>
+                                 <option>Critical</option>
+                             </select>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">Message</label>
+                        <textarea placeholder="Describe your issue in detail..." style="width: 100%; height: 150px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: white; resize: vertical; font-family: 'Inter', sans-serif;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <button class="btn" style="flex: 1;">Send Message <i class="ri-send-plane-fill"></i></button>
+                        <button class="btn secondary" style="width: 50px; display: flex; justify-content: center;"><i class="ri-attachment-line"></i></button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- FAQ Side Helper -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1)); border: 1px solid var(--brand-main);">
+                    <h4 style="margin: 0 0 1rem;">Common Questions</h4>
+                    <ul style="padding-left: 1.2rem; color: var(--text-secondary); line-height: 1.6;">
+                        <li style="margin-bottom: 0.5rem;">How do I top up my wallet?</li>
+                        <li style="margin-bottom: 0.5rem;">Why is my course not loading?</li>
+                        <li style="margin-bottom: 0.5rem;">Can I refund a course?</li>
+                    </ul>
+                    <a href="#" style="color: var(--brand-main); font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem; display: block;">Visit Knowledge Base &rarr;</a>
+                </div>
+
+                <div class="card">
+                     <h4 style="margin: 0 0 1rem;">Admin Contact Info</h4>
+                     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                         <i class="ri-mail-line"></i> support@edulink.com
+                     </p>
+                     <p style="color: var(--text-muted); font-size: 0.9rem;">
+                         <i class="ri-phone-line"></i> +1 (555) 123-4567
+                     </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- TAB 2: COMMUNITY FEED -->
+    <section id="community-feed" class="tab-content" style="display: none;">
+        
+        <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem;">
+            
+            <!-- FEED -->
+            <div>
+                <!-- Create Post Widget -->
+                <div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
+                    <div style="display: flex; gap: 1rem;">
+                        <img src="https://ui-avatars.com/api/?name=Student+User&background=8b5cf6&color=fff" style="width: 45px; height: 45px; border-radius: 50%;">
+                        <div style="flex: 1;">
+                            <textarea placeholder="What's on your mind? Ask a question or share an update..." style="width: 100%; height: 80px; background: transparent; border: none; color: white; resize: none; font-family: 'Inter', sans-serif; font-size: 1rem; outline: none;"></textarea>
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 0.5rem;">
+                                <div style="display: flex; gap: 1rem; color: var(--brand-main); font-size: 1.2rem;">
+                                    <i class="ri-image-line" style="cursor: pointer;"></i>
+                                    <i class="ri-link-m" style="cursor: pointer;"></i>
+                                    <i class="ri-at-line" style="cursor: pointer;"></i>
+                                </div>
+                                <button class="btn" style="padding: 8px 24px;">Post</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post 1 -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <img src="https://ui-avatars.com/api/?name=Alex+M&background=random" style="width: 40px; height: 40px; border-radius: 50%;">
+                            <div>
+                                <h4 style="margin: 0;">Alex Morgan</h4>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">2 hours ago • Data Science Group</span>
+                            </div>
+                        </div>
+                        <button class="btn secondary" style="font-size: 0.8rem; padding: 4px 8px;">Review User</button>
+                    </div>
+                    
+                    <p style="line-height: 1.6; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Does anyone have good resources for understanding Neural Networks backpropagation? I'm stuck on the math part of Module 3. Thanks in advance! 🧠
+                    </p>
+
+                    <div style="display: flex; gap: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem; color: var(--text-muted);">
+                        <span style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><i class="ri-heart-3-line"></i> 12 Likes</span>
+                        <span style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><i class="ri-chat-1-line"></i> 5 Comments</span>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-light);">
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <img src="https://ui-avatars.com/api/?name=Sarah+K&background=random" style="width: 30px; height: 30px; border-radius: 50%;">
+                             <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 12px; flex: 1;">
+                                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 4px;">Sarah King <span style="color: var(--brand-accent); font-size: 0.7rem;">★ 4.8</span></div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Check out 3Blue1Brown on YouTube, best visualization ever!</div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post 2 -->
+                 <div class="card" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                             <img src="https://ui-avatars.com/api/?name=David+L&background=random" style="width: 40px; height: 40px; border-radius: 50%;">
+                            <div>
+                                <h4 style="margin: 0;">David Lee</h4>
+                                <span style="font-size: 0.8rem; color: var(--text-muted);">Yesterday • General</span>
+                            </div>
+                        </div>
+                        <button class="btn secondary" style="font-size: 0.8rem; padding: 4px 8px;">Review User</button>
+                    </div>
+                    
+                    <p style="line-height: 1.6; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Just finished the "Full Stack" course! It was amazing. If anyone needs help with the final project, feel free to DM me. 🚀
+                    </p>
+
+                    <div style="display: flex; gap: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem; color: var(--text-muted);">
+                        <span style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><i class="ri-heart-fill" style="color: var(--brand-accent);"></i> 45 Likes</span>
+                        <span style="cursor: pointer; display: flex; align-items: center; gap: 6px;"><i class="ri-chat-1-line"></i> 12 Comments</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT SIDEBAR: TRENDING & REVIEWS -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <div class="card">
+                    <h4 style="margin: 0 0 1rem; color: var(--warning);"><i class="ri-star-smile-line"></i> Top Contributors</h4>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="https://ui-avatars.com/api/?name=Jane+D&background=random" style="width: 35px; height: 35px; border-radius: 50%;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 0.9rem;">Jane Doe</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">1500 XP</div>
+                            </div>
+                            <span style="background: rgba(255,193,7,0.2); color: #ffc107; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">★ 5.0</span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img src="https://ui-avatars.com/api/?name=Mike+R&background=random" style="width: 35px; height: 35px; border-radius: 50%;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 0.9rem;">Mike Ross</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">1200 XP</div>
+                            </div>
+                            <span style="background: rgba(255,193,7,0.2); color: #ffc107; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">★ 4.9</span>
+                        </div>
+
+                    </div>
+                    <button class="btn secondary" style="width: 100%; margin-top: 1rem; font-size: 0.85rem;">View Leaderboard</button>
+                </div>
+
+                <div class="card" style="background: var(--bg-main); border: 1px solid var(--border-light);">
+                    <h4 style="margin: 0 0 0.5rem;">Community Guidelines</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+                        Be respectful, keep content relevant, and help others learn. No spam or harsh language.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+    function switchTab(id) {
+        // Hide all contents
+        document.querySelectorAll('.tab-content').forEach(section => {
+            section.style.display = 'none';
+        });
+        
+        // Show selected content
+        document.getElementById(id).style.display = 'block';
+        
+        // Update tabs styling
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.style.color = 'var(--text-muted)';
+            btn.style.borderBottom = 'none';
+            btn.classList.remove('active');
+        });
+        
+        const clickedBtn = event.currentTarget || event.target;
+        clickedBtn.style.color = 'var(--brand-main)';
+        clickedBtn.style.borderBottom = '2px solid var(--brand-main)';
+        clickedBtn.classList.add('active');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Wallet - EduLink{% endblock %}
+
+{% block content %}
+<div class="wallet-container">
+
+    <!-- Header & Balance Hero -->
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 class="page-title" style="margin: 0.5rem 0; font-size: 2rem;">My XP Wallet</h1>
+        
+        <!-- CARD VISUALIZATION -->
+        <div class="credit-card" style="width: 380px; height: 220px; background: linear-gradient(135deg, #0F172A, #334155); border-radius: 20px; padding: 25px; color: white; margin: 2rem auto; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: left; border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+            <!-- Shine efffect -->
+            <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(50px);"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <span style="font-family: monospace; font-size: 1.2rem; letter-spacing: 2px;">EduLink Card</span>
+                <i class="ri-wifi-line" style="transform: rotate(90deg); font-size: 1.5rem;"></i>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 5px;">Total XP Balance</div>
+                <div style="font-size: 2.2rem; font-weight: 700; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">{{ app.user.xp }} XP</div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; position: relative; z-index: 10;">
+                <div>
+                   <div style="font-size: 0.7rem; opacity: 0.7;">CARD HOLDER</div>
+                   <div style="font-size: 1rem; font-weight: 600; letter-spacing: 1px;">{{ app.user.fullName|upper }}</div> 
+                </div>
+                <div style="font-size: 1.5rem;">
+                    <i class="ri-copper-coin-line"></i>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 1rem;">
+             <button class="btn" onclick="openTransferModal()"><i class="ri-send-plane-fill"></i> Transfer XP</button>
+             <button class="btn secondary"><i class="ri-download-line"></i> Collect</button>
+        </div>
+    </div>
+
+    <!-- TRANSACTION HISTORY & STATS -->
+    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem;">
+        
+        <!-- History -->
+        <div class="card">
+            <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Transaction History</h3>
+            
+            <table class="wallet-table" style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <th style="text-align: left; padding: 10px; color: var(--text-muted);">Description</th>
+                    <th style="text-align: left; padding: 10px; color: var(--text-muted);">Date</th>
+                    <th style="text-align: right; padding: 10px; color: var(--text-muted);">Amount</th>
+                </tr>
+                
+                {% for t in transactions %}
+                <tr style="border-bottom: 1px solid var(--border-light);">
+                    <td style="padding: 15px 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="background: rgba({{ t.amount > 0 ? '16, 185, 129' : '239, 68, 68' }}, 0.1); padding: 8px; border-radius: 8px; color: var(--{{ t.amount > 0 ? 'success' : 'error' }});">
+                                <i class="{{ t.amount > 0 ? 'ri-arrow-down-line' : 'ri-arrow-up-line' }}"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">{{ t.type }}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">Transaction #{{ t.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color: var(--text-secondary);">{{ t.date|date("M d, Y") }}</td>
+                    <td style="text-align: right; font-weight: 700; color: var(--{{ t.amount > 0 ? 'success' : 'text-main' }});">
+                        {{ t.amount > 0 ? '+' : '' }}{{ t.amount }} XP
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 2rem; color: var(--text-muted);">No transactions yet.</td>
+                </tr>
+                {% endfor %}
+            </table>
+            
+            <div style="text-align: center; margin-top: 1rem;">
+                <button class="btn secondary" style="font-size: 0.8rem;">View All Transactions</button>
+            </div>
+        </div>
+
+        <!-- Quick Stats / Analytics -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2);">
+                <i class="ri-line-chart-line" style="font-size: 2rem; color: var(--success); margin-bottom: 1rem;"></i>
+                <h3 style="margin: 0; font-size: 1.8rem;">+{{ totalEarned }}</h3>
+                <p style="margin: 0; color: var(--text-secondary);">Total XP Earned</p>
+            </div>
+
+             <div class="card">
+                <h4 style="margin: 0 0 1rem;">Spending Breakdown</h4>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    
+                    {% set totalSpentSafe = totalSpent > 0 ? totalSpent : 1 %}
+                    
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px;">
+                            <span>Courses</span>
+                            <span>{{ ((breakdown.COURSES / totalSpentSafe) * 100)|round }}%</span>
+                        </div>
+                        <div style="height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;">
+                            <div style="width: {{ ((breakdown.COURSES / totalSpentSafe) * 100)|round }}%; height: 100%; background: var(--brand-main);"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px;">
+                            <span>Events</span>
+                            <span>{{ ((breakdown.EVENTS / totalSpentSafe) * 100)|round }}%</span>
+                        </div>
+                         <div style="height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;">
+                            <div style="width: {{ ((breakdown.EVENTS / totalSpentSafe) * 100)|round }}%; height: 100%; background: var(--warning);"></div>
+                        </div>
+                    </div>
+                     <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px;">
+                            <span>Transfers</span>
+                            <span>{{ ((breakdown.TRANSFERS / totalSpentSafe) * 100)|round }}%</span>
+                        </div>
+                         <div style="height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;">
+                            <div style="width: {{ ((breakdown.TRANSFERS / totalSpentSafe) * 100)|round }}%; height: 100%; background: var(--error);"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- TRANSFER MODAL -->
+<div id="transferModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100; align-items: center; justify-content: center;">
+    <div class="card" style="width: 450px; position: relative; animation: zoomIn 0.3s ease;">
+         <button onclick="document.getElementById('transferModal').style.display = 'none'" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+         
+         <h2 style="margin-top: 0; margin-bottom: 1.5rem;">Transfer XP</h2>
+
+         {% for message in app.flashes('error') %}
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); color: var(--error); padding: 10px; border-radius: 6px; margin-bottom: 1rem;">
+                {{ message }}
+            </div>
+         {% endfor %}
+
+         {% for message in app.flashes('success') %}
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); padding: 10px; border-radius: 6px; margin-bottom: 1rem;">
+                {{ message }}
+            </div>
+         {% endfor %}
+         
+         {{ form_start(transferForm, {'attr': {'novalidate': 'novalidate'}}) }}
+         <div style="margin-bottom: 1.5rem;">
+             {{ form_label(transferForm.recipientEmail, null, {'label_attr': {'style': 'display: block; color: var(--text-secondary); margin-bottom: 0.5rem;'}}) }}
+             <div style="display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-main); padding: 0 10px;">
+                 <i class="ri-user-search-line" style="color: var(--text-muted);"></i>
+                 {{ form_widget(transferForm.recipientEmail, {'attr': {'class': '', 'style': 'width: 100%; padding: 12px; background: transparent; border: none; color: white; outline: none; font-family: inherit;'}}) }}
+             </div>
+             {{ form_errors(transferForm.recipientEmail, {'attr': {'style': 'color: var(--error); font-size: 0.8rem; margin-top: 4px;'}}) }}
+         </div>
+
+         <div style="margin-bottom: 2rem;">
+             {{ form_label(transferForm.amount, null, {'label_attr': {'style': 'display: block; color: var(--text-secondary); margin-bottom: 0.5rem;'}}) }}
+             {{ form_widget(transferForm.amount, {'attr': {'style': 'width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: white; font-size: 1.2rem; font-weight: 700;'}}) }}
+             <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">Available: {{ app.user.xp }} XP</div>
+             {{ form_errors(transferForm.amount) }}
+         </div>
+
+         <button type="submit" class="btn" style="width: 100%;">Send XP Now</button>
+         {{ form_end(transferForm) }}
+    </div>
+</div>
+
+<style>
+    @keyframes zoomIn {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+</style>
+
+<script>
+    function openTransferModal() {
+        document.getElementById('transferModal').style.display = 'flex';
+    }
+</script>
+{% endblock %}

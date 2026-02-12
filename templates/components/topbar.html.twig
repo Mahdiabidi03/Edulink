@@ -1,0 +1,64 @@
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="menu-toggle"><i data-lucide="menu"></i></div>
+    <span class="page-title">{% block page_title %}Student Dashboard{% endblock %}</span>
+  </div>
+
+  <div class="topbar-right">
+    <button class="icon-btn theme-toggle" id="themeToggle" title="Toggle Theme">
+      <i data-lucide="moon"></i>
+    </button>
+    {{ render(controller('App\\Controller\\NotificationController::recent')) }}
+    
+    <div class="profile-dropdown-container" style="position: relative;">
+        <div class="profile" onclick="toggleProfileMenu()" title="Name: {{ app.user.fullName }} | XP: {{ app.user.xp }}" style="display: flex; gap: 10px; align-items: center; cursor: pointer;">
+          <div class="profile-info" style="text-align: right; line-height: 1.2; display: none; @media (min-width: 768px) { display: block; }">
+              <div style="font-weight: 600; font-size: 0.9rem;">{{ app.user.fullName }}</div>
+              <div style="font-size: 0.75rem; color: var(--brand-accent);">{{ app.user.xp }} XP</div>
+          </div>
+          <img src="https://ui-avatars.com/api/?name={{ app.user.fullName|url_encode }}&background=8b5cf6&color=fff" alt="Profile">
+        </div>
+
+        <div id="profileDropdown" class="dropdown-menu" style="display: none; position: absolute; right: 0; top: 120%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; width: 220px; padding: 0.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 1000;">
+            <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); margin-bottom: 0.5rem;">
+                <div style="font-weight: 600; color: var(--text-main);">{{ app.user.fullName }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ app.user.email }}</div>
+            </div>
+            
+            <a href="{{ path('student_dashboard') }}" class="dropdown-item" style="display: flex; align-items: center; padding: 0.75rem 1rem; color: var(--text-secondary); text-decoration: none; border-radius: 8px; transition: all 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
+                <i data-lucide="layout-dashboard" style="margin-right: 10px; color: var(--brand-main); width: 18px; height: 18px;"></i> Dashboard
+            </a>
+            
+            <a href="{{ path('student_wallet') }}" class="dropdown-item" style="display: flex; align-items: center; padding: 0.75rem 1rem; color: var(--text-secondary); text-decoration: none; border-radius: 8px; transition: all 0.2s;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
+                <i data-lucide="wallet" style="margin-right: 10px; color: var(--success); width: 18px; height: 18px;"></i> Wallet
+            </a>
+
+            <div style="height: 1px; background: var(--border); margin: 0.5rem 0;"></div>
+
+            <a href="{{ path('app_logout') }}" class="dropdown-item" style="display: flex; align-items: center; padding: 0.75rem 1rem; color: var(--error); text-decoration: none; border-radius: 8px; transition: all 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'" onmouseout="this.style.background='transparent'">
+                <i data-lucide="log-out" style="margin-right: 10px; width: 18px; height: 18px;"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <script>
+    function toggleProfileMenu() {
+        const menu = document.getElementById('profileDropdown');
+        if (menu.style.display === 'block') {
+            menu.style.display = 'none';
+        } else {
+            menu.style.display = 'block';
+        }
+    }
+    
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function(e) {
+        const container = document.querySelector('.profile-dropdown-container');
+        const menu = document.getElementById('profileDropdown');
+        if (container && !container.contains(e.target) && menu.style.display === 'block') {
+            menu.style.display = 'none';
+        }
+    });
+    </script>
+  </div>
+</div>

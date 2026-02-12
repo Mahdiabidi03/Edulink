@@ -1,0 +1,190 @@
+{% extends 'auth_base.html.twig' %}
+
+{% block title %}Login - EduLink{% endblock %}
+
+{% block content %}
+<!-- 3D Background -->
+<div class="auth-scene">
+    <div class="cube-container">
+        <div class="cube"></div>
+        <div class="cube"></div>
+        <div class="cube"></div>
+        <div class="cube"></div>
+        <div class="cube"></div>
+    </div>
+</div>
+
+<div class="login-container" data-aos="zoom-in" data-aos-duration="1000">
+  
+  <div class="login-card">
+    <img src="{{ asset('assets/images/logo.png') }}" class="login-logo">
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Sign in to continue your journey</p>
+
+    <form method="post" action="{{ path('login') }}" novalidate>
+      {% if error %}
+          <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.1); color: #f87171; padding: 10px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;">
+              {{ error.messageKey|trans(error.messageData, 'security') }}
+          </div>
+      {% endif %}
+
+      <div class="input-group">
+        <input type="email" value="{{ last_username }}" name="email" id="inputEmail" placeholder="Email Address" autocomplete="email" autofocus>
+        <i data-lucide="mail" class="input-icon"></i>
+      </div>
+
+      <div class="input-group">
+        <input type="password" name="password" id="inputPassword" placeholder="Password" autocomplete="current-password">
+        <i data-lucide="lock" class="input-icon"></i>
+      </div>
+
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+      <div style="text-align: right; margin-bottom: 1.5rem;">
+          <a href="{{ path('forgot_password') }}" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="btn login-btn">Sign In <i data-lucide="arrow-right" style="margin-left: 5px;"></i></button>
+
+      <div style="margin-top: 1rem; text-align: center;">
+        <span style="color: var(--text-muted); font-size: 0.8rem;">OR</span>
+      </div>
+
+      <button type="button" class="btn secondary" style="width: 100%; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="openFaceLogin()">
+        <i data-lucide="scan-face"></i> Login with Face ID
+      </button>
+    </form>
+
+    <!-- Face Login Modal -->
+    <div id="faceLoginModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <div class="card" style="width: 500px; text-align: center; position: relative;">
+            <button onclick="closeFaceLogin()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            
+            <h2 style="margin-bottom: 0.5rem;">Face Verification</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Look directly at the camera.</p>
+            
+            <div style="position: relative; width: 100%; height: 350px; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem;">
+                <video id="loginVideo" autoplay muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; border: 3px dashed rgba(255,255,255,0.3); border-radius: 50%;"></div>
+                <div id="loginLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0,0,0,0.7); padding: 5px 10px; border-radius: 4px;">Loading AI...</div>
+            </div>
+
+            <div id="loginStatus" style="height: 20px; color: var(--text-muted); font-size: 0.9rem;">Initializing...</div>
+        </div>
+    </div>
+    
+    <script src="{{ asset('assets/js/face-api.min.js') }}"></script>
+    <script>
+        let isFaceLoginOpen = false;
+        let loginStream = null;
+        let loginInterval = null;
+
+        async function openFaceLogin() {
+            document.getElementById('faceLoginModal').style.display = 'flex';
+            isFaceLoginOpen = true;
+            
+            const videoEl = document.getElementById('loginVideo');
+            const statusEl = document.getElementById('loginStatus');
+            const loadingEl = document.getElementById('loginLoading');
+            
+            // Load models if not loaded (or reload to be safe)
+            if (!faceapi.nets.ssdMobilenetv1.params) {
+                 statusEl.innerText = "Loading AI Models...";
+                 try {
+                     const modelPath = "{{ asset('models') }}";
+                     await Promise.all([
+                        faceapi.nets.ssdMobilenetv1.loadFromUri(modelPath),
+                        faceapi.nets.faceLandmark68Net.loadFromUri(modelPath),
+                        faceapi.nets.faceRecognitionNet.loadFromUri(modelPath)
+                     ]);
+                 } catch(e) {
+                     statusEl.innerText = "Error loading AI.";
+                     console.error(e);
+                     return;
+                 }
+            }
+            
+            loadingEl.style.display = 'none';
+            statusEl.innerText = "Starting Camera...";
+
+            try {
+                loginStream = await navigator.mediaDevices.getUserMedia({ video: {} });
+                videoEl.srcObject = loginStream;
+                statusEl.innerText = "Detecting face...";
+                
+                // Start scanning loop
+                startScanning();
+            } catch (err) {
+                statusEl.innerText = "Camera denied.";
+                console.error(err);
+            }
+        }
+
+        function closeFaceLogin() {
+            document.getElementById('faceLoginModal').style.display = 'none';
+            isFaceLoginOpen = false;
+            if (loginStream) {
+                loginStream.getTracks().forEach(track => track.stop());
+                loginStream = null;
+            }
+            if (loginInterval) {
+                clearInterval(loginInterval);
+                loginInterval = null;
+            }
+        }
+
+        function startScanning() {
+             const videoEl = document.getElementById('loginVideo');
+             const statusEl = document.getElementById('loginStatus');
+
+             loginInterval = setInterval(async () => {
+                 if (!isFaceLoginOpen || !videoEl.srcObject) return;
+
+                 const detection = await faceapi.detectSingleFace(videoEl).withFaceLandmarks().withFaceDescriptor();
+                 
+                 if (detection) {
+                     statusEl.innerText = "Verifying...";
+                     statusEl.style.color = "var(--brand-main)";
+                     
+                     // Stop scanning while verifying
+                     clearInterval(loginInterval);
+                     
+                     const descriptor = Array.from(detection.descriptor);
+                     
+                     fetch('{{ path('api_face_login') }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ descriptor: descriptor })
+                     })
+                     .then(res => res.json())
+                     .then(data => {
+                         if (data.success) {
+                             statusEl.innerText = "Success! Redirecting...";
+                             statusEl.style.color = "var(--success)";
+                             setTimeout(() => {
+                                 window.location.href = data.redirect; // Redirect to dashboard
+                             }, 1000);
+                         } else {
+                             statusEl.innerText = "Face not recognized.";
+                             statusEl.style.color = "var(--error)";
+                             // Restart scanning after a delay
+                             setTimeout(() => startScanning(), 2000);
+                         }
+                     })
+                     .catch(err => {
+                         statusEl.innerText = "Server Error.";
+                         console.error(err);
+                         setTimeout(() => startScanning(), 2000);
+                     });
+                 }
+             }, 1000); // Check every 1 second
+        }
+    </script>
+
+    <p class="register-link">
+      Don’t have an account? <a href="{{ path('register') }}">Register</a>
+    </p>
+  </div>
+
+</div>
+{% endblock %}

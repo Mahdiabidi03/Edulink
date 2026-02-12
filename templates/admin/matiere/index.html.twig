@@ -1,0 +1,53 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Manage Categories{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>Manage Categories</h1>
+        <a href="{{ path('app_admin_matiere_new') }}" class="btn" style="background: green; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">+ New Category</a>
+    </div>
+
+    <div class="card" style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+                    <th style="padding: 15px; text-align: left;">ID</th>
+                    <th style="padding: 15px; text-align: left;">Name</th>
+                    <th style="padding: 15px; text-align: left;">Status</th>
+                    <th style="padding: 15px; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for matiere in matieres %}
+                <tr style="border-bottom: 1px solid #e9ecef;">
+                    <td style="padding: 15px;">{{ matiere.id }}</td>
+                    <td style="padding: 15px; font-weight: bold;">{{ matiere.name }}</td>
+                    <td style="padding: 15px;">
+                        {% if matiere.status == 'APPROVED' %}
+                            <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">Approved</span>
+                        {% else %}
+                            <span style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 15px; text-align: right;">
+                        {% if matiere.status != 'APPROVED' %}
+                            <form method="post" action="{{ path('app_admin_matiere_approve', {'id': matiere.id}) }}" style="display: inline-block; margin-right: 5px;">
+                                <button class="btn" style="background: #17a2b8; color: white; padding: 5px 10px; font-size: 0.8rem;">Approve</button>
+                            </form>
+                        {% endif %}
+                        <a href="{{ path('app_admin_courses', {'matiere_id': matiere.id}) }}" class="btn" style="background: #17a2b8; color: white; padding: 5px 10px; font-size: 0.8rem; margin-right: 5px; text-decoration: none; border-radius: 4px;">View Courses</a>
+                        <a href="{{ path('app_admin_matiere_edit', {'id': matiere.id}) }}" style="color: blue; margin-right: 10px;">Edit</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" style="padding: 30px; text-align: center; color: #6c757d;">No categories found.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

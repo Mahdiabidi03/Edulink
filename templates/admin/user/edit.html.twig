@@ -1,0 +1,21 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Edit User{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Edit User</h1>
+        <p class="page-subtitle">Update user account #{{ user.id }}</p>
+    </div>
+    <a href="{{ path('app_admin_user_index') }}" class="btn secondary">
+        <i class="ri-arrow-left-line"></i> Back to List
+    </a>
+</div>
+
+<div class="grid-layout">
+    <div class="card-pro" style="max-width: 800px;">
+        {{ include('admin/user/_form.html.twig', {'button_label': 'Update User'}) }}
+    </div>
+</div>
+{% endblock %}

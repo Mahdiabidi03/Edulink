@@ -1,0 +1,428 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}User Management - Admin System{% endblock %}
+
+{% block content %}
+<style>
+    /* Admin Users Specific Styles */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: var(--space-xl);
+    }
+    
+    .users-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: var(--space-lg);
+        align-items: start;
+    }
+
+    /* Enhanced Table */
+    .user-table-container {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .pro-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .pro-table th {
+        text-align: left;
+        padding: 1rem 1.5rem;
+        background: rgba(0,0,0,0.2);
+        color: var(--text-muted);
+        font-family: 'Fira Code', monospace;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .pro-table td {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-light);
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        transition: background 0.2s;
+    }
+
+    .pro-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .pro-table tr:hover td {
+        background: rgba(255,255,255,0.02);
+        color: var(--text-main);
+    }
+    
+    .pro-table tr.active td {
+        background: rgba(99, 102, 241, 0.1);
+        border-bottom-color: rgba(99, 102, 241, 0.2);
+    }
+
+    /* User Avatar */
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--brand-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    /* Role Badges */
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .role-admin { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .role-tutor { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .role-student { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+
+    /* Floating Action Panel */
+    .user-detail-panel {
+        position: sticky;
+        top: 2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .modal-content {
+        background: var(--bg-card);
+        width: 100%;
+        max-width: 500px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-xl);
+        transform: scale(0.9);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Active State for Modal */
+    .modal-overlay.active {
+        display: flex;
+        opacity: 1;
+    }
+    .modal-overlay.active .modal-content {
+        transform: scale(1);
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 1.2rem;
+        text-align: left;
+    }
+    .form-label {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+    .form-input, .form-select {
+        width: 100%;
+        padding: 12px;
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-main);
+        font-family: 'Fira Sans', sans-serif;
+        outline: none;
+        transition: 0.2s;
+    }
+    .form-input:focus, .form-select:focus {
+        border-color: var(--brand-accent);
+        box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.1);
+    }
+    
+    /* Custom Radio for Role Selection */
+    .role-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .role-option {
+        position: relative;
+    }
+    
+    .role-option input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+    
+    .role-card {
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        text-align: center;
+        background: rgba(255,255,255,0.02);
+        transition: 0.2s;
+        cursor: pointer;
+    }
+    
+    .role-option input:checked + .role-card {
+        background: rgba(202, 138, 4, 0.1);
+        border-color: var(--brand-accent);
+        color: var(--brand-accent);
+    }
+
+</style>
+
+<!-- Header -->
+<div class="page-header">
+    <div>
+        <h1 style="margin: 0; font-size: 2rem;">User Database</h1>
+        <p style="color: var(--text-muted); font-family: 'Fira Code', monospace; margin-top: 5px;">
+            <i class="ri-database-2-line"></i> 14,205 entries found
+        </p>
+    </div>
+    <button onclick="openModal()" class="btn btn-primary" style="padding: 12px 24px;">
+        <i class="ri-user-add-line"></i> Create User
+    </button>
+</div>
+
+<div class="users-grid">
+
+    <!-- Users Table -->
+    <div class="user-table-container">
+        <table class="pro-table">
+            <thead>
+                <tr>
+                    <th>Identity</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- User 1 -->
+                <tr onclick="selectUser(this, 'Alex Morgan', 'amorgan@edu.link', 'Student', 'Level 5', 4250)" class="active">
+                    <td style="display: flex; align-items: center; gap: 12px;">
+                        <div class="user-avatar" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);">AM</div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-main);">Alex Morgan</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">ID: #88219</div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-student"><i class="ri-book-open-line"></i> Student</span></td>
+                    <td><span style="color: var(--success); font-size: 0.8rem;">● Online</span></td>
+                    <td>2 days ago</td>
+                    <td>
+                        <button class="icon-btn" style="color: var(--text-secondary);"><i class="ri-more-2-fill"></i></button>
+                    </td>
+                </tr>
+
+                <!-- User 2 -->
+                <tr onclick="selectUser(this, 'Prof. Sarah Connor', 'sconnor@edu.link', 'Tutor', 'Senior Tutor', 15000)">
+                    <td style="display: flex; align-items: center; gap: 12px;">
+                        <div class="user-avatar" style="background: linear-gradient(135deg, #f59e0b, #d97706);">SC</div>
+                        <div>
+                            <div style="font-weight: 600;">Sarah Connor</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">ID: #77102</div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-tutor"><i class="ri-presentation-line"></i> Tutor</span></td>
+                    <td><span style="color: var(--text-muted); font-size: 0.8rem;">○ Offline</span></td>
+                    <td>1 month ago</td>
+                    <td><button class="icon-btn" style="color: var(--text-secondary);"><i class="ri-more-2-fill"></i></button></td>
+                </tr>
+
+                 <!-- User 3 -->
+                <tr onclick="selectUser(this, 'System Admin', 'root@edu.link', 'Admin', 'Super Admin', 999999)">
+                    <td style="display: flex; align-items: center; gap: 12px;">
+                        <div class="user-avatar" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">SA</div>
+                        <div>
+                            <div style="font-weight: 600;">System Admin</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">ID: #00001</div>
+                        </div>
+                    </td>
+                    <td><span class="role-badge role-admin"><i class="ri-shield-key-line"></i> Admin</span></td>
+                    <td><span style="color: var(--warning); font-size: 0.8rem;">● Busy</span></td>
+                    <td>2023</td>
+                    <td><button class="icon-btn" style="color: var(--text-secondary);"><i class="ri-more-2-fill"></i></button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- User Detail Panel -->
+    <div class="user-detail-panel">
+        <div id="detailAvatar" class="user-avatar" style="width: 80px; height: 80px; margin: 0 auto 1.5rem; font-size: 1.5rem; box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);">AM</div>
+        
+        <h2 id="detailName" style="margin: 0; font-size: 1.5rem;">Alex Morgan</h2>
+        <p id="detailEmail" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">amorgan@edu.link</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+            <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Points</div>
+                <div id="detailPoints" style="font-size: 1.2rem; font-weight: 700; color: var(--brand-accent);">4,250</div>
+            </div>
+             <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Rank</div>
+                <div id="detailRank" style="font-size: 1.2rem; font-weight: 700; color: var(--text-main);">Level 5</div>
+            </div>
+        </div>
+
+        <button class="btn" style="width: 100%; border: 1px solid var(--border); background: transparent; margin-bottom: 10px;">View Full Profile</button>
+        <button class="btn" style="width: 100%; border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; background: rgba(239, 68, 68, 0.1);">Suspend User</button>
+    </div>
+
+</div>
+
+<!-- CREATE USER MODAL -->
+<div id="createUserModal" class="modal-overlay">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="margin: 0;">Create New User</h2>
+            <button onclick="closeModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+        </div>
+        
+        <form>
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <div style="position: relative;">
+                    <i class="ri-user-line" style="position: absolute; left: 12px; top: 12px; color: var(--text-muted);"></i>
+                    <input type="text" class="form-input" style="padding-left: 40px;" placeholder="ex. John Doe">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <div style="position: relative;">
+                    <i class="ri-mail-line" style="position: absolute; left: 12px; top: 12px; color: var(--text-muted);"></i>
+                    <input type="email" class="form-input" style="padding-left: 40px;" placeholder="ex. john@edulink.com">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Assign Role</label>
+                <div class="role-selector">
+                    <div class="role-option">
+                        <input type="radio" name="role" value="student" checked>
+                        <div class="role-card">
+                            <i class="ri-book-open-line" style="display: block; font-size: 1.2rem; margin-bottom: 5px;"></i>
+                            <span style="font-size: 0.8rem; font-weight: 600;">Student</span>
+                        </div>
+                    </div>
+                    
+                    <div class="role-option">
+                        <input type="radio" name="role" value="tutor">
+                        <div class="role-card">
+                            <i class="ri-presentation-line" style="display: block; font-size: 1.2rem; margin-bottom: 5px;"></i>
+                            <span style="font-size: 0.8rem; font-weight: 600;">Tutor</span>
+                        </div>
+                    </div>
+
+                    <div class="role-option">
+                        <input type="radio" name="role" value="admin">
+                        <div class="role-card">
+                            <i class="ri-shield-key-line" style="display: block; font-size: 1.2rem; margin-bottom: 5px;"></i>
+                            <span style="font-size: 0.8rem; font-weight: 600;">Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Temporary Password</label>
+                 <div style="position: relative;">
+                    <i class="ri-lock-2-line" style="position: absolute; left: 12px; top: 12px; color: var(--text-muted);"></i>
+                    <input type="text" class="form-input" style="padding-left: 40px;" value="EduLink2024!" readonly style="opacity: 0.7;">
+                    <i class="ri-file-copy-line" style="position: absolute; right: 12px; top: 12px; cursor: pointer; color: var(--brand-accent);"></i>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">User will be prompted to change this on login.</p>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 2rem;">
+                <button type="button" onclick="closeModal()" class="btn" style="flex: 1; background: transparent; border: 1px solid var(--border);">Cancel</button>
+                <button type="button" class="btn btn-primary" style="flex: 1; background: var(--brand-accent); color: black;">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Modal Logic
+    function openModal() {
+        const modal = document.getElementById('createUserModal');
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('createUserModal');
+        modal.classList.remove('active');
+    }
+
+    // Close on outside click
+    document.getElementById('createUserModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    // User Selection Logic
+    function selectUser(row, name, email, role, rank, points) {
+        // Highlight Row
+        document.querySelectorAll('.pro-table tr').forEach(tr => tr.classList.remove('active'));
+        row.classList.add('active');
+
+        // Update Panel
+        document.getElementById('detailName').innerText = name;
+        document.getElementById('detailEmail').innerText = email;
+        document.getElementById('detailRank').innerText = rank;
+        document.getElementById('detailPoints').innerText = points.toLocaleString();
+        document.getElementById('detailAvatar').innerText = name.split(' ').map(n => n[0]).join('');
+        
+        // Dynamic Avatar Color (Randomized for effect based on name length)
+        const hue = (name.length * 50) % 360;
+        document.getElementById('detailAvatar').style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 60%), hsl(${hue+40}, 70%, 50%))`;
+    }
+</script>
+
+{% endblock %}

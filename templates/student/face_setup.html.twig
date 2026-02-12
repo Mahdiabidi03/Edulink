@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Face ID Setup - EduLink{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 2rem auto; text-align: center;">
+    <h1 style="color: var(--brand-main); margin-bottom: 0.5rem;">Face ID Setup</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Secure your account by registering your face.</p>
+
+    <div style="position: relative; margin-bottom: 2rem;">
+        <video id="video" width="100%" height="400" autoplay muted style="border-radius: 12px; border: 2px solid var(--border); background: #000;"></video>
+        <div id="overlay" style="position: absolute; top:0; left:0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none;">
+            <div style="width: 200px; height: 200px; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%;"></div>
+        </div>
+        <div id="loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; background: rgba(0,0,0,0.7); padding: 1rem; border-radius: 8px;">
+            Loading AI Models...
+        </div>
+    </div>
+
+    <div class="actions" style="display: flex; gap: 1rem; justify-content: center;">
+        <button id="startBtn" class="btn" disabled>Start Camera</button>
+        <button id="captureBtn" class="btn success" disabled>Register Face</button>
+    </div>
+
+    <div id="message" style="margin-top: 1rem; font-weight: 500;"></div>
+</div>
+
+<!-- Face API -->
+<script src="{{ asset('assets/js/face-api.min.js') }}"></script>
+<script>
+    const video = document.getElementById('video');
+    const startBtn = document.getElementById('startBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const msg = document.getElementById('message');
+    const loading = document.getElementById('loading');
+    
+    let modelsLoaded = false;
+    let stream = null;
+
+    // Load Models
+    const modelPath = "{{ asset('models') }}";
+    console.log("Loading models from:", modelPath);
+
+    Promise.all([
+        faceapi.nets.ssdMobilenetv1.loadFromUri(modelPath),
+        faceapi.nets.faceLandmark68Net.loadFromUri(modelPath),
+        faceapi.nets.faceRecognitionNet.loadFromUri(modelPath)
+    ]).then(() => {
+        console.log("Models loaded successfully");
+        modelsLoaded = true;
+        loading.style.display = 'none';
+        startBtn.disabled = false;
+        msg.innerText = "Models Loaded. Click 'Start Camera'.";
+        msg.style.color = "var(--success)";
+    }).catch(err => {
+        console.error("Failed to load models:", err);
+        loading.innerText = 'Error loading models: ' + err;
+        msg.style.color = "var(--error)";
+    });
+
+    // Start Video
+    startBtn.addEventListener('click', async () => {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: {} });
+            video.srcObject = stream;
+            startBtn.disabled = true;
+            captureBtn.disabled = false;
+            msg.innerText = "Position your face in the circle.";
+            msg.style.color = "var(--text-main)";
+        } catch (err) {
+            msg.innerText = "Camera access denied.";
+            msg.style.color = "var(--error)";
+            console.error(err);
+        }
+    });
+
+    // Capture & Register
+    captureBtn.addEventListener('click', async () => {
+        if (!modelsLoaded || !stream) return;
+        
+        msg.innerText = "Scanning...";
+        const detection = await faceapi.detectSingleFace(video).withFaceLandmarks().withFaceDescriptor();
+        
+        if (detection) {
+            const descriptor = Array.from(detection.descriptor); // Convert Float32Array to normal Array
+            
+            // Send to Server
+            fetch('{{ path('api_face_register') }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ descriptor: descriptor })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    msg.innerText = "Face Registered Successfully!";
+                    msg.style.color = "var(--success)";
+                    captureBtn.disabled = true;
+                    // Provide feedback - maybe redirect after 2 sec
+                    setTimeout(() => window.location.href = '{{ path('student_dashboard') }}', 2000);
+                } else {
+                    msg.innerText = "Error saving face data.";
+                    msg.style.color = "var(--error)";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                msg.innerText = "Server error.";
+            });
+
+        } else {
+            msg.innerText = "No face detected. Try again.";
+            msg.style.color = "var(--warning)";
+        }
+    });
+</script>
+{% endblock %}

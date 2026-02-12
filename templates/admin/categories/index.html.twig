@@ -1,0 +1,80 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0; background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Categories</h1>
+        <a href="{{ path('app_admin_category_new') }}" class="btn" style="background: var(--success); color: white;">+ New Category</a>
+    </div>
+
+    <!-- Search & Filter Area -->
+    <div class="card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <form method="get" style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: center;">
+            <div style="flex: 0 0 300px; position: relative;">
+                <i class="ri-search-line" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input type="text" name="q" value="{{ q ?? '' }}" placeholder="Search categories..." style="width: 100%; padding: 10px 10px 10px 40px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main);">
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center; flex: 1; justify-content: flex-end;">
+                <select name="sort" style="max-width: 200px; padding: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); min-width: 150px;">
+                    <option value="name_asc" {{ sort == 'name_asc' ? 'selected' : '' }}>Alphabetical (A-Z)</option>
+                    <option value="newest" {{ sort == 'newest' ? 'selected' : '' }}>Newest First</option>
+                </select>
+
+                <button type="submit" class="btn brand" style="padding: 10px 24px;">Apply</button>
+                
+                {% if q or sort != 'name_asc' %}
+                    <a href="{{ path('app_admin_categories') }}" class="btn secondary" style="padding: 10px 15px; text-decoration: none;">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Flash Messages -->
+    {% for message in app.flashes('success') %}
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); padding: 10px; border-radius: 6px; margin-bottom: 1rem;">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <!-- Categories Grid -->
+    {% if matieres is not empty %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            {% for matiere in matieres %}
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div style="height: 120px; background: {{ matiere.imageUrl ? 'url(' ~ matiere.imageUrl ~ ')' : 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center;">
+                        {% if not matiere.imageUrl %}
+                            <i class="ri-book-open-line" style="font-size: 2.5rem; color: white; opacity: 0.5;"></i>
+                        {% endif %}
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <h3 style="margin: 0; font-size: 1.3rem;">{{ matiere.name }}</h3>
+                            <span class="badge" style="background: var(--info); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">
+                                {{ matiere.cours|length }} courses
+                            </span>
+                        </div>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem;">
+                        <a href="{{ path('app_admin_category_manage', {'id': matiere.id}) }}" class="btn" style="flex: 1; min-width: 80px; text-align: center; background: var(--brand-main); color: white; text-decoration: none; padding: 8px; font-size: 0.9rem;">Manage</a>
+                        <a href="{{ path('app_admin_category_edit', {'id': matiere.id}) }}" class="btn secondary" style="padding: 8px 12px; text-decoration: none; border: 1px solid var(--border);"><i class="ri-edit-line"></i></a>
+                        <form method="post" action="{{ path('app_admin_category_delete', {'id': matiere.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this category and all its courses?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ matiere.id) }}">
+                            <button type="submit" class="btn" style="background: var(--error); color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;"><i class="ri-delete-bin-line"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 3rem;">
+            <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 1rem;">No categories yet.</p>
+            <a href="{{ path('app_admin_category_new') }}" class="btn" style="background: var(--brand-main); color: white; text-decoration: none;">Create First Category</a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

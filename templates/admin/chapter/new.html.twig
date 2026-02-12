@@ -1,0 +1,30 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Add Chapter{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 2rem auto; padding: 0 1rem;">
+    <h1>Add Chapter to: {{ cours.title }}</h1>
+    
+    <div class="card" style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 1rem;">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(form.title) }}
+                {{ form_widget(form.title, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 8px;'}}) }}
+                {{ form_errors(form.title) }}
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+                {{ form_label(form.content, 'Content / Description') }}
+                {{ form_widget(form.content, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 8px; min-height: 150px;'}}) }}
+                {{ form_errors(form.content) }}
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn" style="background: blue; color: white; flex: 1;">Save Chapter</button>
+                <a href="{{ path('app_admin_course_manage', {'id': cours.id}) }}" class="btn secondary" style="background: #6c757d; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px;">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

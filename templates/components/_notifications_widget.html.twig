@@ -1,0 +1,54 @@
+<div class="notification-wrapper" style="position: relative;">
+    <button id="notif-btn" onclick="toggleNotifs()" style="background: none; border: none; cursor: pointer; position: relative; padding: 5px;">
+        <i class="ri-notification-3-line" style="font-size: 1.4rem; color: var(--text-main);"></i>
+        {% if count > 0 %}
+            <span style="position: absolute; top: 0; right: 0; background: var(--error); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                {{ count }}
+            </span>
+        {% endif %}
+    </button>
+
+    <div id="notif-dropdown" style="display: none; position: absolute; top: 100%; right: -10px; width: 320px; background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--shadow-lg); border-radius: 12px; z-index: 1000; overflow: hidden; padding: 0.5rem 0;">
+        <div style="padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="margin: 0; font-size: 0.95rem;">Notifications</h4>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">{{ count }} Unread</span>
+        </div>
+        
+        <div style="max-height: 300px; overflow-y: auto;">
+            {% for notif in notifications %}
+                <div class="notif-item" onclick="markRead({{ notif.id }}, '{{ notif.link }}')" style="padding: 1rem; border-bottom: 1px solid var(--border-light); cursor: pointer; transition: 0.2s;">
+                    <p style="margin: 0 0 5px; font-size: 0.9rem; color: var(--text-main); line-height: 1.4;">{{ notif.message }}</p>
+                    <small style="color: var(--text-muted);">{{ notif.createdAt|date('M d, H:i') }}</small>
+                </div>
+            {% else %}
+                <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                    No new notifications
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleNotifs() {
+    const el = document.getElementById('notif-dropdown');
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+function markRead(id, link) {
+    fetch('/notification/read/' + id, { method: 'POST' });
+    if (link) {
+        window.location.href = link;
+    } else {
+        // Just remove from UI or reload
+         window.location.reload();
+    }
+}
+
+// Close when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.notification-wrapper')) {
+        document.getElementById('notif-dropdown').style.display = 'none';
+    }
+});
+</script>

@@ -1,0 +1,44 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 2rem;">
+        <a href="{{ path('app_admin_categories') }}" style="color: var(--text-secondary); text-decoration: none;">← Back to Categories</a>
+        <h1 style="margin-top: 0.5rem;">Create New Category</h1>
+    </div>
+
+    <div class="card" style="padding: 2rem;">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(form.name, 'Category Name', {'label_attr': {'style': 'display: block; margin-bottom: 0.5rem; font-weight: 600;'}}) }}
+                {{ form_widget(form.name, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px;'}}) }}
+                {{ form_errors(form.name) }}
+            </div>
+            <div class="file-upload-wrapper">
+                <label for="{{ form.imageFile.vars.id }}" class="file-upload-label">
+                    <i class="ri-image-add-line"></i>
+                    <span id="file-name-display" style="color: var(--text-secondary);">Click to upload category image</span>
+                </label>
+                {{ form_widget(form.imageFile) }}
+                {{ form_errors(form.imageFile) }}
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 2rem;">
+                <button type="submit" class="btn" style="flex: 1; background: var(--brand-main); color: white;">Create Category</button>
+                <a href="{{ path('app_admin_categories') }}" class="btn secondary" style="text-decoration: none; text-align: center;">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<script>
+function updateFileName(input) {
+    const display = document.getElementById('file-name-display');
+    if (input.files && input.files[0]) {
+        display.textContent = input.files[0].name;
+    } else {
+        display.textContent = "Click to upload category image";
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,63 @@
+<div class="sidebar">
+  <div class="logo-container">
+    <img src="{{ asset('assets/images/logo.png') }}" class="logo-img" alt="EduLink Logo">
+    <span class="logo-text">EduLink</span>
+  </div>
+  
+  <ul class="menu">
+    <li>
+      <a href="{{ path('admin_dashboard') }}" class="{{ app.request.get('_route') == 'admin_dashboard' ? 'active' : '' }}">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Overview</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('app_admin_user_index') }}" class="{{ app.request.get('_route') starts with 'app_admin_user' ? 'active' : '' }}">
+        <i data-lucide="users"></i>
+        <span>Users</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('app_admin_categories') }}" class="{{ app.request.get('_route') starts with 'app_admin_categories' or app.request.get('_route') starts with 'app_admin_course' ? 'active' : '' }}">
+        <i data-lucide="layers"></i>
+        <span>Categories</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('app_admin_moderation') }}" class="{{ app.request.get('_route') == 'app_admin_moderation' ? 'active' : '' }}">
+        <i data-lucide="clipboard-check"></i>
+        <span>Moderation</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('admin_events') }}" class="{{ app.request.get('_route') == 'admin_events' ? 'active' : '' }}">
+        <i data-lucide="calendar"></i>
+        <span>Events</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('admin_challenges') }}" class="{{ app.request.get('_route') == 'admin_challenges' ? 'active' : '' }}">
+        <i data-lucide="award"></i>
+        <span>Challenges</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('admin_assistance') }}" class="{{ app.request.get('_route') == 'admin_assistance' ? 'active' : '' }}">
+        <i data-lucide="headset"></i>
+        <span>Assistance</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('admin_economy') }}" class="{{ app.request.get('_route') == 'admin_economy' ? 'active' : '' }}">
+        <i data-lucide="banknote"></i>
+        <span>Economy</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('app_logout') }}" style="color: var(--error);">
+        <i data-lucide="log-out"></i>
+        <span>Logout</span>
+      </a>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,54 @@
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="form-group">
+        {{ form_label(form.fullName) }}
+        {{ form_widget(form.fullName) }}
+        {{ form_errors(form.fullName) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        <div class="text-error" style="color: var(--error); font-size: 0.85rem; margin-top: 5px;">
+            {{ form_errors(form.email) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.roles) }}
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; padding: 10px 0;">
+            {% for child in form.roles %}
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    {{ form_widget(child, {'attr': {'class': ''}}) }}
+                    <label for="{{ child.vars.id }}" style="cursor: pointer; font-size: 0.95rem;">
+                        {{ child.vars.label }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+        {{ form_errors(form.roles) }}
+    </div>
+
+    <div class="form-group">
+        <div class="grid-2-1" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+                {{ form_row(form.password.first) }}
+            </div>
+            <div>
+                {{ form_row(form.password.second) }}
+            </div>
+        </div>
+        <div class="text-error" style="color: var(--error); font-size: 0.85rem; margin-top: 5px;">
+             {{ form_errors(form.password.first) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.xp) }}
+        {{ form_widget(form.xp) }}
+        {{ form_errors(form.xp) }}
+    </div>
+
+    <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+        <button class="btn">{{ button_label|default('Save User') }}</button>
+    </div>
+{{ form_end(form) }}

@@ -1,0 +1,57 @@
+<div class="sidebar">
+  <div class="logo-container">
+    <img src="{{ asset('assets/images/logo.png') }}" class="logo-img" alt="EduLink Logo">
+    <span class="logo-text">EduLink</span>
+  </div>
+
+  <ul class="menu">
+    <li>
+      <a href="{{ path('student_dashboard') }}" class="{{ app.request.get('_route') == 'student_dashboard' ? 'active' : '' }}">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('app_student_courses') }}" class="{{ app.request.get('_route') == 'app_student_courses' ? 'active' : '' }}">
+        <i data-lucide="book-open"></i>
+        <span>My Courses</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('student_journal') }}" class="{{ app.request.get('_route') == 'student_journal' ? 'active' : '' }}">
+        <i data-lucide="book"></i>
+        <span>Journal</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('student_help') }}" class="{{ app.request.get('_route') == 'student_help' ? 'active' : '' }}">
+        <i data-lucide="help-circle"></i>
+        <span>Help Requests</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('student_events') }}" class="{{ app.request.get('_route') == 'student_events' ? 'active' : '' }}">
+        <i data-lucide="calendar"></i>
+        <span>Events</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('student_ai_tools') }}" class="{{ app.request.get('_route') == 'student_ai_tools' ? 'active' : '' }}">
+        <i data-lucide="bot"></i>
+        <span>AI Tools</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('student_wallet') }}" class="{{ app.request.get('_route') == 'student_wallet' ? 'active' : '' }}">
+        <i data-lucide="wallet"></i>
+        <span>Wallet</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('app_logout') }}" style="color: var(--error);">
+        <i data-lucide="log-out"></i>
+        <span>Logout</span>
+      </a>
+    </li>
+  </ul>
+</div>
