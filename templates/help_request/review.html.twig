@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Review Session - EduLink{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-lg border-0" style="max-width: 500px; width: 100%;" data-aos="fade-up">
+        <div class="card-body p-5 text-center">
+            <div class="mb-4">
+                <i class="ri-star-smile-line ri-4x text-warning"></i>
+            </div>
+            <h2 class="fw-bold mb-3">Rate your Tutor</h2>
+            <p class="text-muted mb-4">How was your session with <strong>{{ session.tutor.fullName }}</strong>?</p>
+            
+            {{ form_start(form) }}
+                <div class="mb-4 text-start">
+                    {{ form_label(form.rating, 'Rating', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    <div class="d-flex justify-content-between px-3">
+                        {% for child in form.rating %}
+                            <div class="form-check form-check-inline text-center">
+                                {{ form_widget(child, {'attr': {'class': 'form-check-input'}}) }}
+                                {{ form_label(child, null, {'label_attr': {'class': 'form-check-label d-block small'}}) }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {{ form_errors(form.rating) }}
+                </div>
+
+                <div class="mb-4 text-start">
+                    {{ form_label(form.comment, 'Feedback', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.comment) }}
+                    {{ form_errors(form.comment) }}
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">Submit Review</button>
+                    <a href="{{ path('app_help_request_index') }}" class="btn btn-link text-decoration-none mt-2">Skip</a>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

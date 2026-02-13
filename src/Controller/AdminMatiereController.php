@@ -129,7 +129,7 @@ class AdminMatiereController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('imageFile')->getData();
             if ($imageFile) {
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $newFilename = uniqid().'.'.$imageFile->getClientOriginalExtension();
                 try {
                     $imageFile->move(
                         $this->getParameter('kernel.project_dir').'/public/uploads/categories',
@@ -161,7 +161,7 @@ class AdminMatiereController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('imageFile')->getData();
             if ($imageFile) {
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $newFilename = uniqid().'.'.$imageFile->getClientOriginalExtension();
                 try {
                     $imageFile->move(
                         $this->getParameter('kernel.project_dir').'/public/uploads/categories',

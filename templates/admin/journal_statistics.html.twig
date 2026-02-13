@@ -1,0 +1,193 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Journal Statistics - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .stats-header {
+        background: var(--bg-card);
+        color: var(--text-main);
+        padding: var(--space-xl);
+        border-radius: 12px;
+        margin-bottom: var(--space-xl);
+        border: 1px solid var(--border);
+    }
+    .stats-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .stats-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .stats-table thead {
+        background: var(--bg-soft);
+        color: var(--text-main);
+    }
+    .stats-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border);
+    }
+    .stats-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+    }
+    .stats-table tbody tr:hover {
+        background: var(--bg-soft);
+    }
+    .avatar {
+        width: 40px;
+        height: 40px;
+        background: var(--brand-accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: bold;
+        font-size: 1rem;
+    }
+    .stat-number {
+        font-family: 'Fira Code', monospace;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: var(--space-md);
+        margin-bottom: var(--space-lg);
+    }
+    .summary-card {
+        background: var(--bg-card);
+        padding: var(--space-lg);
+        border-radius: 10px;
+        border-left: 4px solid var(--brand-accent);
+        border: 1px solid var(--border);
+    }
+    .summary-card h4 {
+        margin: 0 0 6px 0;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+    }
+    .summary-card .value {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    .sparkline {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 6px;
+        align-items: end;
+        height: 50px;
+        margin-top: 8px;
+    }
+    .spark-bar {
+        background: var(--brand-accent);
+        border-radius: 6px 6px 0 0;
+    }
+</style>
+
+<div class="stats-header">
+    <h1 style="margin: 0 0 6px 0; font-size: 1.6rem;">📗 Journal Statistics</h1>
+    <p style="margin: 0; color: var(--text-muted);">Overview of student journal activity by student</p>
+    <form method="GET" action="{{ path('admin_journal_stats') }}" style="display:flex; gap: 10px; align-items: center; margin-top: var(--space-md);">
+        <input name="q" type="search" value="{{ searchQuery }}" placeholder="Search by student name or email..." style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background: var(--bg-main); color: var(--text-main);" />
+        <button type="submit" class="btn"><i class="ri-search-line"></i> Apply</button>
+        {% if searchQuery %}
+        <a href="{{ path('admin_journal_stats') }}" class="btn secondary" style="text-decoration: none;">Reset</a>
+        {% endif %}
+    </form>
+</div>
+
+{# legacy filter by category removed: categories are per-student #}
+
+<div class="summary-cards">
+    <div class="summary-card">
+        <h4>Total Students</h4>
+        <div class="value">{{ summary.totalStudents }}</div>
+    </div>
+    <div class="summary-card">
+        <h4>Total Notes</h4>
+        <div class="value">{{ summary.grandTotalNotes }}</div>
+    </div>
+    <div class="summary-card">
+        <h4>Avg Notes / Student</h4>
+        <div class="value">{{ summary.avgNotesPerStudent }}</div>
+    </div>
+    <div class="summary-card">
+        <h4>Avg Categories / Student</h4>
+        <div class="value">{{ summary.avgCategoriesPerStudent }}</div>
+    </div>
+</div>
+
+<div class="stats-card" style="padding: var(--space-md);">
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <strong style="color: var(--text-main);">Notes in last 7 days</strong>
+        <span style="color: var(--text-muted); font-size: 0.85rem;">
+            {% set maxv = 1 %}
+            {% for d, v in summary.last7Days %}{% if v > maxv %}{% set maxv = v %}{% endif %}{% endfor %}
+            Peak: {{ maxv }}
+        </span>
+    </div>
+    <div class="sparkline">
+        {% set maxv = 1 %}
+        {% for d, v in summary.last7Days %}{% if v > maxv %}{% set maxv = v %}{% endif %}{% endfor %}
+        {% for day, count in summary.last7Days %}
+            {% set h = (count / maxv * 50)|round(0, 'ceil') %}
+            <div class="spark-bar" style="height: {{ h }}px;" title="{{ day }}: {{ count }}"></div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="stats-card">
+    <table class="stats-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Email</th>
+                <th style="text-align:right;">Categories</th>
+                <th style="text-align:right;">Avg Notes / Category</th>
+                <th style="text-align:right;">Total Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in journalStats %}
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="avatar">
+                            {{ stat.fullName|default(stat.email)|slice(0, 1)|upper }}
+                        </div>
+                        <span style="font-weight: 500; color: var(--text-main);">
+                            {{ stat.fullName|default('N/A') }}
+                        </span>
+                    </div>
+                </td>
+                <td style="color: var(--text-muted);">{{ stat.email }}</td>
+                <td style="text-align: right;"><span class="stat-number">{{ stat.totalCategories }}</span></td>
+                <td style="text-align: right;"><span class="stat-number">{{ stat.avgNotesPerCategory }}</span></td>
+                <td style="text-align: right;"><span class="stat-number">{{ stat.totalNotes }}</span></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    <i class="ri-inbox-line" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                    No journal activities found
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

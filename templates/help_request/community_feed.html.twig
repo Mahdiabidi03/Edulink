@@ -1,0 +1,312 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Community Feed - EduLink{% endblock %}
+
+{% block content %}
+
+
+<style>
+    .feed-layout { display: grid; grid-template-columns: 1fr 300px; gap: var(--space-xl); max-width: 920px; margin: 0 auto; padding: var(--space-lg) 0; }
+    .feed-header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md); }
+    .feed-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    .feed-header h1 i { color: var(--brand-accent); }
+    .header-links { display: flex; gap: 8px; }
+    .header-links a { text-decoration: none; padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: 1px solid var(--border); color: var(--text-secondary); transition: all 0.2s; }
+    .header-links a:hover { color: var(--brand-main); border-color: var(--brand-main); }
+    .header-links a.hl-active { background: var(--brand-gradient); color: white; border-color: transparent; }
+
+    /* COMPOSER */
+    .composer { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: var(--space-lg); margin-bottom: var(--space-lg); box-shadow: var(--shadow-sm); }
+    .composer-row { display: flex; gap: var(--space-md); align-items: flex-start; }
+    .c-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--brand-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+    .composer textarea { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 0.88rem; resize: none; background: var(--bg-main); color: var(--text-main); outline: none; box-sizing: border-box; transition: border-color 0.2s; }
+    .composer textarea:focus { border-color: var(--brand-main); }
+    .composer-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-sm); padding-left: 50px; }
+    .composer-opts { display: flex; gap: 6px; align-items: center; }
+    .composer select, .composer input[type="text"] { padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.78rem; background: var(--bg-main); color: var(--text-main); font-family: inherit; outline: none; }
+    .composer input[type="text"] { width: 100px; }
+
+    /* CHIPS */
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-lg); }
+    .chip { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid var(--border); text-decoration: none; color: var(--text-secondary); transition: all 0.15s; }
+    .chip:hover { border-color: var(--brand-main); color: var(--brand-main); }
+    .chip.on { background: var(--brand-gradient); color: white; border-color: transparent; }
+
+    /* FEED ITEM */
+    .fi { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: var(--space-lg); margin-bottom: var(--space-md); transition: border-color 0.2s, box-shadow 0.2s; }
+    .fi:hover { border-color: rgba(99,102,241,0.15); box-shadow: var(--shadow-md); }
+    .fi-head { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); }
+    .fi-av { width: 36px; height: 36px; border-radius: 50%; background: var(--brand-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.82rem; flex-shrink: 0; }
+    .fi-meta { flex: 1; }
+    .fi-meta strong { color: var(--text-main); font-size: 0.88rem; }
+    .fi-meta .fi-time { color: var(--text-muted); font-size: 0.72rem; display: block; }
+    .fi-badge { font-size: 0.68rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+    .b-tip { background: rgba(245,158,11,0.12); color: var(--warning); }
+    .b-question { background: rgba(59,130,246,0.12); color: var(--info); }
+    .b-discussion { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+    .b-celebration { background: rgba(34,197,94,0.12); color: var(--success); }
+    .fi-tag { display: inline-block; font-size: 0.72rem; color: var(--brand-main); background: rgba(99,102,241,0.08); padding: 2px 7px; border-radius: 5px; margin-bottom: var(--space-sm); }
+    .fi-body { font-size: 0.9rem; line-height: 1.6; color: var(--text-main); margin-bottom: var(--space-md); word-break: break-word; white-space: pre-line; }
+
+    /* REACTIONS */
+    .reactions-bar { display: flex; align-items: center; gap: 2px; padding: var(--space-sm) 0; border-top: 1px solid var(--border-light, rgba(0,0,0,0.05)); border-bottom: 1px solid var(--border-light, rgba(0,0,0,0.05)); }
+    .react-btn { display: inline-flex; align-items: center; gap: 3px; padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; background: none; border: 1px solid transparent; font-family: inherit; transition: all 0.15s; text-decoration: none; }
+    .react-btn:hover { background: rgba(99,102,241,0.06); color: var(--brand-main); border-color: var(--border); }
+    .react-btn.active { background: rgba(99,102,241,0.1); color: var(--brand-main); border-color: var(--brand-main); font-weight: 600; }
+    .react-count { font-size: 0.72rem; color: var(--text-muted); margin-left: auto; display: flex; gap: 4px; align-items: center; }
+    .react-count span { background: rgba(99,102,241,0.06); padding: 2px 6px; border-radius: 10px; font-size: 0.68rem; }
+
+    /* ACTION ROW */
+    .fi-actions { display: flex; align-items: center; gap: 4px; padding-top: var(--space-sm); }
+    .fi-act { display: inline-flex; align-items: center; gap: 3px; padding: 5px 10px; border-radius: 6px; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; background: none; border: none; font-family: inherit; transition: all 0.12s; text-decoration: none; }
+    .fi-act:hover { background: rgba(99,102,241,0.06); color: var(--brand-main); }
+    .fi-act.danger:hover { color: var(--error); background: rgba(239,68,68,0.06); }
+    .fi-act-sep { flex: 1; }
+
+    /* COMMENTS */
+    .comments-section { margin-top: var(--space-md); }
+    .comments-toggle { font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; background: none; border: none; padding: 4px 0; font-family: inherit; }
+    .comments-toggle:hover { color: var(--brand-main); }
+    .comments-list { margin-top: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-sm); }
+    .comment-item { display: flex; gap: var(--space-sm); padding: var(--space-sm); background: rgba(128,128,128,0.06); border-radius: 10px; }
+    .comment-av { width: 28px; height: 28px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); flex-shrink: 0; }
+    .comment-body { flex: 1; }
+    .comment-body strong { font-size: 0.8rem; color: var(--text-main); }
+    .comment-body p { margin: 2px 0 0; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; }
+    .comment-body .comment-time { font-size: 0.68rem; color: var(--text-muted); }
+    .comment-del { font-size: 0.7rem; color: var(--text-muted); background: none; border: none; cursor: pointer; padding: 2px 4px; }
+    .comment-del:hover { color: var(--error); }
+    .comment-form { display: flex; gap: var(--space-sm); margin-top: var(--space-sm); }
+    .comment-form input { flex: 1; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; background: var(--bg-main); color: var(--text-main); font-family: inherit; outline: none; box-sizing: border-box; }
+    .comment-form input:focus { border-color: var(--brand-main); }
+    .comment-form button { padding: 7px 14px; border-radius: 8px; border: none; background: var(--brand-gradient); color: white; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+
+    /* REPORT MODAL */
+    .report-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+    .report-overlay.show { display: flex; }
+    .report-dialog { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; max-width: 400px; width: 90%; max-height: 90vh; overflow-y: auto; }
+    .report-dialog-header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-md) var(--space-lg); border-bottom: 1px solid var(--border); }
+    .report-dialog-header h6 { margin: 0; font-weight: 700; color: var(--text-main); font-size: 0.95rem; }
+    .report-dialog-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; padding: 4px; }
+    .report-dialog-body { padding: var(--space-lg); }
+    .report-dialog-footer { display: flex; gap: 8px; justify-content: flex-end; padding: var(--space-md) var(--space-lg); border-top: 1px solid var(--border); }
+    .report-form select, .report-form textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.85rem; background: var(--bg-main); color: var(--text-main); outline: none; box-sizing: border-box; }
+    .report-form textarea { min-height: 80px; resize: vertical; margin-top: var(--space-sm); }
+    .report-form label { font-size: 0.82rem; font-weight: 600; color: var(--text-main); display: block; margin-bottom: 4px; }
+
+    /* SIDEBAR */
+    .feed-sidebar { display: flex; flex-direction: column; gap: var(--space-lg); }
+    .sb-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: var(--space-lg); }
+    .sb-card h4 { font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin: 0 0 var(--space-md); display: flex; align-items: center; gap: 6px; }
+    .sb-card h4 i { color: var(--brand-accent); }
+    .sb-stat { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.04); font-size: 0.82rem; }
+    .sb-stat:last-child { border-bottom: none; }
+    .sb-stat .lab { color: var(--text-secondary); }
+    .sb-stat .val { font-weight: 700; color: var(--text-main); }
+    .sb-link { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px; text-decoration: none; color: var(--text-secondary); font-size: 0.82rem; transition: all 0.12s; }
+    .sb-link:hover { background: rgba(99,102,241,0.06); color: var(--brand-main); }
+    .sb-link i { font-size: 1rem; color: var(--text-muted); }
+
+    /* Flash */
+    .ff { padding: var(--space-md); border-radius: 8px; margin-bottom: var(--space-md); font-size: 0.82rem; display: flex; align-items: center; gap: 6px; }
+    .ff-ok { background: rgba(34,197,94,0.1); color: var(--success); border: 1px solid rgba(34,197,94,0.15); }
+    .ff-err { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid rgba(239,68,68,0.15); }
+
+    .empty-feed { text-align: center; padding: var(--space-2xl); color: var(--text-muted); }
+    .empty-feed i { font-size: 2.5rem; display: block; margin-bottom: var(--space-md); opacity: 0.3; }
+
+    .d-none { display: none !important; }
+    @media (max-width: 768px) { .feed-layout { grid-template-columns: 1fr; } }
+</style>
+
+<div class="feed-layout">
+
+    {# HEADER #}
+    <div class="feed-header">
+        <h1><i class="ri-community-line"></i> Community Feed</h1>
+        <div class="header-links">
+            <a href="{{ path('app_help_request_index') }}"><i class="ri-arrow-left-s-line"></i> Help Board</a>
+            <a href="{{ path('app_community_feed') }}" class="hl-active"><i class="ri-community-line"></i> Feed</a>
+        </div>
+    </div>
+
+    {# MAIN #}
+    <div>
+        {% for m in app.flashes('success') %}<div class="ff ff-ok"><i class="ri-check-line"></i> {{ m }}</div>{% endfor %}
+        {% for m in app.flashes('error') %}<div class="ff ff-err"><i class="ri-error-warning-line"></i> {{ m }}</div>{% endfor %}
+
+        {# COMPOSER #}
+        <div class="composer">
+            {{ form_start(form) }}
+            <div class="composer-row">
+                <div class="c-avatar">{{ app.user.fullName|first|default('U') }}</div>
+                <div style="flex:1;">{{ form_widget(form.content) }}</div>
+            </div>
+            <div class="composer-bottom">
+                <div class="composer-opts">
+                    {{ form_widget(form.type) }}
+                    {{ form_widget(form.tag) }}
+                </div>
+                <button type="submit" class="btn" style="padding:7px 16px;font-size:0.82rem;"><i class="ri-send-plane-line"></i> Post</button>
+            </div>
+            {{ form_end(form) }}
+        </div>
+
+        {# FILTER CHIPS #}
+        <div class="chips">
+            <a href="{{ path('app_community_feed') }}" class="chip {{ feed_filter == 'all' ? 'on' : '' }}">🌍 All</a>
+            <a href="{{ path('app_community_feed', {feed_filter: 'tip'}) }}" class="chip {{ feed_filter == 'tip' ? 'on' : '' }}">💡 Tips</a>
+            <a href="{{ path('app_community_feed', {feed_filter: 'question'}) }}" class="chip {{ feed_filter == 'question' ? 'on' : '' }}">❓ Questions</a>
+            <a href="{{ path('app_community_feed', {feed_filter: 'discussion'}) }}" class="chip {{ feed_filter == 'discussion' ? 'on' : '' }}">💬 Discussions</a>
+            <a href="{{ path('app_community_feed', {feed_filter: 'celebration'}) }}" class="chip {{ feed_filter == 'celebration' ? 'on' : '' }}">🎉 Celebrations</a>
+        </div>
+
+        {# FEED ITEMS #}
+        {% for item in feed_items %}
+        {% set p = item.post %}
+        <div class="fi" id="post-{{ p.id }}">
+            {# HEAD #}
+            <div class="fi-head">
+                <div class="fi-av">{{ p.author.fullName|first|default('?') }}</div>
+                <div class="fi-meta">
+                    <strong>{{ p.author.fullName|default('Anonymous') }}</strong>
+                    <span class="fi-time">
+                        {{ p.createdAt|date('M d') }} at {{ p.createdAt|date('H:i') }}
+                        · {{ p.type == 'tip' ? 'shared a tip' : (p.type == 'question' ? 'asked a question' : (p.type == 'celebration' ? 'celebrated' : 'started a discussion')) }}
+                    </span>
+                </div>
+                <span class="fi-badge b-{{ p.type }}">
+                    {{ p.type == 'tip' ? '💡 Tip' : (p.type == 'question' ? '❓ Question' : (p.type == 'celebration' ? '🎉 Celebration' : '💬 Discussion')) }}
+                </span>
+            </div>
+
+            {# CONTENT #}
+            {% if p.tag %}<span class="fi-tag">#{{ p.tag }}</span>{% endif %}
+            <div class="fi-body">{{ p.content }}</div>
+
+            {# REACTIONS BAR #}
+            <div class="reactions-bar">
+                {% set reactionTypes = {like: '👍', love: '❤️', insightful: '💡', funny: '😂', support: '🙏'} %}
+                {% for rType, emoji in reactionTypes %}
+                    <form action="{{ path('app_community_react', {id: p.id, type: rType}) }}" method="post" style="display:inline;">
+                        <button type="submit" class="react-btn {{ item.userReaction == rType ? 'active' : '' }}">
+                            {{ emoji }}
+                            {% if item.reactions[rType] is defined and item.reactions[rType] > 0 %}
+                                <span>{{ item.reactions[rType] }}</span>
+                            {% endif %}
+                        </button>
+                    </form>
+                {% endfor %}
+                {% if item.totalReactions > 0 %}
+                    <span class="react-count">{{ item.totalReactions }} reactions</span>
+                {% endif %}
+            </div>
+
+            {# ACTION ROW #}
+            <div class="fi-actions">
+                <button class="fi-act" onclick="document.getElementById('comments-{{ p.id }}').classList.toggle('d-none')">
+                    <i class="ri-chat-1-line"></i> {{ item.commentCount }} Comment{{ item.commentCount != 1 ? 's' : '' }}
+                </button>
+
+                {# REPORT #}
+                <button class="fi-act" onclick="document.getElementById('reportOverlay{{ p.id }}').classList.add('show')">
+                    <i class="ri-flag-line"></i> Report
+                </button>
+
+                <span class="fi-act-sep"></span>
+
+                {% if p.author == app.user %}
+                    <form action="{{ path('app_community_delete', {id: p.id}) }}" method="post" style="display:inline;" onsubmit="return confirm('Delete this post?');">
+                        <button type="submit" class="fi-act danger"><i class="ri-delete-bin-line"></i> Delete</button>
+                    </form>
+                {% endif %}
+            </div>
+
+            {# COMMENTS SECTION #}
+            <div class="comments-section {{ item.commentCount == 0 ? 'd-none' : '' }}" id="comments-{{ p.id }}">
+                <div class="comments-list">
+                    {% for c in item.comments %}
+                    <div class="comment-item">
+                        <div class="comment-av">{{ c.author.fullName|first|default('?') }}</div>
+                        <div class="comment-body">
+                            <strong>{{ c.author.fullName }}</strong>
+                            <span class="comment-time">· {{ c.createdAt|date('M d, H:i') }}</span>
+                            <p>{{ c.content }}</p>
+                        </div>
+                        {% if c.author == app.user %}
+                            <form action="{{ path('app_community_comment_delete', {id: c.id}) }}" method="post">
+                                <button type="submit" class="comment-del" title="Delete"><i class="ri-close-line"></i></button>
+                            </form>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <form class="comment-form" action="{{ path('app_community_comment', {id: p.id}) }}" method="post">
+                    <input type="text" name="comment_content" placeholder="Write a comment..." required maxlength="1000">
+                    <button type="submit"><i class="ri-send-plane-line"></i></button>
+                </form>
+            </div>
+
+            {# REPORT MODAL #}
+            <div class="report-overlay" id="reportOverlay{{ p.id }}">
+                <div class="report-dialog">
+                    <div class="report-dialog-header">
+                        <h6><i class="ri-flag-line" style="color: var(--error);"></i> Report Post</h6>
+                        <button class="report-dialog-close" onclick="this.closest('.report-overlay').classList.remove('show')">&times;</button>
+                    </div>
+                    <form action="{{ path('app_community_report', {id: p.id}) }}" method="post" class="report-form">
+                        <div class="report-dialog-body">
+                            <label>Reason</label>
+                            <select name="report_reason">
+                                <option value="inappropriate">🚫 Inappropriate Content</option>
+                                <option value="spam">📧 Spam</option>
+                                <option value="harassment">😠 Harassment / Bullying</option>
+                                <option value="misinformation">❌ Misinformation</option>
+                                <option value="hate_speech">🛑 Hate Speech</option>
+                                <option value="other">📝 Other</option>
+                            </select>
+                            <label style="margin-top: var(--space-md);">Details (optional)</label>
+                            <textarea name="report_details" placeholder="Tell us more..."></textarea>
+                        </div>
+                        <div class="report-dialog-footer">
+                            <button type="button" class="btn secondary" style="padding:7px 14px;font-size:0.82rem;" onclick="this.closest('.report-overlay').classList.remove('show')">Cancel</button>
+                            <button type="submit" class="btn danger" style="padding:7px 14px;font-size:0.82rem;"><i class="ri-flag-line"></i> Submit Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <div class="empty-feed">
+                <i class="ri-chat-smile-2-line"></i>
+                <h4 style="color: var(--text-muted);">No posts yet</h4>
+                <p>Be the first! Share a tip, ask a question, or start a discussion.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# SIDEBAR #}
+    <div class="feed-sidebar">
+        <div class="sb-card">
+            <h4><i class="ri-bar-chart-box-line"></i> Stats</h4>
+            <div class="sb-stat"><span class="lab">💬 Posts</span><span class="val">{{ post_count }}</span></div>
+        </div>
+        <div class="sb-card">
+            <h4><i class="ri-links-line"></i> Quick Links</h4>
+            <a href="{{ path('app_help_request_index') }}" class="sb-link"><i class="ri-question-line"></i> Help Board</a>
+            <a href="{{ path('app_help_request_new') }}" class="sb-link"><i class="ri-add-circle-line"></i> Ask for Help</a>
+            <a href="{{ path('app_community_feed', {feed_filter: 'tip'}) }}" class="sb-link"><i class="ri-lightbulb-line"></i> Browse Tips</a>
+        </div>
+        <div class="sb-card" style="background: linear-gradient(135deg, rgba(99,102,241,0.04), rgba(168,85,247,0.04));">
+            <h4><i class="ri-shield-check-line"></i> Guidelines</h4>
+            <ul style="padding-left:14px;margin:0;font-size:0.78rem;color:var(--text-secondary);line-height:1.8;">
+                <li>Be respectful and constructive</li>
+                <li>Share knowledge generously</li>
+                <li>No spam or self-promotion</li>
+                <li>Report inappropriate content</li>
+                <li>Help others and earn points!</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

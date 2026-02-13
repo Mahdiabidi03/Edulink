@@ -30,7 +30,7 @@
       </a>
     </li>
     <li>
-      <a href="{{ path('student_events') }}" class="{{ app.request.get('_route') == 'student_events' ? 'active' : '' }}">
+      <a href="{{ path('app_event_index') }}" class="{{ app.request.get('_route') == 'app_event_index' ? 'active' : '' }}">
         <i data-lucide="calendar"></i>
         <span>Events</span>
       </a>
@@ -45,6 +45,12 @@
       <a href="{{ path('student_wallet') }}" class="{{ app.request.get('_route') == 'student_wallet' ? 'active' : '' }}">
         <i data-lucide="wallet"></i>
         <span>Wallet</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('challenge_index') }}" class="{{ app.request.get('_route') starts with 'challenge' or app.request.get('_route') == 'my_challenges' ? 'active' : '' }}">
+        <i data-lucide="award"></i>
+        <span>Challenges</span>
       </a>
     </li>
     <li>

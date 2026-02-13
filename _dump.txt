@@ -1,0 +1,1 @@
+ALTER TABLE user CHANGE wallet_balance wallet_balance DOUBLE PRECISION DEFAULT 0 NOT NULL;

@@ -8,7 +8,18 @@
     <p style="color: #666; margin-bottom: 2rem;">Suggest a new topic for the platform. It will be reviewed by an admin.</p>
     
     <div class="card" style="padding: 2.5rem; background: var(--bg-card); border-radius: 12px; box-shadow: var(--shadow-lg);">
+        {% for message in app.flashes('error') %}
+            <div style="background: rgba(239,68,68,0.1); border: 1px solid var(--error); color: var(--error); padding: 12px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;">
+                <i class="ri-error-warning-line"></i> {{ message }}
+            </div>
+        {% endfor %}
+        {% for message in app.flashes('success') %}
+            <div style="background: rgba(34,197,94,0.1); border: 1px solid var(--success); color: var(--success); padding: 12px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;">
+                <i class="ri-check-line"></i> {{ message }}
+            </div>
+        {% endfor %}
         {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_errors(form) }}
             <div style="margin-bottom: 2rem;">
                 {{ form_label(form.name, 'Category Name', {'label_attr': {'style': 'display: block; margin-bottom: 0.75rem; font-weight: 600; color: var(--text-main);'}}) }}
                 {{ form_widget(form.name, {'attr': {
@@ -21,7 +32,7 @@
 
             <div style="margin-bottom: 2.5rem;">
                 <label style="display: block; margin-bottom: 0.75rem; font-weight: 600; color: var(--text-main);">Category Image</label>
-                <div class="file-upload-wrapper" style="border: 2px dashed var(--border); padding: 2rem; border-radius: 12px; text-align: center; transition: all 0.3s; cursor: pointer;" onmouseover="this.style.borderColor='var(--brand-main)'; this.style.background='rgba(91, 42, 110, 0.05)'" onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent'">
+                <div class="file-upload-wrapper" style="border: 2px dashed var(--border); padding: 2rem; border-radius: 12px; text-align: center; transition: all 0.3s; cursor: pointer;" onmouseover="this.style.borderColor='var(--brand-main)'; this.style.background='rgba(99, 102, 241, 0.05)'" onmouseout="this.style.borderColor='var(--border)'; this.style.background='transparent'">
                     <label for="{{ form.imageFile.vars.id }}" style="cursor: pointer; display: block; width: 100%;">
                         <i class="ri-image-add-line" style="font-size: 2.5rem; color: var(--brand-main); display: block; margin-bottom: 1rem;"></i>
                         <span id="file-name-display" style="color: var(--text-secondary); font-weight: 500;">Click to upload category image</span>

@@ -1,0 +1,268 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Community Moderation - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .cm-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-xl); }
+    .cm-header h1 { font-family: 'Fira Sans', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    .cm-header h1 i { color: var(--brand-accent); }
+
+    /* Stats bar */
+    .cm-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-md); margin-bottom: var(--space-xl); }
+    .cm-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: var(--space-lg); text-align: center; transition: border-color 0.2s; }
+    .cm-stat:hover { border-color: var(--brand-main); }
+    .cm-stat .cm-stat-val { font-family: 'Fira Sans', sans-serif; font-size: 2rem; font-weight: 700; color: var(--text-main); }
+    .cm-stat .cm-stat-lab { font-family: 'Fira Code', monospace; font-size: 0.72rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; margin-top: 4px; }
+    .cm-stat.alert-stat .cm-stat-val { color: var(--error); }
+    .cm-stat.alert-stat { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.03); }
+
+    /* Tabs */
+    .cm-tabs { display: flex; gap: 0; margin-bottom: var(--space-lg); border-bottom: 2px solid var(--border); }
+    .cm-tab { padding: 10px 20px; font-family: 'Fira Sans', sans-serif; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .cm-tab:hover { color: var(--text-main); }
+    .cm-tab.active { color: var(--brand-main); border-bottom-color: var(--brand-main); }
+
+    .cm-panel { display: none; }
+    .cm-panel.active { display: block; }
+
+    /* Table */
+    .cm-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .cm-table th { font-family: 'Fira Code', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); }
+    .cm-table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-main); vertical-align: middle; }
+    .cm-table tr:hover td { background: rgba(91, 42, 110, 0.03); }
+
+    .cm-badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+    .cm-badge.pending { background: rgba(245, 158, 11, 0.12); color: var(--warning); }
+    .cm-badge.actioned { background: rgba(34, 197, 94, 0.12); color: var(--success); }
+    .cm-badge.dismissed { background: rgba(107, 114, 128, 0.12); color: var(--text-muted); }
+
+    .cm-reason { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+    .cm-reason.inappropriate { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+    .cm-reason.spam { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+    .cm-reason.harassment { background: rgba(239, 68, 68, 0.15); color: #dc2626; }
+    .cm-reason.misinformation { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+    .cm-reason.hate_speech { background: rgba(139, 69, 19, 0.15); color: #92400e; }
+    .cm-reason.other { background: rgba(107, 114, 128, 0.1); color: var(--text-secondary); }
+
+    .cm-actions { display: flex; gap: 6px; }
+    .cm-btn { padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; font-family: 'Fira Sans', sans-serif; border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+    .cm-btn:hover { transform: translateY(-1px); }
+    .cm-btn.view { background: rgba(59, 130, 246, 0.08); color: var(--info); border-color: rgba(59, 130, 246, 0.2); }
+    .cm-btn.view:hover { background: rgba(59, 130, 246, 0.15); }
+    .cm-btn.dismiss { background: rgba(107, 114, 128, 0.08); color: var(--text-secondary); }
+    .cm-btn.dismiss:hover { background: rgba(107, 114, 128, 0.15); }
+    .cm-btn.action { background: rgba(239, 68, 68, 0.08); color: var(--error); border-color: rgba(239, 68, 68, 0.2); }
+    .cm-btn.action:hover { background: rgba(239, 68, 68, 0.15); }
+    .cm-btn.delete { background: rgba(239, 68, 68, 0.06); color: var(--error); border-color: rgba(239, 68, 68, 0.15); }
+    .cm-btn.delete:hover { background: rgba(239, 68, 68, 0.12); }
+
+    /* Post preview */
+    .cm-post-preview { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; color: var(--text-secondary); }
+
+    .cm-type { font-size: 0.72rem; padding: 2px 7px; border-radius: 6px; font-weight: 600; }
+    .cm-type.tip { background: rgba(245,158,11,0.12); color: var(--warning); }
+    .cm-type.question { background: rgba(59,130,246,0.12); color: var(--info); }
+    .cm-type.discussion { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+    .cm-type.celebration { background: rgba(34,197,94,0.12); color: var(--success); }
+
+    /* Flash */
+    .cm-flash { padding: var(--space-md); border-radius: 8px; margin-bottom: var(--space-md); font-size: 0.82rem; display: flex; align-items: center; gap: 6px; font-family: 'Fira Sans', sans-serif; }
+    .cm-flash.success { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.15); }
+
+    .cm-empty { text-align: center; padding: var(--space-2xl); color: var(--text-muted); font-family: 'Fira Sans', sans-serif; }
+    .cm-empty i { font-size: 2.5rem; display: block; margin-bottom: var(--space-md); opacity: 0.3; }
+
+    @media (max-width: 768px) { .cm-stats { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+{# HEADER #}
+<div class="cm-header">
+    <h1><i class="ri-community-line"></i> Community Moderation</h1>
+</div>
+
+{# FLASH #}
+{% for m in app.flashes('success') %}<div class="cm-flash success"><i class="ri-check-line"></i> {{ m }}</div>{% endfor %}
+
+{# STATS #}
+<div class="cm-stats">
+    <div class="cm-stat">
+        <div class="cm-stat-val">{{ stats.totalPosts }}</div>
+        <div class="cm-stat-lab">Total Posts</div>
+    </div>
+    <div class="cm-stat {{ stats.pendingReports > 0 ? 'alert-stat' : '' }}">
+        <div class="cm-stat-val">{{ stats.pendingReports }}</div>
+        <div class="cm-stat-lab">Pending Reports</div>
+    </div>
+    <div class="cm-stat">
+        <div class="cm-stat-val">{{ stats.totalReports }}</div>
+        <div class="cm-stat-lab">Total Reports</div>
+    </div>
+    <div class="cm-stat">
+        <div class="cm-stat-val">{{ stats.totalComments }}</div>
+        <div class="cm-stat-lab">Comments</div>
+    </div>
+    <div class="cm-stat">
+        <div class="cm-stat-val">{{ stats.totalReactions }}</div>
+        <div class="cm-stat-lab">Reactions</div>
+    </div>
+</div>
+
+{# TABS #}
+<div class="cm-tabs">
+    <button class="cm-tab active" onclick="switchTab('reports')">🚩 Pending Reports ({{ stats.pendingReports }})</button>
+    <button class="cm-tab" onclick="switchTab('history')">📋 Report History ({{ stats.totalReports }})</button>
+    <button class="cm-tab" onclick="switchTab('posts')">💬 All Posts ({{ stats.totalPosts }})</button>
+</div>
+
+{# === PENDING REPORTS === #}
+<div class="cm-panel active" id="panel-reports">
+    {% if pending_reports|length > 0 %}
+    <table class="cm-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Reporter</th>
+                <th>Reason</th>
+                <th>Post Author</th>
+                <th>Post Preview</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for report in pending_reports %}
+            <tr>
+                <td>#{{ report.id }}</td>
+                <td>{{ report.reporter.fullName|default('—') }}</td>
+                <td>
+                    <span class="cm-reason {{ report.reason }}">
+                        {% if report.reason == 'inappropriate' %}🚫 Inappropriate
+                        {% elseif report.reason == 'spam' %}📧 Spam
+                        {% elseif report.reason == 'harassment' %}😠 Harassment
+                        {% elseif report.reason == 'misinformation' %}❌ Misinfo
+                        {% elseif report.reason == 'hate_speech' %}🛑 Hate Speech
+                        {% else %}📝 Other{% endif %}
+                    </span>
+                </td>
+                <td>{{ report.post.author.fullName|default('Deleted') }}</td>
+                <td><div class="cm-post-preview">{{ report.post.content|default('—')|slice(0, 80) }}</div></td>
+                <td style="font-family:'Fira Code',monospace;font-size:0.75rem;color:var(--text-muted);">{{ report.createdAt|date('M d, H:i') }}</td>
+                <td>
+                    <div class="cm-actions">
+                        <a href="{{ path('app_admin_community_view_report', {id: report.id}) }}" class="cm-btn view"><i class="ri-eye-line"></i> View</a>
+                        <form action="{{ path('app_admin_community_dismiss_report', {id: report.id}) }}" method="post" style="display:inline;">
+                            <button class="cm-btn dismiss"><i class="ri-close-line"></i> Dismiss</button>
+                        </form>
+                        <form action="{{ path('app_admin_community_action_report', {id: report.id}) }}" method="post" style="display:inline;" onsubmit="return confirm('This will DELETE the post. Continue?');">
+                            <button class="cm-btn action"><i class="ri-delete-bin-line"></i> Remove Post</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="cm-empty">
+            <i class="ri-shield-check-line"></i>
+            <h4>No pending reports</h4>
+            <p>The community is clean! 🎉</p>
+        </div>
+    {% endif %}
+</div>
+
+{# === REPORT HISTORY === #}
+<div class="cm-panel" id="panel-history">
+    {% if all_reports|length > 0 %}
+    <table class="cm-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Reporter</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Post Preview</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for report in all_reports %}
+            <tr>
+                <td>#{{ report.id }}</td>
+                <td>{{ report.reporter.fullName|default('—') }}</td>
+                <td>
+                    <span class="cm-reason {{ report.reason }}">
+                        {% if report.reason == 'inappropriate' %}🚫 Inappropriate
+                        {% elseif report.reason == 'spam' %}📧 Spam
+                        {% elseif report.reason == 'harassment' %}😠 Harassment
+                        {% elseif report.reason == 'misinformation' %}❌ Misinfo
+                        {% elseif report.reason == 'hate_speech' %}🛑 Hate Speech
+                        {% else %}📝 Other{% endif %}
+                    </span>
+                </td>
+                <td><span class="cm-badge {{ report.status|lower }}">{{ report.status }}</span></td>
+                <td><div class="cm-post-preview">{{ report.post.content|default('Deleted')|slice(0, 80) }}</div></td>
+                <td style="font-family:'Fira Code',monospace;font-size:0.75rem;color:var(--text-muted);">{{ report.createdAt|date('M d, H:i') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="cm-empty">
+            <i class="ri-history-line"></i>
+            <h4>No report history</h4>
+        </div>
+    {% endif %}
+</div>
+
+{# === ALL POSTS === #}
+<div class="cm-panel" id="panel-posts">
+    {% if all_posts|length > 0 %}
+    <table class="cm-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Author</th>
+                <th>Type</th>
+                <th>Content</th>
+                <th>Tag</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for post in all_posts %}
+            <tr>
+                <td>#{{ post.id }}</td>
+                <td>{{ post.author.fullName|default('—') }}</td>
+                <td><span class="cm-type {{ post.type }}">{{ post.type }}</span></td>
+                <td><div class="cm-post-preview">{{ post.content|slice(0, 100) }}</div></td>
+                <td>{{ post.tag ? '#' ~ post.tag : '—' }}</td>
+                <td style="font-family:'Fira Code',monospace;font-size:0.75rem;color:var(--text-muted);">{{ post.createdAt|date('M d, H:i') }}</td>
+                <td>
+                    <form action="{{ path('app_admin_community_delete_post', {id: post.id}) }}" method="post" style="display:inline;" onsubmit="return confirm('Delete this post permanently?');">
+                        <button class="cm-btn delete"><i class="ri-delete-bin-line"></i> Delete</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="cm-empty">
+            <i class="ri-chat-smile-2-line"></i>
+            <h4>No posts yet</h4>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function switchTab(tab) {
+    document.querySelectorAll('.cm-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.cm-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}

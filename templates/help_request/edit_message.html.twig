@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Message - EduLink{% endblock %}
+
+{% block content %}
+<style>
+    .form-page { display: flex; justify-content: center; align-items: center; min-height: 60vh; padding: var(--space-xl); }
+    .form-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: var(--space-2xl); max-width: 500px; width: 100%; box-shadow: var(--shadow-xl); position: relative; overflow: hidden; }
+    .form-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--brand-gradient); }
+    .form-title { font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-bottom: var(--space-xl); text-align: center; }
+    .form-group { margin-bottom: var(--space-lg); }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: var(--space-xs); }
+    .form-group textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-main); color: var(--text-main); font-size: 0.9rem; font-family: inherit; outline: none; min-height: 100px; resize: vertical; transition: border-color 0.2s; box-sizing: border-box; }
+    .form-group textarea:focus { border-color: var(--brand-main); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+    .form-actions { display: flex; gap: var(--space-md); margin-top: var(--space-xl); }
+    .form-actions .btn { flex: 1; justify-content: center; padding: 12px 20px; text-decoration: none; text-align: center; }
+</style>
+
+<div class="form-page">
+    <div class="form-card">
+        <h2 class="form-title"><i class="ri-edit-line" style="color: var(--brand-accent);"></i> Edit Message</h2>
+
+        {{ form_start(form) }}
+            <div class="form-group">
+                <label>Message Content</label>
+                {{ form_widget(form.content, {'attr': {'rows': 4}}) }}
+                {{ form_errors(form.content) }}
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn"><i class="ri-save-line"></i> Save</button>
+                <a href="{{ path('app_help_request_chat', {'id': message.session.id}) }}" class="btn secondary">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

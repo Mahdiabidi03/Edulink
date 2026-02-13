@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test - Journal Statistics</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th {
+            background: #6366f1;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+        .count {
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .personal { color: #0dcaf0; }
+        .course { color: #198754; }
+        .total { color: #212529; }
+    </style>
+</head>
+<body>
+    <h1>📊 Journal Statistics - Test Page</h1>
+    <p>Total records: <strong>{{ journalStats|length }}</strong></p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Email</th>
+                <th>Personal Notes</th>
+                <th>Course Notes</th>
+                <th>Total Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in journalStats %}
+            <tr>
+                <td>{{ stat.fullName|default('N/A') }}</td>
+                <td>{{ stat.email }}</td>
+                <td class="count personal">{{ stat.personalNotes }}</td>
+                <td class="count course">{{ stat.courseNotes }}</td>
+                <td class="count total">{{ stat.totalNotes }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #999;">No data found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <hr style="margin: 40px 0;">
+    <h2>Debug Info</h2>
+    <pre>{{ dump(journalStats) }}</pre>
+</body>
+</html>

@@ -71,4 +71,20 @@ class GeminiService
         $prompt = "Summarize the following text in 3-5 bullet points. Text: \n\n" . substr($text, 0, 30000);
         return $this->generateContent($prompt);
     }
+
+    public function isToxic(string $text): bool
+    {
+        $bad = [
+            'hate', 'racist', 'homophobic', 'sexist',
+            'kill', 'bomb', 'terror', 'harass',
+            'slur', 'offensive', 'insult',
+        ];
+        $lower = mb_strtolower($text);
+        foreach ($bad as $w) {
+            if (str_contains($lower, $w)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

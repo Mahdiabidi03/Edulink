@@ -8,41 +8,39 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
 class NotificationController extends AbstractController
 {
-    #[Route('/notification/recent', name: 'notification_recent')]
     public function recent(NotificationRepository $notificationRepository): Response
     {
         $user = $this->getUser();
-        if (!$user) {
-            return new Response('');
-        }
+        $notifications = [];
+        $count = 0;
 
-        $notifications = $notificationRepository->findBy(
-            ['user' => $user, 'isRead' => false],
-            ['createdAt' => 'DESC'],
-            5 // Limit to 5
-        );
+        if ($user) {
+            $notifications = $notificationRepository->findUnreadByUser($user);
+            $count = count($notifications);
+        }
 
         return $this->render('components/_notifications_widget.html.twig', [
             'notifications' => $notifications,
-            'count' => count($notifications)
+            'count' => $count,
         ]);
     }
 
-    #[Route('/notification/read/{id}', name: 'notification_read', methods: ['POST'])]
-    public function markAsRead(Notification $notification, EntityManagerInterface $entityManager): JsonResponse
-    {
-        // Security check
+    #[Route('/notification/read/{id}', name: 'app_notification_read', methods: ['POST'])]
+    public function markRead(
+        Notification $notification,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
         if ($notification->getUser() !== $this->getUser()) {
-            return new JsonResponse(['error' => 'Unauthorized'], 403);
+            return new JsonResponse(['ok' => false, 'error' => 'Forbidden'], 403);
         }
 
         $notification->setIsRead(true);
         $entityManager->flush();
 
-        return new JsonResponse(['success' => true]);
+        return new JsonResponse(['ok' => true]);
     }
 }

@@ -1,0 +1,263 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Request #{{ help_request.id }} - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: var(--space-xl);
+    }
+
+    .detail-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .detail-card-header {
+        padding: var(--space-lg);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .detail-card-header h3 {
+        margin: 0;
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .detail-card-body {
+        padding: var(--space-lg);
+    }
+
+    .meta-row {
+        display: flex;
+        gap: var(--space-xl);
+        margin-top: var(--space-md);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .chat-log {
+        max-height: 500px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .log-msg {
+        padding: var(--space-md);
+        border-radius: 10px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border-light);
+        position: relative;
+    }
+
+    .log-msg.toxic {
+        border-color: rgba(239, 68, 68, 0.3);
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .log-msg-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        font-size: 0.8rem;
+    }
+
+    .log-msg-content {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .status-open { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .status-progress { background: rgba(251, 191, 36, 0.15); color: var(--warning); }
+    .status-closed { background: rgba(148, 163, 184, 0.2); color: var(--text-secondary); }
+    .status-flagged { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+
+    .admin-action-btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: transparent;
+        cursor: pointer;
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+        color: var(--text-main);
+    }
+    .admin-action-btn:hover { background: rgba(255,255,255,0.05); }
+    .admin-action-btn.resolve { border-color: var(--success); color: var(--success); }
+    .admin-action-btn.resolve:hover { background: rgba(34, 197, 94, 0.1); }
+    .admin-action-btn.danger { border-color: var(--error); color: var(--error); }
+    .admin-action-btn.danger:hover { background: rgba(239, 68, 68, 0.1); }
+</style>
+
+<!-- Back Button -->
+<a href="{{ path('app_admin_assistance_index') }}" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); text-decoration: none; margin-bottom: var(--space-lg); font-size: 0.9rem;">
+    <i class="ri-arrow-left-line"></i> Back to Assistance Center
+</a>
+
+<div class="detail-grid">
+
+    <!-- ==================== LEFT: Request Detail + Chat ==================== -->
+    <div style="display: flex; flex-direction: column; gap: var(--space-xl);">
+
+        <!-- Request Info -->
+        <div class="detail-card">
+            <div class="detail-card-header">
+                <h3><i class="ri-file-text-line" style="color: var(--brand-accent);"></i> Request #{{ help_request.id }}</h3>
+                <div style="display: flex; gap: 8px;">
+                    <span class="status-badge {{ help_request.status == 'OPEN' ? 'status-open' : (help_request.status == 'IN_PROGRESS' ? 'status-progress' : 'status-closed') }}">
+                        {{ help_request.status }}
+                    </span>
+                    {% if help_request.closeReason %}
+                        <span class="status-badge {{ help_request.closeReason == 'REPORTED' ? 'status-flagged' : 'status-closed' }}">
+                            {{ help_request.closeReason }}
+                        </span>
+                    {% endif %}
+                    {% if help_request.isTicket %}
+                        <span class="status-badge status-flagged">FLAGGED</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="detail-card-body">
+                <h2 style="margin: 0 0 var(--space-md); font-size: 1.3rem;">{{ help_request.title }}</h2>
+                <p style="line-height: 1.6; color: var(--text-secondary);">{{ help_request.description }}</p>
+
+                <div class="meta-row">
+                    <div class="meta-item">
+                        <i class="ri-user-line"></i>
+                        <strong>{{ help_request.student.fullName|default('Unknown') }}</strong>
+                    </div>
+                    <div class="meta-item">
+                        <i class="ri-coins-line"></i>
+                        {{ help_request.bounty }} points
+                    </div>
+                    <div class="meta-item">
+                        <i class="ri-time-line"></i>
+                        {{ help_request.createdAt|date('Y-m-d H:i') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Log -->
+        {% if help_request.session %}
+        <div class="detail-card">
+            <div class="detail-card-header">
+                <h3><i class="ri-chat-3-line" style="color: var(--info);"></i> Chat Log</h3>
+                <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--text-muted);">
+                    Tutor: {{ help_request.session.tutor.fullName|default('N/A') }}
+                    &bull; {{ help_request.session.messages|length }} messages
+                </span>
+            </div>
+            <div class="detail-card-body">
+                <div class="chat-log">
+                    {% for message in help_request.session.messages %}
+                    <div class="log-msg {{ message.isToxic ? 'toxic' : '' }}">
+                        <div class="log-msg-header">
+                            <strong style="color: var(--text-main);">{{ message.sender.fullName }}</strong>
+                            <span style="color: var(--text-muted); font-family: 'Fira Code', monospace;">{{ message.timestamp|date('Y-m-d H:i') }}</span>
+                        </div>
+                        <div class="log-msg-content">{{ message.content }}</div>
+                        {% if message.isToxic %}
+                            <div style="margin-top: 6px;">
+                                <span class="status-badge status-flagged"><i class="ri-alert-line"></i> Toxic Content</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <p style="text-align: center; color: var(--text-muted);">No messages in this session.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- ==================== RIGHT: Admin Actions ==================== -->
+    <div style="display: flex; flex-direction: column; gap: var(--space-xl);">
+        <div class="detail-card">
+            <div class="detail-card-header">
+                <h3><i class="ri-shield-star-line" style="color: var(--warning);"></i> Admin Actions</h3>
+            </div>
+            <div class="detail-card-body" style="display: flex; flex-direction: column; gap: var(--space-md);">
+                {% if help_request.isTicket %}
+                <form action="{{ path('app_admin_assistance_resolve', {'id': help_request.id}) }}" method="post">
+                    <button type="submit" class="admin-action-btn resolve">
+                        <i class="ri-check-double-line"></i> Mark as Resolved
+                    </button>
+                </form>
+                {% endif %}
+
+                <form action="{{ path('app_admin_assistance_delete', {'id': help_request.id}) }}" method="post" onsubmit="return confirm('Permanently delete this request and all related data? This cannot be undone.');">
+                    <button type="submit" class="admin-action-btn danger">
+                        <i class="ri-delete-bin-line"></i> Delete Request
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Session Info -->
+        {% if help_request.session %}
+        <div class="detail-card">
+            <div class="detail-card-header">
+                <h3><i class="ri-information-line" style="color: var(--text-secondary);"></i> Session Info</h3>
+            </div>
+            <div class="detail-card-body" style="font-size: 0.85rem; color: var(--text-secondary);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Tutor</span>
+                    <strong style="color: var(--text-main);">{{ help_request.session.tutor.fullName|default('N/A') }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Status</span>
+                    <strong style="color: {{ help_request.session.isActive ? 'var(--success)' : 'var(--text-muted)' }};">
+                        {{ help_request.session.isActive ? 'Active' : 'Closed' }}
+                    </strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Started</span>
+                    <span style="font-family: 'Fira Code', monospace;">{{ help_request.session.startedAt|date('Y-m-d H:i') }}</span>
+                </div>
+                {% if help_request.session.endedAt %}
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Ended</span>
+                    <span style="font-family: 'Fira Code', monospace;">{{ help_request.session.endedAt|date('Y-m-d H:i') }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -28,6 +28,17 @@ class RegistrationFormType extends AbstractType
                 'required' => false,
                 'first_options'  => ['label' => false, 'attr' => ['class' => 'form-input', 'placeholder' => 'Password'], 'required' => false],
                 'second_options' => ['label' => false, 'attr' => ['class' => 'form-input', 'placeholder' => 'Confirm Password'], 'required' => false],
+                'constraints' => [
+                    new \Symfony\Component\Validator\Constraints\NotBlank([
+                        'message' => 'Please enter a password',
+                    ]),
+                    new \Symfony\Component\Validator\Constraints\Length([
+                        'min' => 6,
+                        'minMessage' => 'Your password should be at least {{ limit }} characters',
+                        // max length allowed by Symfony for security reasons
+                        'max' => 4096,
+                    ]),
+                ],
                 'invalid_message' => 'The password fields must match.',
             ])
             ->add('agreeTerms', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [

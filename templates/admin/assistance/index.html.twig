@@ -1,0 +1,666 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Assistance Center - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .assist-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--space-xl);
+    }
+
+    .assist-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .assist-card-header {
+        padding: var(--space-lg);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .assist-card-header h3 {
+        margin: 0;
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .assist-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .assist-table thead {
+        background: rgba(0,0,0,0.15);
+        font-family: 'Fira Code', monospace;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+    }
+
+    .assist-table th {
+        text-align: left;
+        padding: 12px 20px;
+    }
+
+    .assist-table td {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .assist-table tbody tr:hover {
+        background: rgba(255,255,255,0.02);
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .status-open { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .status-progress { background: rgba(251, 191, 36, 0.15); color: var(--warning); }
+    .status-closed { background: rgba(148, 163, 184, 0.2); color: var(--text-secondary); }
+    .status-reported { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: var(--text-secondary);
+        text-decoration: none;
+    }
+    .action-btn:hover { background: rgba(255,255,255,0.05); border-color: var(--brand-main); color: var(--brand-main); }
+    .action-btn-success:hover { border-color: var(--success); color: var(--success); }
+    .action-btn-danger:hover { border-color: var(--error); color: var(--error); }
+
+    .ticket-count {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.8rem;
+        padding: 4px 10px;
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+        border-radius: 20px;
+    }
+
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--brand-main);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: var(--space-2xl);
+        color: var(--text-muted);
+    }
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: var(--space-md);
+        display: block;
+        opacity: 0.4;
+    }
+
+    .alert-bar {
+        padding: var(--space-md) var(--space-lg);
+        border-radius: 10px;
+        margin-bottom: var(--space-lg);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .alert-success { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.2); }
+    .alert-warning { background: rgba(251, 191, 36, 0.1); color: var(--warning); border: 1px solid rgba(251, 191, 36, 0.2); }
+
+    /* ===== STATISTICS DASHBOARD ===== */
+    .stats-hero {
+        background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 60%),
+                    linear-gradient(180deg, rgba(28, 25, 23, 0.8) 0%, rgba(12, 10, 9, 0.95) 100%);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: var(--space-xl);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(20px);
+        box-shadow: var(--shadow-xl);
+        margin-bottom: var(--space-xl);
+    }
+    .stats-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 2px;
+        background: linear-gradient(90deg, transparent, var(--brand-accent), transparent);
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-lg);
+        position: relative;
+        z-index: 10;
+    }
+    .stat-card {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+        padding-left: var(--space-lg);
+        border-left: 1px solid var(--border);
+        animation: fadeInUp 0.5s ease-out backwards;
+    }
+    .stat-card:first-child { border-left: none; padding-left: 0; }
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+    .stat-card:nth-child(3) { animation-delay: 0.2s; }
+    .stat-card:nth-child(4) { animation-delay: 0.3s; }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center; justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: var(--space-xs);
+    }
+    .stat-label {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .stat-value {
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-main);
+        line-height: 1;
+    }
+    .stat-sub {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.78rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Secondary stats row */
+    .stats-secondary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-md);
+        margin-bottom: var(--space-xl);
+    }
+    .stat-mini {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: var(--space-md) var(--space-lg);
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat-mini:hover {
+        transform: translateY(-2px);
+        border-color: var(--brand-main);
+    }
+    .stat-mini-icon {
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .stat-mini-value {
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 1.4rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .stat-mini-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    /* Chart section */
+    .stats-chart-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-xl);
+        margin-bottom: var(--space-xl);
+    }
+    .chart-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: var(--space-lg);
+    }
+    .chart-card h3 {
+        margin: 0 0 var(--space-lg) 0;
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 1rem;
+        display: flex; align-items: center; gap: 8px;
+    }
+</style>
+
+<!-- Header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-xl);">
+    <div>
+        <h1 style="margin: 0; font-size: 2rem;">Assistance Center</h1>
+        <p style="color: var(--text-muted); font-family: 'Fira Code', monospace; margin-top: 5px;">
+            <i class="ri-customer-service-2-line"></i> Manage help requests & reported tickets
+        </p>
+    </div>
+    <div style="display: flex; gap: var(--space-sm);">
+        <a href="{{ path('app_admin_assistance_export_requests') }}" class="btn secondary" style="font-size: 0.85rem; padding: 8px 14px; text-decoration: none;">
+            <i class="ri-file-download-line"></i> Export Requests
+        </a>
+        <a href="{{ path('app_admin_assistance_export_tickets') }}" class="btn secondary" style="font-size: 0.85rem; padding: 8px 14px; text-decoration: none;">
+            <i class="ri-flag-line"></i> Export Tickets
+        </a>
+        <a href="{{ path('app_admin_assistance_export_stats') }}" class="btn" style="font-size: 0.85rem; padding: 8px 14px; background: var(--brand-accent); color: var(--bg-main); border: none; text-decoration: none;">
+            <i class="ri-bar-chart-box-line"></i> Export Stats
+        </a>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% for message in app.flashes('success') %}
+    <div class="alert-bar alert-success"><i class="ri-check-line"></i> {{ message }}</div>
+{% endfor %}
+{% for message in app.flashes('warning') %}
+    <div class="alert-bar alert-warning"><i class="ri-alert-line"></i> {{ message }}</div>
+{% endfor %}
+
+<!-- ==================== STATISTICS DASHBOARD ==================== -->
+<div class="stats-hero">
+    <div class="stats-grid">
+        <!-- Total Requests -->
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--brand-main);">
+                <i class="ri-questionnaire-line"></i>
+            </div>
+            <span class="stat-label">Total Requests</span>
+            <span class="stat-value">{{ stats.totalRequests }}</span>
+            <span class="stat-sub" style="color: var(--success);">
+                <i class="ri-check-double-line"></i> {{ stats.closedRequests }} closed
+            </span>
+        </div>
+
+        <!-- Active Sessions -->
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(251, 191, 36, 0.15); color: var(--warning);">
+                <i class="ri-live-line"></i>
+            </div>
+            <span class="stat-label">Active Sessions</span>
+            <span class="stat-value">{{ stats.activeSessions }}</span>
+            <span class="stat-sub" style="color: var(--brand-accent);">
+                <i class="ri-group-line"></i> {{ stats.totalSessions }} total
+            </span>
+        </div>
+
+        <!-- Average Rating -->
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                <i class="ri-star-smile-line"></i>
+            </div>
+            <span class="stat-label">Avg Rating</span>
+            <span class="stat-value">{{ stats.avgRating }}<span style="font-size: 1rem; color: var(--text-muted);">/5</span></span>
+            <span class="stat-sub" style="color: var(--text-secondary);">
+                <i class="ri-chat-check-line"></i> {{ stats.totalReviews }} reviews
+            </span>
+        </div>
+
+        <!-- Resolution Rate -->
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(56, 189, 248, 0.15); color: var(--info);">
+                <i class="ri-pie-chart-line"></i>
+            </div>
+            <span class="stat-label">Resolution Rate</span>
+            <span class="stat-value">{{ stats.resolutionRate }}<span style="font-size: 1rem; color: var(--text-muted);">%</span></span>
+            <span class="stat-sub" style="color: var(--text-secondary);">
+                <i class="ri-chat-3-line"></i> {{ stats.totalMessages }} messages
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Stats Row -->
+<div class="stats-secondary">
+    <div class="stat-mini">
+        <div class="stat-mini-icon" style="background: rgba(34, 197, 94, 0.12); color: var(--success);">
+            <i class="ri-door-open-line"></i>
+        </div>
+        <div>
+            <div class="stat-mini-value" style="color: var(--success);">{{ stats.openRequests }}</div>
+            <div class="stat-mini-label">Open Requests</div>
+        </div>
+    </div>
+    <div class="stat-mini">
+        <div class="stat-mini-icon" style="background: rgba(251, 191, 36, 0.12); color: var(--warning);">
+            <i class="ri-loader-4-line"></i>
+        </div>
+        <div>
+            <div class="stat-mini-value" style="color: var(--warning);">{{ stats.inProgressRequests }}</div>
+            <div class="stat-mini-label">In Progress</div>
+        </div>
+    </div>
+    <div class="stat-mini">
+        <div class="stat-mini-icon" style="background: rgba(99, 102, 241, 0.12); color: var(--brand-main);">
+            <i class="ri-coin-line"></i>
+        </div>
+        <div>
+            <div class="stat-mini-value" style="color: var(--brand-main);">{{ stats.totalBounty }}</div>
+            <div class="stat-mini-label">Total Bounty (pts)</div>
+        </div>
+    </div>
+    <div class="stat-mini">
+        <div class="stat-mini-icon" style="background: rgba(239, 68, 68, 0.12); color: var(--error);">
+            <i class="ri-alarm-warning-line"></i>
+        </div>
+        <div>
+            <div class="stat-mini-value" style="color: var(--error);">{{ stats.reportedTickets }}</div>
+            <div class="stat-mini-label">Reported Tickets</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="stats-chart-row">
+    <div class="chart-card">
+        <h3><i class="ri-bar-chart-horizontal-line" style="color: var(--brand-accent);"></i> Request Distribution</h3>
+        <div style="display: flex; flex-direction: column; gap: var(--space-lg); padding: var(--space-md) 0;">
+            <!-- Open -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                    <span style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                        <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--success); display: inline-block;"></span> Open
+                    </span>
+                    <span style="font-family: 'Fira Code', monospace; font-size: 1.1rem; font-weight: 700; color: var(--success);">{{ stats.openRequests }}</span>
+                </div>
+                <div style="height: 10px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden;">
+                    <div style="height: 100%; width: {{ stats.totalRequests > 0 ? ((stats.openRequests / stats.totalRequests) * 100) : 0 }}%; background: linear-gradient(90deg, rgba(34,197,94,0.6), var(--success)); border-radius: 6px; transition: width 0.8s ease;"></div>
+                </div>
+            </div>
+            <!-- In Progress -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                    <span style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                        <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--warning); display: inline-block;"></span> In Progress
+                    </span>
+                    <span style="font-family: 'Fira Code', monospace; font-size: 1.1rem; font-weight: 700; color: var(--warning);">{{ stats.inProgressRequests }}</span>
+                </div>
+                <div style="height: 10px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden;">
+                    <div style="height: 100%; width: {{ stats.totalRequests > 0 ? ((stats.inProgressRequests / stats.totalRequests) * 100) : 0 }}%; background: linear-gradient(90deg, rgba(251,191,36,0.6), var(--warning)); border-radius: 6px; transition: width 0.8s ease;"></div>
+                </div>
+            </div>
+            <!-- Closed -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                    <span style="font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                        <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--text-secondary); display: inline-block;"></span> Closed
+                    </span>
+                    <span style="font-family: 'Fira Code', monospace; font-size: 1.1rem; font-weight: 700; color: var(--text-secondary);">{{ stats.closedRequests }}</span>
+                </div>
+                <div style="height: 10px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden;">
+                    <div style="height: 100%; width: {{ stats.totalRequests > 0 ? ((stats.closedRequests / stats.totalRequests) * 100) : 0 }}%; background: linear-gradient(90deg, rgba(148,163,184,0.4), var(--text-secondary)); border-radius: 6px; transition: width 0.8s ease;"></div>
+                </div>
+            </div>
+            <!-- Total summary -->
+            <div style="display: flex; justify-content: center; padding-top: var(--space-sm); border-top: 1px solid var(--border-light);">
+                <span style="font-family: 'Fira Code', monospace; font-size: 0.78rem; color: var(--text-muted);">
+                    Total: {{ stats.totalRequests }} requests
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="chart-card">
+        <h3><i class="ri-shield-check-line" style="color: var(--success);"></i> Moderation Overview</h3>
+        <div style="display: flex; flex-direction: column; gap: var(--space-md); padding: var(--space-md) 0;">
+            <!-- Messages Bar -->
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+                    <span>Total Messages</span>
+                    <span style="font-family: 'Fira Code', monospace; color: var(--text-secondary);">{{ stats.totalMessages }}</span>
+                </div>
+                <div style="height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; width: 100%; background: var(--brand-main); border-radius: 4px;"></div>
+                </div>
+            </div>
+            <!-- Toxic Bar -->
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+                    <span style="color: var(--error);">Toxic Flagged</span>
+                    <span style="font-family: 'Fira Code', monospace; color: var(--error);">{{ stats.toxicMessages }}</span>
+                </div>
+                <div style="height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; width: {{ stats.totalMessages > 0 ? ((stats.toxicMessages / stats.totalMessages) * 100) : 0 }}%; background: var(--error); border-radius: 4px;"></div>
+                </div>
+            </div>
+            <!-- Reviews Bar -->
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+                    <span style="color: var(--success);">Completed Reviews</span>
+                    <span style="font-family: 'Fira Code', monospace; color: var(--success);">{{ stats.totalReviews }}</span>
+                </div>
+                <div style="height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden;">
+                    <div style="height: 100%; width: {{ stats.totalSessions > 0 ? ((stats.totalReviews / stats.totalSessions) * 100) : 0 }}%; background: var(--success); border-radius: 4px;"></div>
+                </div>
+            </div>
+            <!-- Rating display -->
+            <div style="margin-top: var(--space-md); display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: rgba(0,0,0,0.2); border-radius: 10px;">
+                <div style="font-size: 2rem; line-height: 1;">
+                    {% for i in 1..5 %}
+                        {% if i <= stats.avgRating %}
+                            <i class="ri-star-fill" style="color: #FCD34D;"></i>
+                        {% elseif i - stats.avgRating < 1 %}
+                            <i class="ri-star-half-fill" style="color: #FCD34D;"></i>
+                        {% else %}
+                            <i class="ri-star-line" style="color: rgba(255,255,255,0.15);"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div>
+                    <div style="font-family: 'Fira Sans', sans-serif; font-weight: 700; font-size: 1.3rem;">{{ stats.avgRating }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">out of 5.0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="assist-grid">
+
+    <!-- ==================== REPORTED TICKETS ==================== -->
+    <div class="assist-card">
+        <div class="assist-card-header">
+            <h3>
+                <i class="ri-flag-line" style="color: var(--error);"></i>
+                Reported Tickets
+            </h3>
+            <span class="ticket-count">{{ tickets|length }} ticket{{ tickets|length != 1 ? 's' : '' }}</span>
+        </div>
+
+        {% if tickets|length > 0 %}
+        <table class="assist-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Close Reason</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td style="font-family: 'Fira Code', monospace;">#{{ ticket.id }}</td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">{{ ticket.student.fullName|first|upper|default('?') }}</div>
+                            <span>{{ ticket.student.fullName|default('Unknown') }}</span>
+                        </div>
+                    </td>
+                    <td>{{ ticket.title }}</td>
+                    <td>
+                        <span class="status-badge {{ ticket.status == 'OPEN' ? 'status-open' : (ticket.status == 'IN_PROGRESS' ? 'status-progress' : 'status-closed') }}">
+                            {{ ticket.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-reported">{{ ticket.closeReason|default('N/A') }}</span>
+                    </td>
+                    <td style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--text-muted);">
+                        {{ ticket.createdAt|date('Y-m-d H:i') }}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="{{ path('app_admin_assistance_view', {'id': ticket.id}) }}" class="action-btn" title="View Details">
+                                <i class="ri-eye-line"></i>
+                            </a>
+                            <form action="{{ path('app_admin_assistance_resolve', {'id': ticket.id}) }}" method="post" style="display:inline;">
+                                <button type="submit" class="action-btn action-btn-success" title="Resolve">
+                                    <i class="ri-check-line"></i>
+                                </button>
+                            </form>
+                            <form action="{{ path('app_admin_assistance_delete', {'id': ticket.id}) }}" method="post" style="display:inline;" onsubmit="return confirm('Permanently delete?');">
+                                <button type="submit" class="action-btn action-btn-danger" title="Delete">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="ri-shield-check-line"></i>
+            <p>No reported tickets. All clear!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ==================== ALL HELP REQUESTS ==================== -->
+    <div class="assist-card">
+        <div class="assist-card-header">
+            <h3>
+                <i class="ri-list-check" style="color: var(--brand-accent);"></i>
+                All Help Requests
+            </h3>
+            <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--text-muted);">
+                {{ all_requests|length }} total
+            </span>
+        </div>
+
+        {% if all_requests|length > 0 %}
+        <table class="assist-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Student</th>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Bounty</th>
+                    <th>Close Reason</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in all_requests %}
+                <tr>
+                    <td style="font-family: 'Fira Code', monospace;">#{{ req.id }}</td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">{{ req.student.fullName|first|upper|default('?') }}</div>
+                            <span>{{ req.student.fullName|default('N/A') }}</span>
+                        </div>
+                    </td>
+                    <td>{{ req.title }}</td>
+                    <td>
+                        <span class="status-badge {{ req.status == 'OPEN' ? 'status-open' : (req.status == 'IN_PROGRESS' ? 'status-progress' : 'status-closed') }}">
+                            {{ req.status }}
+                        </span>
+                    </td>
+                    <td style="font-family: 'Fira Code', monospace;">{{ req.bounty }} pts</td>
+                    <td>
+                        {% if req.closeReason %}
+                            <span class="status-badge {{ req.closeReason == 'REPORTED' ? 'status-reported' : 'status-closed' }}">
+                                {{ req.closeReason }}
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-muted);">—</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--text-muted);">
+                        {{ req.createdAt|date('Y-m-d H:i') }}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="{{ path('app_admin_assistance_view', {'id': req.id}) }}" class="action-btn" title="View">
+                                <i class="ri-eye-line"></i>
+                            </a>
+                            <form action="{{ path('app_admin_assistance_delete', {'id': req.id}) }}" method="post" style="display:inline;" onsubmit="return confirm('Delete this request?');">
+                                <button type="submit" class="action-btn action-btn-danger" title="Delete">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="ri-inbox-line"></i>
+            <p>No help requests yet.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

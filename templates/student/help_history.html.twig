@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Help History{% endblock %}
+
+{% block content %}
+<style>
+  .hist-hero { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: var(--space-xl); margin-bottom: var(--space-xl); box-shadow: var(--shadow-sm); }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-md); }
+  .stat { background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; padding: var(--space-md); }
+  .stat .label { font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat .value { font-size: 1.6rem; font-weight: 700; color: var(--text-main); }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th, .table td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); text-align: left; }
+  .badge { font-size: 0.72rem; padding: 3px 8px; border-radius: 12px; font-weight: 600; }
+  .badge-resolved { background: rgba(34,197,94,0.15); color: var(--success); }
+  .badge-cancelled { background: rgba(251,191,36,0.15); color: var(--warning); }
+  .badge-reported { background: rgba(239,68,68,0.15); color: var(--error); }
+  .badge-open { background: rgba(99,102,241,0.15); color: var(--brand-main); }
+</style>
+
+<div class="hist-hero">
+  <h2 style="margin:0 0 var(--space-md) 0;">Help History</h2>
+  <div class="stats-grid">
+    <div class="stat"><div class="label">Total Assists</div><div class="value">{{ stats.totalAssists }}</div></div>
+    <div class="stat"><div class="label">Resolved</div><div class="value">{{ stats.resolvedAssists }}</div></div>
+    <div class="stat"><div class="label">Cancelled</div><div class="value">{{ stats.cancelledAssists }}</div></div>
+    <div class="stat"><div class="label">Reported</div><div class="value">{{ stats.reportedAssists }}</div></div>
+  </div>
+  <div style="margin-top: var(--space-md); font-family:'Fira Code', monospace; color: var(--text-secondary);">
+    <span>Current Balance: </span><span style="color: var(--brand-main); font-weight:700;">{{ currentBalance }} pts</span>
+    <span style="margin-left: 12px;">Total Earned: </span><span style="color: var(--success); font-weight:700;">{{ stats.totalEarned }} pts</span>
+  </div>
+  <div style="margin-top: var(--space-md);"><a href="{{ path('student_wallet') }}" class="btn secondary" style="text-decoration:none;">Open Wallet</a></div>
+</div>
+
+{% if items|length > 0 %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Student</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Bounty</th>
+        <th>Earned</th>
+        <th>Started</th>
+        <th>Ended</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for it in items %}
+      <tr>
+        <td>{{ it.id }}</td>
+        <td>{{ it.student|default('—') }}</td>
+        <td>{{ it.title }}</td>
+        <td>
+          {% if it.status == 'CLOSED' and it.reason == 'RESOLVED' %}
+            <span class="badge badge-resolved">Resolved</span>
+          {% elseif it.status == 'CLOSED' and it.reason == 'CANCELLED' %}
+            <span class="badge badge-cancelled">Cancelled</span>
+          {% elseif it.status == 'CLOSED' and it.reason == 'REPORTED' %}
+            <span class="badge badge-reported">Reported</span>
+          {% else %}
+            <span class="badge badge-open">{{ it.status }}</span>
+          {% endif %}
+        </td>
+        <td style="font-family:'Fira Code', monospace;">{{ it.bounty }} pts</td>
+        <td style="font-family:'Fira Code', monospace; color: var(--success);">{{ it.earned }} pts</td>
+        <td style="font-family:'Fira Code', monospace; color: var(--text-muted);">{{ it.startedAt|date('Y-m-d H:i') }}</td>
+        <td style="font-family:'Fira Code', monospace; color: var(--text-muted);">{{ it.endedAt ? it.endedAt|date('Y-m-d H:i') : '—' }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <div class="empty-state" style="text-align:center; padding: var(--space-2xl); color: var(--text-muted);">
+    <i class="ri-time-line" style="font-size:2.2rem; display:block; margin-bottom: var(--space-md); opacity:0.4;"></i>
+    No assistance sessions yet.
+  </div>
+{% endif %}
+{% endblock %}

@@ -11,7 +11,9 @@
             <h1 class="page-title" style="margin: 0; font-size: 2rem; background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">My Journal</h1>
             <p style="color: var(--text-secondary); margin-top: 0.5rem;">Capture your thoughts, track tasks, and stay organized.</p>
         </div>
-        <button class="btn" onclick="createNewNote()"><i class="ri-add-line"></i> New Note</button>
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn" onclick="document.getElementById('noteFormContainer').scrollIntoView({behavior: 'smooth'}); document.querySelector('#note_title').focus();" style="background: var(--brand-gradient); color: white; border: none; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);"><i class="ri-add-line"></i> New Note</button>
+        </div>
     </div>
 
     <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 2rem; align-items: start;">
@@ -20,54 +22,130 @@
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
             
             <!-- Quick Input -->
-            <div class="card" style="padding: 1.5rem;">
-                <input type="text" id="noteTitle" placeholder="Note Title..." style="width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: white; font-size: 1.1rem; font-weight: 600;">
-                <textarea id="noteContent" placeholder="Write something..." style="width: 100%; height: 120px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); font-family: 'Inter', sans-serif; resize: none; margin-bottom: 1rem;"></textarea>
-                <div style="display: flex; justify-content: flex-end;">
-                    <button class="btn secondary" style="padding: 8px 16px;"><i class="ri-save-3-line"></i> Save Note</button>
-                </div>
+            <div class="card" style="padding: 1.5rem;" id="noteFormContainer">
+                {{ form_start(noteForm, {'attr': {'style': 'display: contents;', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+                    {{ form_widget(noteForm.title, {'attr': {'class': 'form-input', 'style': 'margin-bottom: 10px; box-sizing: border-box;', 'placeholder': 'Note Title'}}) }}
+                    
+                    {% if noteForm.title.vars.errors %}
+                        <div style="color: var(--error); font-size: 0.9rem; margin-bottom: 10px;">
+                            {% for error in noteForm.title.vars.errors %}
+                                {{ error.message }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    {{ form_widget(noteForm.content, {'attr': {'class': 'form-textarea', 'style': 'height: 120px; resize: none; margin-bottom: 1rem; box-sizing: border-box;', 'placeholder': 'Write your note here...'}}) }}
+                    
+                    {% if noteForm.content.vars.errors %}
+                        <div style="color: var(--error); font-size: 0.9rem; margin-bottom: 10px;">
+                            {% for error in noteForm.content.vars.errors %}
+                                {{ error.message }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {{ form_widget(noteForm.attachment, {'attr': {'class': 'form-input file-input', 'style': 'margin-bottom: 1rem; box-sizing: border-box;'}}) }}
+                    
+                    {% if noteForm.attachment.vars.errors %}
+                         <div style="color: var(--error); font-size: 0.9rem; margin-bottom: 10px;">
+                             {% for error in noteForm.attachment.vars.errors %}
+                                 {{ error.message }}
+                             {% endfor %}
+                         </div>
+                     {% endif %}
+
+                    {% if userCategories is empty %}
+                        <div class="alert-bar alert-warning" style="margin-bottom: 1rem;">
+                            <i class="ri-alert-line"></i>
+                            You need to create categories before adding notes.
+                            <a href="{{ path('category_new') }}" class="btn secondary" style="margin-left: 8px; text-decoration: none;">Create Category</a>
+                        </div>
+                    {% endif %}
+                    <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 6px;">
+                        <label style="font-weight:600; color: var(--text-main);">Category</label>
+                        <a href="{{ path('category_new') }}" class="btn secondary" style="text-decoration:none; font-size:0.85rem; padding:6px 10px;">+ Add Category</a>
+                    </div>
+                    {{ form_widget(noteForm.category, {'attr': {'class': 'form-input', 'style': 'margin-bottom: 1rem; box-sizing: border-box;'}}) }}
+                    
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn" style="padding: 10px 24px; background: var(--brand-gradient); color: white; border: none; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); transition: transform 0.2s;"><i class="ri-save-3-line"></i> Save Note</button>
+                    </div>
+                {{ form_end(noteForm) }}
             </div>
 
             <!-- Saved Notes List -->
-            <h3 style="margin: 0; color: var(--text-muted); font-size: 1rem;">Recent Notes</h3>
-            
-            <div class="notes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-                <!-- Note 1 -->
-                <div class="card" style="cursor: pointer; transition: transform 0.2s; border-left: 4px solid var(--brand-accent);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <h4 style="margin: 0;">Project Ideas</h4>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">2h ago</span>
-                    </div>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                        1. AI Checkers game using Python.
-                        2. Portfolio website with glassmorphism.
-                        3. EduLink feature: Student Journal...
-                    </p>
-                </div>
+            <h3 style="margin: 0; color: var(--text-muted); font-size: 1rem; display:flex; align-items:center; justify-content:space-between;">Recent Notes
+                <small style="font-weight:600; color:var(--text-secondary); font-size:0.9rem;">({{ notes|length }})</small>
+            </h3>
 
-                <!-- Note 2 -->
-                <div class="card" style="cursor: pointer; transition: transform 0.2s; border-left: 4px solid var(--success);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <h4 style="margin: 0;">Meeting Notes</h4>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">Yesterday</span>
+            <!-- Search and Filter -->
+            <div style="margin: 0.75rem 0 1rem;">
+                <form method="GET" action="{{ path('student_journal') }}" style="display:flex; flex-direction: column; gap: 12px;">
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input name="q" type="search" value="{{ searchQuery }}" placeholder="Search notes by title or content..." aria-label="Search notes" style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background: var(--bg-card); color:var(--text-main);" />
+                        <button type="submit" class="btn" style="padding: 10px 16px; background: var(--brand-gradient); color: white;"><i class="ri-search-line"></i></button>
+                        <a href="{{ path('student_journal') }}" class="btn secondary" style="padding:10px 16px;">Clear</a>
                     </div>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                        Discussed the database schema for the new module. Need to add a 'status' field to the 'tasks' table.
-                        Next meeting scheduled for Friday.
-                    </p>
-                </div>
-                 <!-- Note 3 -->
-                <div class="card" style="cursor: pointer; transition: transform 0.2s; border-left: 4px solid var(--info);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <h4 style="margin: 0;">SQL Commands</h4>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">3 days ago</span>
+                    
+                    {% if userCategories|length > 0 %}
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary); margin-right: 4px;">Filter by category:</span>
+                        <a href="{{ path('student_journal', {q: searchQuery}) }}" class="tag-filter {{ not currentCategory ? 'active' : '' }}" style="padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; text-decoration: none; border: 1px solid var(--border); background: {{ not currentCategory ? 'var(--brand-main)' : 'var(--bg-card)' }}; color: {{ not currentCategory ? 'white' : 'var(--text-secondary)' }};">All</a>
+                        {% for cat in userCategories %}
+                            <a href="{{ path('student_journal', {category: cat.id, q: searchQuery}) }}" class="tag-filter {{ currentCategory == cat.id ? 'active' : '' }}" style="padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; text-decoration: none; border: 1px solid var(--border); background: {{ currentCategory == cat.id ? 'var(--brand-main)' : 'var(--bg-card)' }}; color: {{ currentCategory == cat.id ? 'white' : 'var(--text-secondary)' }};">
+                                {{ cat.name }}
+                            </a>
+                        {% endfor %}
                     </div>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                        SELECT * FROM users WHERE role = 'student';
-                        UPDATE users SET points = points + 10 WHERE id = 1;
-                    </p>
-                </div>
+                    {% endif %}
+                </form>
             </div>
+
+            {% if notes|length == 0 %}
+                <div class="card" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                    <i class="ri-note-line" style="font-size: 2.5rem; display: block; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    No notes yet. Create your first note above!
+                </div>
+            {% else %}
+                <div class="notes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+                    {% for note in notes %}
+                        <div class="card card-pro note-card" data-title="{{ note.title|lower|e('html_attr') }}" style="cursor: pointer; transition: all 0.3s ease; border-top: 4px solid var(--brand-accent); position: relative; group: hover; box-shadow: var(--shadow-sm); overflow:hidden;">
+                            
+                            <!-- Colorful header background fade -->
+                            <div style="position: absolute; top:0; left:0; width:100%; height: 60px; background: linear-gradient(180deg, var(--brand-accent)15 0%, transparent 100%); opacity: 0.5;"></div>
+
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; position: relative;">
+                                <h4 style="margin: 0; flex: 1; color: var(--text-main); font-weight: 700; font-size: 1.1rem;">{{ note.title }}</h4>
+                                <div style="display: flex; gap: 4px;">
+                                    <a href="{{ path('student_note_export_pdf', {id: note.id}) }}" class="icon-btn-hover" style="padding: 6px; color: var(--text-secondary); cursor: pointer; border-radius: 50%; transition: background 0.2s;" title="Export PDF" target="_blank">
+                                        <i class="ri-file-pdf-line"></i>
+                                    </a>
+                                    <a href="{{ path('student_note_edit', {id: note.id}) }}" class="icon-btn-hover" style="padding: 6px; color: var(--text-secondary); cursor: pointer; border-radius: 50%; transition: background 0.2s;" title="Edit">
+                                        <i class="ri-edit-line"></i>
+                                    </a>
+                                    <form method="POST" action="{{ path('student_note_delete', {id: note.id}) }}" style="display: inline;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('student_note_delete' ~ note.id) }}" />
+                                        <button type="submit" class="icon-btn-hover" style="padding: 6px; color: var(--text-secondary); border: none; background: none; cursor: pointer; border-radius: 50%; transition: background 0.2s;" title="Delete" onclick="return confirm('Are you sure?')">
+                                            <i class="ri-delete-bin-line"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div style="position: relative;">
+                                {% if note.category %}
+                                    <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(99, 102, 241, 0.1); color: var(--brand-main); font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;">
+                                        <i class="ri-bookmark-2-line"></i> {{ note.category.name }}
+                                    </span>
+                                {% endif %}
+                                <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                    {{ note.content }}
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
         </div>
 
@@ -75,73 +153,118 @@
         <div style="display: flex; flex-direction: column; gap: 2rem;">
             
             <!-- Tasks Widget -->
-            <div class="card" style="padding: 0; overflow: hidden;">
-                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2);">
-                    <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+            <div class="card card-pro" style="padding: 0; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border);">
+                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); background: var(--bg-main); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
                         <i class="ri-checkbox-circle-line" style="color: var(--success);"></i> My Tasks
                     </h3>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button id="sortTasksBtn" data-asc="true" class="icon-btn" style="width:auto; padding:6px 10px; font-size:0.9rem;" onclick="sortTasks();">Trier (non faits d'abord)</button>
+                    </div>
                 </div>
                 
                 <div style="padding: 1.5rem;">
                     <div style="display: flex; gap: 8px; margin-bottom: 1.5rem;">
-                        <input type="text" placeholder="Add new task..." style="flex: 1; padding: 8px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 6px; color: white;">
-                        <button class="btn secondary" style="padding: 8px;"><i class="ri-add-line"></i></button>
+                    {{ form_start(taskForm, {'attr': {'style': 'display: flex; gap: 8px; width: 100%;', 'novalidate': 'novalidate'}}) }}
+                            {{ form_widget(taskForm.title, {'attr': {'class': 'form-input', 'style': 'flex:1;', 'placeholder': 'New Task...'}}) }}
+                            <button type="submit" class="icon-btn" style="background: var(--brand-main); color: var(--text-inverted); width: 44px; height: 44px;"><i class="ri-add-line"></i></button>
+                        {{ form_end(taskForm) }}
                     </div>
 
-                    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <li class="task-item">
-                            <input type="checkbox" id="task1">
-                            <label for="task1">Finish Database Assignment</label>
-                        </li>
-                        <li class="task-item checked">
-                            <input type="checkbox" id="task2" checked>
-                            <label for="task2">Read Chapter 4 of AI Book</label>
-                        </li>
-                         <li class="task-item">
-                            <input type="checkbox" id="task3">
-                            <label for="task3">Update Profile Picture</label>
-                        </li>
-                         <li class="task-item">
-                            <input type="checkbox" id="task4">
-                            <label for="task4">Email Professor Smith</label>
-                        </li>
-                    </ul>
+                    {% if taskForm.title.vars.errors %}
+                        <div style="color: var(--error); font-size: 0.85rem; margin-bottom: 10px;">
+                            {% for error in taskForm.title.vars.errors %}
+                                {{ error.message }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if tasks|length == 0 %}
+                        <div style="text-align: center; color: var(--text-muted); padding: 1rem; font-size: 0.9rem;">
+                            No tasks yet. Add one above!
+                        </div>
+                    {% else %}
+                        <ul id="tasksList" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem;">
+                            {% for task in tasks %}
+                                <li class="task-item {% if task.isCompleted %}checked{% endif %}" style="background: var(--bg-main); border: 1px solid var(--border);">
+                                    <form method="POST" action="{{ path('student_task_toggle', {id: task.id}) }}" style="display: inline; margin:0; padding:0; flex:1; display:flex; align-items:center;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('student_task_toggle' ~ task.id) }}" />
+                                        <input type="checkbox" id="task{{ task.id }}" name="toggle" class="task-checkbox" {% if task.isCompleted %}checked{% endif %} onchange="this.form.submit();" style="vertical-align: middle; margin-right:8px;">
+                                        <label for="task{{ task.id }}" style="color: var(--text-main);">{{ task.title }}</label>
+                                    </form>
+                                    <span class="badge badge-success" style="margin-left:8px; {% if not task.isCompleted %}display:none;{% endif %}">{% if task.isCompleted %}Fait{% endif %}</span>
+                                    <form method="POST" action="{{ path('student_task_delete', {id: task.id}) }}" style="display: inline; margin-left:8px;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('student_task_delete' ~ task.id) }}" />
+                                        <button type="submit" onclick="return confirm('Delete this task?');" class="icon-btn" style="width:24px; height:24px; color: var(--text-muted);" title="Delete">
+                                            <i class="ri-delete-line"></i>
+                                        </button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                 </div>
             </div>
 
             <!-- Reminders Widget -->
-            <div class="card" style="padding: 0; overflow: hidden;">
-                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2);">
-                    <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+            <div class="card card-pro" style="padding: 0; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border);">
+                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); background: var(--bg-main);">
+                    <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; color: var(--text-main);">
                         <i class="ri-alarm-warning-line" style="color: var(--warning);"></i> Upcoming Reminders
                     </h3>
                 </div>
-                <div style="padding: 1rem;">
-                    
-                    <div class="reminder-item">
-                        <div class="reminder-date">
-                            <span style="font-size: 1.2rem; font-weight: 700;">02</span>
-                            <span style="font-size: 0.7rem; text-transform: uppercase;">Feb</span>
-                        </div>
-                        <div class="reminder-content">
-                            <div style="font-weight: 600;">Project Submission</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">11:59 PM • Web Development</div>
-                        </div>
+                
+                {% if reminders|length == 0 %}
+                    <div style="padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                        <i class="ri-time-line" style="font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                        No reminders yet. Create one below!
                     </div>
-
-                    <div class="reminder-item">
-                        <div class="reminder-date">
-                            <span style="font-size: 1.2rem; font-weight: 700;">05</span>
-                            <span style="font-size: 0.7rem; text-transform: uppercase;">Feb</span>
-                        </div>
-                        <div class="reminder-content">
-                            <div style="font-weight: 600;">Quiz: SQL Basics</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">10:00 AM • Databases</div>
-                        </div>
+                {% else %}
+                    <div style="padding: 1rem;">
+                        {% for reminder in reminders %}
+                            {% if reminder.status == 'pending' %}
+                                <div class="reminder-item" style="position: relative; group: hover; display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid var(--border-light); background: var(--bg-main); border: 1px solid var(--border); margin-bottom: 8px;">
+                                    <div class="reminder-date" style="background: var(--brand-accent); box-shadow: var(--shadow-sm);">
+                                        <span style="font-size: 1.2rem; font-weight: 700;">{{ reminder.reminderTime|date('d') }}</span>
+                                        <span style="font-size: 0.7rem; text-transform: uppercase;">{{ reminder.reminderTime|date('M') }}</span>
+                                    </div>
+                                    <div class="reminder-content" style="flex: 1;">
+                                        <div style="font-weight: 600; color: var(--text-main);" title="{{ reminder.title }}">{{ reminder.title }}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">{{ reminder.reminderTime|date('H:i') }} • {% if reminder.description %}{{ reminder.description|slice(0, 20) }}...{% endif %}</div>
+                                    </div>
+                                    <div class="reminder-actions" style="display: flex; gap: 8px;">
+                                        <a href="{{ path('student_reminder_edit', {id: reminder.id}) }}" class="icon-btn" style="width: 32px; height: 32px; color: var(--text-secondary);" title="Edit reminder">
+                                            <i class="ri-edit-line"></i>
+                                        </a>
+                                        <div style="position: relative; display: inline-block;">
+                                            <button type="button" onclick="toggleDeferMenu(this)" class="icon-btn" style="width: 32px; height: 32px; color: var(--text-secondary);" title="Snooze reminder">
+                                                <i class="ri-alarm-snooze-line"></i>
+                                            </button>
+                                            <div class="defer-menu" style="display: none; position: absolute; top: 100%; right: 0; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 0; z-index: 1000; min-width: 160px; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                                                <form method="POST" action="{{ path('student_reminder_defer', {id: reminder.id}) }}" style="display: block;">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('student_reminder_defer' ~ reminder.id) }}" />
+                                                    <button type="submit" name="defer_minutes" value="15" style="width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; color: var(--text-main); cursor: pointer; font-size: 0.9rem;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='none'">⏱️ 15 minutes</button>
+                                                    <button type="submit" name="defer_minutes" value="30" style="width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; color: var(--text-main); cursor: pointer; font-size: 0.9rem;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='none'">⏱️ 30 minutes</button>
+                                                    <button type="submit" name="defer_minutes" value="60" style="width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; color: var(--text-main); cursor: pointer; font-size: 0.9rem;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='none'">⏱️ 1 hour</button>
+                                                    <button type="submit" name="defer_minutes" value="240" style="width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; color: var(--text-main); cursor: pointer; font-size: 0.9rem;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='none'">⏱️ 4 hours</button>
+                                                    <button type="submit" name="defer_minutes" value="1440" style="width: 100%; padding: 8px 12px; text-align: left; background: none; border: none; color: var(--text-main); cursor: pointer; font-size: 0.9rem;" onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='none'">⏱️ 1 day</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <form method="POST" action="{{ path('student_reminder_delete', {id: reminder.id}) }}" style="display: inline;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('student_reminder_delete' ~ reminder.id) }}" />
+                                            <button type="submit" class="icon-btn" style="width: 32px; height: 32px; color: var(--error);" title="Delete reminder" onclick="return confirm('Delete this reminder?');">
+                                                <i class="ri-delete-line"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
                     </div>
-
-                </div>
-                 <button class="btn secondary" style="width: 100%; border-top: 1px solid var(--border); border-radius: 0; border-left: none; border-right: none; border-bottom: none;">+ Set Reminder</button>
+                {% endif %}
+                
+                <button class="btn secondary" style="width: 100%; border-top: 1px solid var(--border); border-radius: 0; border-left: none; border-right: none; border-bottom: none; background: var(--bg-card); color: var(--brand-main);" onclick="document.getElementById('reminderModalToggle').checked = true;"><i class="ri-add-line"></i> Add Reminder</button>
             </div>
 
         </div>
@@ -150,24 +273,64 @@
 
 </div>
 
+<!-- Hidden checkbox to toggle modal -->
+<input type="checkbox" id="reminderModalToggle" style="display: none;">
+
+<!-- Modal for adding/editing Reminders -->
+<div class="reminder-modal">
+    <div class="reminder-modal-content">
+        <div class="reminder-modal-header">
+            <h2 style="margin: 0;">Create Reminder</h2>
+            <label for="reminderModalToggle" class="reminder-modal-close" style="cursor: pointer;"><i class="ri-close-line"></i></label>
+        </div>
+
+
+        {{ form_start(reminderForm, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_errors(reminderForm) }}
+            
+            {{ form_widget(reminderForm.title, {'attr': {'class': 'form-control', 'placeholder': 'Reminder title...'}}) }}
+            {{ form_errors(reminderForm.title) }}
+
+            <div style="margin-bottom: 1rem;"></div>
+            
+            {{ form_widget(reminderForm.description, {'attr': {'class': 'form-control', 'placeholder': 'Add details...'}}) }}
+            {{ form_errors(reminderForm.description) }}
+
+            <div style="margin-bottom: 1rem;"></div>
+
+            {{ form_widget(reminderForm.reminderTime, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(reminderForm.reminderTime) }}
+
+            <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                <button type="submit" class="btn" style="flex: 1;"><i class="ri-save-3-line"></i> Create Reminder</button>
+                <label for="reminderModalToggle" class="btn secondary" style="flex: 1; cursor: pointer; text-align: center;">Cancel</label>
+            </div>
+        {{ form_end(reminderForm) }}
+    </div>
+</div>
+
+
+
 <style>
     /* Task Item Styling */
     .task-item {
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 8px;
-        border-radius: 6px;
+        padding: 10px 12px;
+        border-radius: 8px;
         transition: background 0.2s;
     }
     .task-item:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--bg-card);
+        border-color: var(--brand-main) !important;
     }
     .task-item input[type="checkbox"] {
         accent-color: var(--brand-main);
         width: 18px;
         height: 18px;
         cursor: pointer;
+        border: 1px solid var(--border);
     }
     .task-item label {
         flex: 1;
@@ -176,47 +339,401 @@
     }
     .task-item.checked label {
         text-decoration: line-through;
-        color: var(--text-muted);
+        color: var(--text-muted) !important;
     }
 
     /* Reminder Item Styling */
     .reminder-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 12px;
-        border-bottom: 1px solid var(--border-light);
+        transition: all 0.2s;
+        border-radius: 10px;
+        /* Background handled inline/by default now */
     }
     .reminder-item:last-of-type {
         border-bottom: none;
     }
+    .reminder-item:hover {
+        border-color: var(--brand-accent) !important;
+        box-shadow: var(--shadow-sm);
+        transform: translateX(4px);
+    }
+    .reminder-actions {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex !important;
+        gap: 8px;
+    }
+    .reminder-item:hover .reminder-actions {
+        opacity: 1;
+    }
     .reminder-date {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
+        border-radius: 10px;
         width: 50px;
         height: 50px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        color: var(--brand-light);
+        color: white;
+        flex-shrink: 0;
+        font-weight: bold;
+    }
+
+    /* Form Control Styling */
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+    }
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+    textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    /* Modal Styling */
+    .reminder-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    #reminderModalToggle:checked ~ .reminder-modal {
+        display: flex !important;
+    }
+    .reminder-modal-content {
+        background: var(--bg-card) !important;
+        padding: 2rem;
+        border-radius: 16px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        border: 1px solid var(--border) !important;
+        box-shadow: var(--shadow-xl) !important;
+    }
+    .reminder-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        color: var(--text-main);
+    }
+    .reminder-modal-close {
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+    }
+    .reminder-modal-close:hover {
+        color: var(--brand-main);
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px) scale(0.95);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0) scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Edit Reminder Modal Styling */
+    #editReminderModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5) !important;
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    #editReminderModal.active {
+        display: flex;
+    }
+    .icon-btn-hover:hover {
+        background-color: var(--bg-main) !important;
+        color: var(--brand-main) !important;
     }
 </style>
 
+
 <script>
-    // Simple interactions for demo
-    document.querySelectorAll('.task-item input').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            if(this.checked) {
-                this.parentElement.classList.add('checked');
+    // Task checkbox toggle (optimistic UI + label click handling)
+    function handleTaskToggleCheckbox(checkbox) {
+        return async function(e) {
+            const taskId = checkbox.dataset.taskId;
+            const parentLi = checkbox.parentElement;
+            const badge = parentLi.querySelector('.task-badge');
+
+            // optimistic UI
+            const willBeChecked = checkbox.checked;
+            if (willBeChecked) {
+                parentLi.classList.add('checked');
+                if (badge) { badge.style.display = 'inline'; badge.textContent = 'Fait'; }
             } else {
-                this.parentElement.classList.remove('checked');
+                parentLi.classList.remove('checked');
+                if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
             }
-        });
+
+            try {
+                const response = await fetch(`/student/task/${taskId}/toggle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error('Server reported failure');
+                }
+
+                // keep optimistic UI (server confirms)
+            } catch (error) {
+                console.error('Error toggling task:', error);
+                // revert UI
+                checkbox.checked = !willBeChecked;
+                if (!willBeChecked) {
+                    parentLi.classList.add('checked');
+                    if (badge) { badge.style.display = 'inline'; badge.textContent = 'Fait'; }
+                } else {
+                    parentLi.classList.remove('checked');
+                    if (badge) { badge.style.display = 'none'; badge.textContent = ''; }
+                }
+            }
+        };
+    }
+
+    document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', handleTaskToggleCheckbox(checkbox));
     });
 
-    function createNewNote() {
-        document.getElementById('noteTitle').focus();
+    // Sort tasks by completion status (incomplete first)
+    function sortTasks() {
+        const list = document.getElementById('tasksList');
+        if (!list) return;
+        const items = Array.from(list.children);
+        // toggle sort direction stored on button
+        const btn = document.getElementById('sortTasksBtn');
+        const asc = btn.dataset.asc !== 'false'; // default true
+
+        items.sort((a, b) => {
+            const aDone = a.classList.contains('checked');
+            const bDone = b.classList.contains('checked');
+            if (aDone === bDone) return 0;
+            return aDone ? 1 : -1; // incomplete first
+        });
+
+        // Re-append in sorted order
+        items.forEach(item => list.appendChild(item));
+
+        // Toggle button state for next click
+        btn.dataset.asc = (!asc).toString();
+        btn.textContent = asc ? 'Trier (faits en bas)' : 'Trier (non faits d\'abord)';
     }
+
+    // Close modal when clicking outside
+    // Build a client-side schedule from reminders rendered by the server (pending only)
+    var serverScheduledReminders = [
+        {% set __first = true %}
+        {% for r in reminders %}
+            {% if r.status == 'pending' %}
+                {% if not __first %},{% endif %}
+                {
+                    id: {{ r.id }},
+                    title: "{{ r.title|e('js') }}",
+                    description: "{{ r.description|default('')|e('js') }}",
+                    datetime: "{{ r.reminderTime ? r.reminderTime|date('Y-m-d H:i:s') : '' }}"
+                }
+                {% set __first = false %}
+            {% endif %}
+        {% endfor %}
+    ];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.querySelector('.reminder-modal');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    document.getElementById('reminderModalToggle').checked = false;
+                }
+            });
+        }
+
+        // Schedule client-side timers for server reminders (fallback + immediate show if due)
+        try {
+            serverScheduledReminders.forEach(function(rem) {
+                if (!rem.datetime) return;
+                // parse as local time (browser) from server-provided Y-m-d H:i:s
+                const parts = rem.datetime.split(/[- :]/).map(Number);
+                // parts: [Y, M, D, H, i, s]
+                const dt = new Date(parts[0], parts[1] - 1, parts[2], parts[3] || 0, parts[4] || 0, parts[5] || 0);
+                const ms = dt.getTime() - Date.now();
+                if (ms <= 0) {
+                    // already due - show immediately
+                    showReminderAlert(rem, 0);
+                } else if (ms < 2147483647) { // safe timeout range
+                    setTimeout(function() { showReminderAlert(rem, 0); }, ms);
+                } else {
+                    // fallback: schedule via periodic check
+                    console.log('[Journal] Reminder delay too long for setTimeout, relying on periodic checks for', rem.id);
+                }
+            });
+        } catch (e) {
+            console.error('[Journal] scheduling error:', e);
+        }
+
+        // Check for due reminders immediately on page load
+        console.log('[Journal] Page loaded, checking reminders...');
+        checkDueReminders();
+        
+        // Check for due reminders every 5 seconds
+        setInterval(checkDueReminders, 5000);
+    });
+
+    function checkDueReminders() {
+        console.log('[Journal] Checking for due reminders...');
+        fetch('/student/reminders-check', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            console.log('[Journal] Response status:', response.status);
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('[Journal] Reminders data received:', data);
+            if (data.reminders && data.reminders.length > 0) {
+                console.log('[Journal] Found ' + data.reminders.length + ' due reminders');
+                data.reminders.forEach((reminder, index) => {
+                    console.log('[Journal] Showing reminder:', reminder.title);
+                    showReminderAlert(reminder, index);
+                });
+            } else {
+                console.log('[Journal] No due reminders');
+            }
+        })
+        .catch(error => console.error('[Journal] Error checking reminders:', error));
+    }
+
+    function showReminderAlert(reminder, index) {
+        const alertId = `reminder-alert-${reminder.id}-${Date.now()}`;
+        const alertHtml = `
+            <div style="position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, #fca726 0%, #f78e1c 100%); color: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(252, 167, 38, 0.3); max-width: 400px; z-index: 9999; animation: slideIn 0.3s ease-out;" id="${alertId}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">
+                            <i class="ri-time-line" style="font-size: 1.2rem;"></i>
+                            <strong style="font-size: 1.1rem;">${reminder.title}</strong>
+                        </div>
+                        ${reminder.description ? `<p style="margin: 0.5rem 0 0 0; opacity: 0.95; font-size: 0.95rem;">${reminder.description}</p>` : ''}
+                        <small style="display: block; margin-top: 0.5rem; opacity: 0.8;">Scheduled for ${reminder.time}</small>
+                    </div>
+                    <button onclick="document.getElementById('${alertId}').remove();" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem; padding: 0; opacity: 0.8;">
+                        <i class="ri-close-line"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        console.log('[Journal] Inserting alert:', alertId);
+        document.body.insertAdjacentHTML('beforeend', alertHtml);
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            const element = document.getElementById(alertId);
+            if (element) {
+                console.log('[Journal] Auto-removing alert:', alertId);
+                element.remove();
+            }
+        }, 10000);
+    }
+
+    // Toggle defer menu visibility
+    function toggleDeferMenu(button) {
+        const menu = button.nextElementSibling;
+        if (!menu || !menu.classList.contains('defer-menu')) {
+            console.error('Defer menu not found');
+            return;
+        }
+
+        // Close other menus
+        document.querySelectorAll('.defer-menu').forEach(m => {
+            if (m !== menu && m.style.display !== 'none') {
+                m.style.display = 'none';
+            }
+        });
+
+        // Toggle current menu
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Close defer menus when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.defer-menu') && !e.target.closest('[onclick*="toggleDeferMenu"]')) {
+            document.querySelectorAll('.defer-menu').forEach(menu => {
+                menu.style.display = 'none';
+            });
+        }
+    });
+
+    // Notes search: filter notes by title (client-side)
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('noteSearch');
+        const clearBtn = document.getElementById('noteSearchClear');
+        if (!searchInput) return;
+
+        function filterNotes() {
+            const q = (searchInput.value || '').trim().toLowerCase();
+            document.querySelectorAll('.note-card').forEach(card => {
+                const title = (card.dataset.title || '').toLowerCase();
+                if (q === '' || title.indexOf(q) !== -1) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('input', filterNotes);
+        clearBtn?.addEventListener('click', function() { searchInput.value = ''; filterNotes(); searchInput.focus(); });
+    });
+
+
+    // Close modal when clicking outside
+    document.getElementById('editReminderModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            // Modal removed - edit now uses dedicated page
+        }
+    });
 </script>
+
 {% endblock %}

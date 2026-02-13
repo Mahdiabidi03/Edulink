@@ -64,6 +64,9 @@ class AdminEconomyController extends AbstractController
         // I will treat both as adding points, but maybe Refunds are tracked differently.
         $transaction->setAmount($amount); 
         
+        // Update User Balance
+        $user->setXp($user->getXp() + $amount); 
+        
         $entityManager->persist($transaction);
 
         // Create Notification

@@ -51,6 +51,17 @@
             {{ form_errors(editProfileForm.email) }}
         </div>
 
+        <div class="form-group" style="margin-bottom: 1rem;">
+             {{ form_label(editProfileForm.plainPassword.first, null, {'label_attr': {'style': 'display: block; margin-bottom: 0.5rem; color: var(--text-secondary);'}}) }}
+             {{ form_widget(editProfileForm.plainPassword.first, {'attr': {'class': 'form-input', 'style': 'width: 100%; padding: 10px; background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px;'}}) }}
+             {{ form_errors(editProfileForm.plainPassword.first) }}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+             {{ form_label(editProfileForm.plainPassword.second, null, {'label_attr': {'style': 'display: block; margin-bottom: 0.5rem; color: var(--text-secondary);'}}) }}
+             {{ form_widget(editProfileForm.plainPassword.second, {'attr': {'class': 'form-input', 'style': 'width: 100%; padding: 10px; background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px;'}}) }}
+        </div>
+
         <button type="submit" class="btn" style="width: 100%;">Save Changes</button>
     {{ form_end(editProfileForm) }}
   </div>

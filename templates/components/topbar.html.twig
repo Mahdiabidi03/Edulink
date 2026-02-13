@@ -8,6 +8,7 @@
     <button class="icon-btn theme-toggle" id="themeToggle" title="Toggle Theme">
       <i data-lucide="moon"></i>
     </button>
+    {% if app.user %}
     {{ render(controller('App\\Controller\\NotificationController::recent')) }}
     
     <div class="profile-dropdown-container" style="position: relative;">
@@ -40,6 +41,7 @@
             </a>
         </div>
     </div>
+    {% endif %}
 
     <script>
     function toggleProfileMenu() {

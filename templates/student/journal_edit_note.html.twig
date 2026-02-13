@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Note - EduLink{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 2rem auto;">
+    <a href="{{ path('student_journal') }}" style="color: var(--brand-main); text-decoration: none; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 6px;">
+        <i class="ri-arrow-left-line"></i> Back to Journal
+    </a>
+
+    <div class="card" style="padding: 2rem;">
+        <h1 style="margin-top: 0; margin-bottom: 1.5rem;">Edit Note</h1>
+
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(form.title, 'Note Title') }}
+                {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+                {% if form.title.vars.errors %}
+                    <div style="color: #ff6b6b; font-size: 0.9rem; margin-top: 5px;">
+                        {% for error in form.title.vars.errors %}
+                            {{ error.message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(form.content, 'Note Content') }}
+                {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': 10}}) }}
+                {% if form.content.vars.errors %}
+                    <div style="color: #ff6b6b; font-size: 0.9rem; margin-top: 5px;">
+                        {% for error in form.content.vars.errors %}
+                            {{ error.message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                {{ form_label(form.category, 'Category') }}
+                {{ form_widget(form.category, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn"><i class="ri-save-3-line"></i> Save Changes</button>
+                <a href="{{ path('student_journal') }}" class="btn secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="ri-close-line"></i> Cancel
+                </a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<style>
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: white;
+        font-family: 'Inter', sans-serif;
+    }
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+    textarea.form-control {
+        resize: vertical;
+        min-height: 200px;
+    }
+
+    form > div > label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+</style>
+{% endblock %}

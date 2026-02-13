@@ -17,7 +17,7 @@ class MatiereType extends AbstractType
         $builder
             ->add('name', TextType::class, [
                 'label' => 'Category Name',
-                'required' => false,
+                'required' => true,
                 'attr' => ['class' => 'form-control']
             ])
             ->add('imageFile', FileType::class, [

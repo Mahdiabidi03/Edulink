@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Reminder - EduLink{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 2rem auto; padding: 2rem;">
+    <h1 style="margin-bottom: 2rem; color: var(--brand-main);">✏️ Edit Reminder</h1>
+    
+    {{ form_start(form) }}
+        {{ form_errors(form) }}
+        
+        <div style="margin-bottom: 1.5rem;">
+            {{ form_label(form.title, 'Title', {'label_attr': {'style': 'display: block; margin-bottom: 0.5rem; font-weight: 600;'}}) }}
+            {{ form_widget(form.title, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);'}}) }}
+            {{ form_errors(form.title) }}
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            {{ form_label(form.description, 'Description', {'label_attr': {'style': 'display: block; margin-bottom: 0.5rem; font-weight: 600;'}}) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border); min-height: 100px;'}}) }}
+            {{ form_errors(form.description) }}
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            {{ form_label(form.reminderTime, 'Date & Time', {'label_attr': {'style': 'display: block; margin-bottom: 0.5rem; font-weight: 600;'}}) }}
+            {{ form_widget(form.reminderTime, {'attr': {'class': 'form-control', 'style': 'width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border);'}}) }}
+            {{ form_errors(form.reminderTime) }}
+        </div>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button type="submit" class="btn" style="flex: 1;">
+                <i class="ri-save-3-line"></i> Save Changes
+            </button>
+            <a href="{{ path('student_journal') }}" class="btn secondary" style="flex: 1; text-align: center; text-decoration: none;">
+                <i class="ri-close-line"></i> Cancel
+            </a>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

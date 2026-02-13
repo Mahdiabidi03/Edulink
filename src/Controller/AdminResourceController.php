@@ -28,7 +28,7 @@ class AdminResourceController extends AbstractController
             $file = $form->get('file')->getData();
             if ($file) {
                 $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-                $newFilename = uniqid().'.'.$file->guessExtension();
+                $newFilename = uniqid().'.'.$file->getClientOriginalExtension();
                 
                 try {
                     $file->move(
@@ -77,7 +77,7 @@ class AdminResourceController extends AbstractController
                     }
                 }
 
-                $newFilename = uniqid().'.'.$file->guessExtension();
+                $newFilename = uniqid().'.'.$file->getClientOriginalExtension();
                 try {
                     $file->move(
                         $this->getParameter('kernel.project_dir').'/public/uploads/resources',

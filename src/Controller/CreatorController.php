@@ -47,6 +47,26 @@ class CreatorController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Handle matiere_name unmapped field
+            if (!$hideMatiere && $form->has('matiere_name')) {
+                $matiereName = trim($form->get('matiere_name')->getData() ?? '');
+                if ($matiereName !== '') {
+                    $existingMatiere = $em->getRepository(\App\Entity\Matiere::class)
+                        ->findOneBy(['name' => $matiereName]);
+                    if ($existingMatiere) {
+                        $cours->setMatiere($existingMatiere);
+                    } else {
+                        $newMatiere = new \App\Entity\Matiere();
+                        $newMatiere->setName($matiereName);
+                        $newMatiere->setStatus('PENDING');
+                        $newMatiere->setCreator($this->getUser());
+                        $newMatiere->setCreatedAt(new \DateTimeImmutable());
+                        $em->persist($newMatiere);
+                        $cours->setMatiere($newMatiere);
+                    }
+                }
+            }
+
             $cours->setAuthor($this->getUser());
             $cours->setStatus('PENDING');
             $cours->setCreatedAt(new \DateTimeImmutable());
@@ -95,7 +115,7 @@ class CreatorController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $file = $form->get('file')->getData();
             if ($file) {
-                $newFilename = uniqid().'.'.$file->guessExtension();
+                $newFilename = uniqid().'.'.$file->getClientOriginalExtension();
                 try {
                     $file->move(
                         $this->getParameter('kernel.project_dir').'/public/uploads/resources',
@@ -139,7 +159,7 @@ class CreatorController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('imageFile')->getData();
             if ($imageFile) {
-                $newFilename = uniqid().'.'.$imageFile->guessExtension();
+                $newFilename = uniqid().'.'.$imageFile->getClientOriginalExtension();
                 try {
                     $imageFile->move(
                         $this->getParameter('kernel.project_dir').'/public/uploads/categories',

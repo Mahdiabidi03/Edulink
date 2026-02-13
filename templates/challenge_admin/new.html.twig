@@ -1,0 +1,22 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}New Challenge{% endblock %}
+
+{% block content %}
+<div style="padding: 24px; max-width: 700px; margin: 0 auto;">
+  <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;">
+    <div>
+      <h1 style="margin:0; font-size: 1.4rem; color: var(--text-main);">New Challenge</h1>
+      <div style="color: var(--text-muted); font-size: .9rem;">Create a new challenge for students</div>
+    </div>
+
+    <a href="{{ path('app_challenge_admin_index') }}" class="btn secondary">
+      <i data-lucide="arrow-left"></i> Back to list
+    </a>
+  </div>
+
+  <div class="card" style="padding: 2rem;">
+    {{ include('challenge_admin/_form.html.twig', { form: form, button_label: 'Create' }) }}
+  </div>
+</div>
+{% endblock %}

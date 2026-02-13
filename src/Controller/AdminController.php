@@ -29,14 +29,10 @@ class AdminController extends AbstractController
     #[Route('/admin/challenges', name: 'admin_challenges')]
     public function challenges(): Response
     {
-        return $this->render('admin/challenges.html.twig');
+        return $this->redirectToRoute('app_challenge_admin_index');
     }
 
-    #[Route('/admin/assistance', name: 'admin_assistance')]
-    public function assistance(): Response
-    {
-        return $this->render('admin/assistance.html.twig');
-    }
+    // Assistance route is handled by App\Controller\Admin\AssistanceController
 
 
 }

@@ -1,0 +1,356 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Chat - {{ session.helpRequest.title }}{% endblock %}
+
+{% block content %}
+<style>
+    .chat-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 120px);
+        gap: var(--space-md);
+    }
+
+    /* ===== HEADER ===== */
+    .chat-top {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: var(--space-lg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .chat-top h3 {
+        margin: 0 0 4px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .chat-meta {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .badge {
+        font-size: 0.7rem;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .badge-success { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+    .badge-muted { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); }
+    .badge-info { background: rgba(59, 130, 246, 0.12); color: var(--info); }
+
+    .close-actions {
+        display: flex;
+        gap: var(--space-sm);
+    }
+
+    .close-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 7px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+    .close-btn:hover { transform: translateY(-1px); }
+    .close-btn-resolve { color: var(--success); border-color: var(--success); }
+    .close-btn-resolve:hover { background: rgba(34, 197, 94, 0.1); }
+    .close-btn-cancel { color: var(--warning); border-color: var(--warning); }
+    .close-btn-cancel:hover { background: rgba(245, 158, 11, 0.1); }
+    .close-btn-report { color: var(--error); border-color: var(--error); }
+    .close-btn-report:hover { background: rgba(239, 68, 68, 0.1); }
+
+    /* ===== MESSAGES ===== */
+    .chat-body {
+        flex: 1;
+        overflow-y: auto;
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: var(--space-lg);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .msg-row {
+        display: flex;
+    }
+    .msg-row.sent { justify-content: flex-end; }
+    .msg-row.received { justify-content: flex-start; }
+
+    .msg-bubble {
+        max-width: 70%;
+        padding: var(--space-md);
+        border-radius: 14px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        position: relative;
+    }
+
+    .msg-row.sent .msg-bubble {
+        background: var(--brand-gradient);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .msg-row.received .msg-bubble {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        border-bottom-left-radius: 4px;
+    }
+
+    .msg-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 6px;
+        font-size: 0.7rem;
+    }
+
+    .msg-row.sent .msg-footer { color: rgba(255,255,255,0.5); }
+    .msg-row.received .msg-footer { color: var(--text-muted); }
+
+    .msg-edit-link {
+        text-decoration: none;
+        font-size: 0.72rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        transition: opacity 0.2s;
+        opacity: 0.7;
+    }
+    .msg-edit-link:hover { opacity: 1; }
+    .msg-row.sent .msg-edit-link { color: rgba(255,255,255,0.7); }
+    .msg-row.received .msg-edit-link { color: var(--text-muted); }
+
+    .toxic-warn {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-bottom: 4px;
+    }
+
+    .chat-empty {
+        text-align: center;
+        color: var(--text-muted);
+        padding: var(--space-2xl);
+    }
+    .chat-empty i {
+        font-size: 2.5rem;
+        margin-bottom: var(--space-md);
+        display: block;
+        opacity: 0.3;
+    }
+
+    /* ===== INPUT ===== */
+    .chat-input-bar {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: var(--space-md);
+        display: flex;
+        gap: var(--space-md);
+        align-items: flex-end;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .chat-input-bar textarea,
+    .chat-input-bar input[type="text"] {
+        flex: 1;
+        padding: 10px 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg-main);
+        color: var(--text-main);
+        font-size: 0.9rem;
+        font-family: inherit;
+        outline: none;
+        resize: none;
+        min-height: 42px;
+        max-height: 120px;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .chat-input-bar textarea:focus,
+    .chat-input-bar input[type="text"]:focus {
+        border-color: var(--brand-main);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .send-btn {
+        background: var(--brand-gradient);
+        border: none;
+        color: white;
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .send-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-neon);
+    }
+
+    .session-closed-bar {
+        background: rgba(148, 163, 184, 0.1);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: var(--space-lg);
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Flash notifications */
+    .flash-toast {
+        position: fixed;
+        bottom: var(--space-lg);
+        right: var(--space-lg);
+        padding: var(--space-md) var(--space-lg);
+        border-radius: 10px;
+        font-size: 0.85rem;
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+    }
+    .flash-warning {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--warning);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+</style>
+
+<div class="chat-wrapper">
+
+    {# ======================== HEADER ======================== #}
+    <div class="chat-top">
+        <div>
+            <h3>{{ session.helpRequest.title }}</h3>
+            <div class="chat-meta">
+                <span>{{ session.helpRequest.student.fullName }} & {{ session.tutor.fullName }}</span>
+                <span class="badge {{ session.isActive ? 'badge-success' : 'badge-muted' }}">
+                    {{ session.isActive ? 'Active' : 'Closed' }}
+                </span>
+                {% if session.helpRequest.closeReason %}
+                    <span class="badge badge-info">{{ session.helpRequest.closeReason }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if session.isActive %}
+        <div class="close-actions">
+            <form action="{{ path('app_help_request_close', {'id': session.id}) }}" method="post"
+                  onsubmit="return confirm('Close session and transfer bounty?');">
+                <input type="hidden" name="close_reason" value="RESOLVED">
+                <button type="submit" class="close-btn close-btn-resolve">
+                    <i class="ri-check-double-line"></i> Done (Pay)
+                </button>
+            </form>
+            <form action="{{ path('app_help_request_close', {'id': session.id}) }}" method="post"
+                  onsubmit="return confirm('Cancel without paying bounty?');">
+                <input type="hidden" name="close_reason" value="CANCELLED">
+                <button type="submit" class="close-btn close-btn-cancel">
+                    <i class="ri-close-line"></i> Cancel
+                </button>
+            </form>
+            <form action="{{ path('app_help_request_close', {'id': session.id}) }}" method="post"
+                  onsubmit="return confirm('Report this session to admin?');">
+                <input type="hidden" name="close_reason" value="REPORTED">
+                <button type="submit" class="close-btn close-btn-report">
+                    <i class="ri-flag-line"></i> Report
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    {# ======================== MESSAGES ======================== #}
+    <div class="chat-body" id="chat-messages">
+        {% for message in session.messages %}
+            <div class="msg-row {{ message.sender == app.user ? 'sent' : 'received' }}">
+                <div class="msg-bubble">
+                    {% if message.isToxic %}
+                        <div class="toxic-warn"><i class="ri-alert-line"></i> Toxicity Detected</div>
+                    {% endif %}
+                    <div>{{ message.content }}</div>
+                    <div class="msg-footer">
+                        <span>{{ message.timestamp|date('H:i') }}</span>
+                        {% if message.sender == app.user and session.isActive %}
+                            <a href="{{ path('app_help_request_message_edit', {'id': message.id}) }}" class="msg-edit-link">
+                                <i class="ri-edit-line"></i> edit
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="chat-empty">
+                <i class="ri-chat-smile-2-line"></i>
+                <p>Start the conversation!</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# ======================== INPUT ======================== #}
+    {% if session.isActive %}
+        <div class="chat-input-bar">
+            {{ form_start(form, {'attr': {'style': 'display: flex; gap: var(--space-md); width: 100%; align-items: flex-end;'}}) }}
+                <div style="flex: 1;">
+                    {{ form_widget(form.content, {'attr': {'placeholder': 'Type your message...', 'rows': 1}}) }}
+                </div>
+                <button type="submit" class="send-btn" title="Send">
+                    <i class="ri-send-plane-fill"></i>
+                </button>
+            {{ form_end(form) }}
+        </div>
+    {% else %}
+        <div class="session-closed-bar">
+            <i class="ri-lock-line"></i> This session is closed. You can no longer send messages.
+        </div>
+    {% endif %}
+</div>
+
+{% for message in app.flashes('warning') %}
+    <div class="flash-toast flash-warning"><i class="ri-alert-line"></i> {{ message }}</div>
+{% endfor %}
+
+<script>
+    const chatContainer = document.getElementById('chat-messages');
+    if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+</script>
+{% endblock %}

@@ -1,0 +1,232 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Request - EduLink{% endblock %}
+
+{% block content %}
+<style>
+    .form-page {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: var(--space-xl);
+    }
+
+    .form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: var(--space-2xl);
+        max-width: 560px;
+        width: 100%;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--brand-gradient);
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: var(--space-xs);
+        text-align: center;
+    }
+
+    .form-subtitle {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-align: center;
+        margin-bottom: var(--space-xl);
+    }
+
+    .form-group {
+        margin-bottom: var(--space-lg);
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-main);
+        margin-bottom: var(--space-xs);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--bg-main);
+        color: var(--text-main);
+        font-size: 0.9rem;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        border-color: var(--brand-main);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-group input[type="number"] {
+        max-width: 180px;
+    }
+
+    .form-hint {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: var(--space-xs);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: var(--space-md);
+        margin-top: var(--space-xl);
+    }
+
+    .form-actions .btn {
+        flex: 1;
+        justify-content: center;
+        padding: 12px 20px;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .form-alert {
+        padding: var(--space-md);
+        border-radius: 10px;
+        margin-bottom: var(--space-lg);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .wallet-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--brand-main);
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+
+    /* ===== Validation Error Styles ===== */
+    .form-group .has-error input,
+    .form-group .has-error textarea,
+    .form-group .has-error select,
+    .form-group input.is-invalid,
+    .form-group textarea.is-invalid {
+        border-color: var(--error) !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+    }
+
+    .form-group ul {
+        list-style: none;
+        padding: 0;
+        margin: var(--space-xs) 0 0 0;
+    }
+
+    .form-group ul li {
+        font-size: 0.8rem;
+        color: var(--error);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.15);
+        border-radius: 8px;
+        margin-top: 4px;
+        animation: errorSlideIn 0.3s ease-out backwards;
+    }
+
+    .form-group ul li::before {
+        content: '\eb96';
+        font-family: 'remixicon';
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    @keyframes errorSlideIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fieldShake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-4px); }
+        40%, 80% { transform: translateX(4px); }
+    }
+</style>
+
+<div class="form-page">
+    <div class="form-card">
+        <h2 class="form-title"><i class="ri-question-line" style="color: var(--brand-accent);"></i> Ask for Help</h2>
+        <p class="form-subtitle">Describe your problem and set a bounty to attract tutors</p>
+
+        {% for message in app.flashes('error') %}
+            <div class="form-alert form-alert-error"><i class="ri-error-warning-line"></i> {{ message }}</div>
+        {% endfor %}
+
+        {{ form_start(form) }}
+            <div class="form-group">
+                <label><i class="ri-text" style="margin-right: 4px; color: var(--brand-accent);"></i> Title</label>
+                {{ form_widget(form.title, {'attr': {'placeholder': 'Enter a brief title for your request'}}) }}
+                {{ form_errors(form.title) }}
+            </div>
+
+            <div class="form-group">
+                <label><i class="ri-file-text-line" style="margin-right: 4px; color: var(--brand-accent);"></i> Description</label>
+                {{ form_widget(form.description, {'attr': {'placeholder': 'Describe your problem in detail...', 'rows': 5}}) }}
+                <div class="form-hint">Be specific about what you need help with.</div>
+                {{ form_errors(form.description) }}
+            </div>
+
+            <div class="form-group">
+                <label><i class="ri-coins-line" style="margin-right: 4px; color: var(--brand-accent);"></i> Bounty (Points)</label>
+                {{ form_widget(form.bounty, {'attr': {'min': 0, 'placeholder': '0'}}) }}
+                <div class="form-hint">
+                    Higher bounty attracts more tutors. Your balance: 
+                    <span class="wallet-badge"><i class="ri-wallet-3-line"></i> {{ app.user.walletBalance }} pts</span>
+                </div>
+                {{ form_errors(form.bounty) }}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn"><i class="ri-send-plane-line"></i> Post Request</button>
+                <a href="{{ path('app_help_request_index') }}" class="btn secondary">Cancel</a>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

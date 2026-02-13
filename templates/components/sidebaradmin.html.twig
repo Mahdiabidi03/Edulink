@@ -42,9 +42,15 @@
       </a>
     </li>
     <li>
-      <a href="{{ path('admin_assistance') }}" class="{{ app.request.get('_route') == 'admin_assistance' ? 'active' : '' }}">
+      <a href="{{ path('admin_assistance') }}" class="{{ app.request.get('_route') starts with 'admin_assistance' or app.request.get('_route') starts with 'app_admin_assistance' ? 'active' : '' }}">
         <i data-lucide="headset"></i>
         <span>Assistance</span>
+      </a>
+    </li>
+    <li>
+      <a href="{{ path('admin_journal_stats') }}" class="{{ app.request.get('_route') == 'admin_journal_stats' ? 'active' : '' }}">
+        <i data-lucide="bar-chart-2"></i>
+        <span>Journal Statistics</span>
       </a>
     </li>
     <li>

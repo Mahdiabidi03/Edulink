@@ -39,6 +39,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $xp = 0;
 
+    #[ORM\Column(type: 'float', options: ['default' => 0])]
+    private float $walletBalance = 0;
+
     #[ORM\Column(nullable: true)]
     private ?array $faceDescriptor = null;
 
@@ -60,6 +63,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: UserMatiereStat::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $userMatiereStats;
 
+    /**
+     * @var Collection<int, Event>
+     */
+    #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'organizer')]
+    private Collection $events;
+
+    /**
+     * @var Collection<int, Reservation>
+     */
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'user')]
+    private Collection $reservations;
+
     public function __construct()
     {
         $this->badge = new ArrayCollection();
@@ -69,6 +84,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->cours = new ArrayCollection();
         $this->createdMatieres = new ArrayCollection();
         $this->resources = new ArrayCollection();
+        $this->helpRequests = new ArrayCollection();
+        $this->notes = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
+        $this->reminders = new ArrayCollection();
+        $this->sessionsAsTutor = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
+        $this->events = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -292,6 +315,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Resource::class, mappedBy: 'author')]
     private Collection $resources;
 
+    /**
+     * @var Collection<int, HelpRequest>
+     */
+    #[ORM\OneToMany(targetEntity: HelpRequest::class, mappedBy: 'student', orphanRemoval: true)]
+    private Collection $helpRequests;
+
+    /**
+     * @var Collection<int, Note>
+     */
+    #[ORM\OneToMany(targetEntity: Note::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $notes;
+
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $notifications;
+
+    /**
+     * @var Collection<int, Reminder>
+     */
+    #[ORM\OneToMany(targetEntity: Reminder::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $reminders;
+
+    /**
+     * @var Collection<int, Session>
+     */
+    #[ORM\OneToMany(targetEntity: Session::class, mappedBy: 'tutor', orphanRemoval: true)]
+    private Collection $sessionsAsTutor;
+
+    /**
+     * @var Collection<int, Task>
+     */
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $tasks;
+
     public function getResetOtp(): ?string
     {
         return $this->resetOtp;
@@ -431,6 +490,120 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, HelpRequest>
+     */
+    public function getHelpRequests(): Collection
+    {
+        return $this->helpRequests;
+    }
+
+    /**
+     * @return Collection<int, Note>
+     */
+    public function getNotes(): Collection
+    {
+        return $this->notes;
+    }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function getNotifications(): Collection
+    {
+        return $this->notifications;
+    }
+
+    /**
+     * @return Collection<int, Reminder>
+     */
+    public function getReminders(): Collection
+    {
+        return $this->reminders;
+    }
+
+    /**
+     * @return Collection<int, Session>
+     */
+    public function getSessionsAsTutor(): Collection
+    {
+        return $this->sessionsAsTutor;
+    }
+
+    /**
+     * @return Collection<int, Task>
+     */
+    public function getTasks(): Collection
+    {
+        return $this->tasks;
+    }
+
+    public function getWalletBalance(): float
+    {
+        return $this->walletBalance;
+    }
+
+    public function setWalletBalance(float $walletBalance): static
+    {
+        $this->walletBalance = $walletBalance;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Event>
+     */
+    public function getEvents(): Collection
+    {
+        return $this->events;
+    }
+
+    public function addEvent(Event $event): static
+    {
+        if (!$this->events->contains($event)) {
+            $this->events->add($event);
+            $event->setOrganizer($this);
+        }
+        return $this;
+    }
+
+    public function removeEvent(Event $event): static
+    {
+        if ($this->events->removeElement($event)) {
+            if ($event->getOrganizer() === $this) {
+                $event->setOrganizer(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            if ($reservation->getUser() === $this) {
+                $reservation->setUser(null);
+            }
+        }
         return $this;
     }
 }

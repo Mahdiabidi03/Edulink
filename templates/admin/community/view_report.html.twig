@@ -1,0 +1,126 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Report #{{ report.id }} - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .rv-back { display: inline-flex; align-items: center; gap: 4px; color: var(--text-secondary); text-decoration: none; font-size: 0.82rem; margin-bottom: var(--space-lg); font-family: 'Fira Sans', sans-serif; }
+    .rv-back:hover { color: var(--brand-main); }
+    .rv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-xl); }
+    .rv-header h1 { font-family: 'Fira Sans', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
+    .rv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); }
+    .rv-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: var(--space-xl); }
+    .rv-card h3 { font-family: 'Fira Sans', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0 0 var(--space-lg); display: flex; align-items: center; gap: 6px; }
+    .rv-card h3 i { color: var(--brand-accent); }
+    .rv-field { margin-bottom: var(--space-md); }
+    .rv-label { font-family: 'Fira Code', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 2px; }
+    .rv-value { font-family: 'Fira Sans', sans-serif; font-size: 0.9rem; color: var(--text-main); }
+    .rv-content { background: rgba(0,0,0,0.03); border-radius: 8px; padding: var(--space-md); font-size: 0.88rem; line-height: 1.6; color: var(--text-main); white-space: pre-line; word-break: break-word; }
+    .rv-reason { display: inline-block; padding: 4px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
+    .rv-reason.inappropriate { background: rgba(239,68,68,0.1); color: var(--error); }
+    .rv-reason.spam { background: rgba(245,158,11,0.1); color: var(--warning); }
+    .rv-reason.harassment { background: rgba(239,68,68,0.15); color: #dc2626; }
+    .rv-reason.misinformation { background: rgba(59,130,246,0.1); color: var(--info); }
+    .rv-reason.hate_speech { background: rgba(139,69,19,0.15); color: #92400e; }
+    .rv-reason.other { background: rgba(107,114,128,0.1); color: var(--text-secondary); }
+    .rv-status { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
+    .rv-status.pending { background: rgba(245,158,11,0.12); color: var(--warning); }
+    .rv-status.actioned { background: rgba(34,197,94,0.12); color: var(--success); }
+    .rv-status.dismissed { background: rgba(107,114,128,0.12); color: var(--text-muted); }
+    .rv-actions { display: flex; gap: var(--space-md); margin-top: var(--space-xl); }
+    .rv-btn { padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; font-family: 'Fira Sans', sans-serif; border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+    .rv-btn.dismiss { background: rgba(107,114,128,0.08); color: var(--text-secondary); }
+    .rv-btn.dismiss:hover { background: rgba(107,114,128,0.15); }
+    .rv-btn.action { background: rgba(239,68,68,0.08); color: var(--error); border-color: rgba(239,68,68,0.2); }
+    .rv-btn.action:hover { background: rgba(239,68,68,0.15); }
+</style>
+
+<a href="{{ path('app_admin_community_index') }}" class="rv-back"><i class="ri-arrow-left-s-line"></i> Back to Community Moderation</a>
+
+<div class="rv-header">
+    <h1><i class="ri-flag-line" style="color:var(--error);"></i> Report #{{ report.id }}</h1>
+    <span class="rv-status {{ report.status|lower }}">{{ report.status }}</span>
+</div>
+
+<div class="rv-grid">
+    {# REPORT INFO #}
+    <div class="rv-card">
+        <h3><i class="ri-flag-line"></i> Report Details</h3>
+        <div class="rv-field">
+            <div class="rv-label">Reporter</div>
+            <div class="rv-value">{{ report.reporter.fullName|default('—') }} ({{ report.reporter.email|default('—') }})</div>
+        </div>
+        <div class="rv-field">
+            <div class="rv-label">Reason</div>
+            <div class="rv-value">
+                <span class="rv-reason {{ report.reason }}">
+                    {% if report.reason == 'inappropriate' %}🚫 Inappropriate Content
+                    {% elseif report.reason == 'spam' %}📧 Spam
+                    {% elseif report.reason == 'harassment' %}😠 Harassment / Bullying
+                    {% elseif report.reason == 'misinformation' %}❌ Misinformation
+                    {% elseif report.reason == 'hate_speech' %}🛑 Hate Speech
+                    {% else %}📝 Other{% endif %}
+                </span>
+            </div>
+        </div>
+        {% if report.details %}
+        <div class="rv-field">
+            <div class="rv-label">Additional Details</div>
+            <div class="rv-content">{{ report.details }}</div>
+        </div>
+        {% endif %}
+        <div class="rv-field">
+            <div class="rv-label">Reported At</div>
+            <div class="rv-value" style="font-family:'Fira Code',monospace;font-size:0.82rem;">{{ report.createdAt|date('M d, Y H:i:s') }}</div>
+        </div>
+    </div>
+
+    {# POST CONTENT #}
+    <div class="rv-card">
+        <h3><i class="ri-chat-1-line"></i> Reported Post</h3>
+        {% if report.post %}
+            <div class="rv-field">
+                <div class="rv-label">Author</div>
+                <div class="rv-value">{{ report.post.author.fullName|default('—') }} ({{ report.post.author.email|default('—') }})</div>
+            </div>
+            <div class="rv-field">
+                <div class="rv-label">Type</div>
+                <div class="rv-value">{{ report.post.type }}</div>
+            </div>
+            {% if report.post.tag %}
+            <div class="rv-field">
+                <div class="rv-label">Tag</div>
+                <div class="rv-value">#{{ report.post.tag }}</div>
+            </div>
+            {% endif %}
+            <div class="rv-field">
+                <div class="rv-label">Content</div>
+                <div class="rv-content">{{ report.post.content }}</div>
+            </div>
+            <div class="rv-field">
+                <div class="rv-label">Posted At</div>
+                <div class="rv-value" style="font-family:'Fira Code',monospace;font-size:0.82rem;">{{ report.post.createdAt|date('M d, Y H:i:s') }}</div>
+            </div>
+        {% else %}
+            <div style="text-align:center;padding:var(--space-xl);color:var(--text-muted);">
+                <i class="ri-delete-bin-line" style="font-size:2rem;opacity:0.3;"></i>
+                <p>Post has been deleted.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{# ACTIONS #}
+{% if report.status == 'PENDING' %}
+<div class="rv-actions">
+    <form action="{{ path('app_admin_community_dismiss_report', {id: report.id}) }}" method="post">
+        <button class="rv-btn dismiss"><i class="ri-close-line"></i> Dismiss Report</button>
+    </form>
+    {% if report.post %}
+    <form action="{{ path('app_admin_community_action_report', {id: report.id}) }}" method="post" onsubmit="return confirm('This will DELETE the post permanently. Continue?');">
+        <button class="rv-btn action"><i class="ri-delete-bin-line"></i> Remove Post & Action Report</button>
+    </form>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

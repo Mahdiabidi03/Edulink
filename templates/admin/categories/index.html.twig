@@ -43,9 +43,19 @@
     {% if matieres is not empty %}
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
             {% for matiere in matieres %}
+                {% set cover = matiere.imageUrl %}
+                {% if not cover %}
+                    {% for course in matiere.cours %}
+                        {% for res in course.resources %}
+                            {% if res.url and res.url starts with '/uploads/resources/' and not cover %}
+                                {% set cover = res.url %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
                 <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="height: 120px; background: {{ matiere.imageUrl ? 'url(' ~ matiere.imageUrl ~ ')' : 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center;">
-                        {% if not matiere.imageUrl %}
+                    <div style="height: 120px; background: {{ cover ? 'url(' ~ cover ~ ')' : 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center;">
+                        {% if not cover %}
                             <i class="ri-book-open-line" style="font-size: 2.5rem; color: white; opacity: 0.5;"></i>
                         {% endif %}
                     </div>

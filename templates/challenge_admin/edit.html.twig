@@ -1,0 +1,31 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Edit Challenge{% endblock %}
+
+{% block content %}
+<div style="padding: 24px; max-width: 700px; margin: 0 auto;">
+  <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;">
+    <div>
+      <h1 style="margin:0; font-size: 1.4rem; color: var(--text-main);">Edit Challenge</h1>
+      <div style="color: var(--text-muted); font-size: .9rem;">Update challenge information</div>
+    </div>
+
+    <div style="display:flex; gap: 10px; align-items:center;">
+      <a href="{{ path('app_challenge_admin_index') }}" class="btn secondary">
+        <i data-lucide="arrow-left"></i> Back to list
+      </a>
+    </div>
+  </div>
+
+  <div class="card" style="padding: 2rem;">
+    {{ include('challenge_admin/_form.html.twig', { form: form, button_label: 'Update' }) }}
+
+    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="color: var(--error); font-size: 0.9rem;">Danger Zone: deleting this challenge will also remove all student participations.</span>
+        {{ include('challenge_admin/_delete_form.html.twig') }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
