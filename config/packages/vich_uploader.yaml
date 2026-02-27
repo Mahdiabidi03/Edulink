@@ -1,0 +1,17 @@
+vich_uploader:
+    db_driver: orm
+    metadata:
+        type: attribute
+
+    mappings:
+        challenge_proofs:
+            uri_prefix: /uploads/proofs
+            upload_destination: '%kernel.project_dir%/public/uploads/proofs'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+        chat_attachments:
+            uri_prefix: /uploads/chat
+            upload_destination: '%kernel.project_dir%/public/uploads/chat'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            inject_on_load: false
+            delete_on_update: true
+            delete_on_remove: true

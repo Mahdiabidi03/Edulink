@@ -138,6 +138,7 @@
                 <div class="hb-card-footer">
                     {% if app.user != request.student %}
                         <form action="{{ path('app_help_request_join', {'id': request.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('join_help_' ~ request.id) }}">
                             <button type="submit" class="btn secondary btn-offer">
                                 <i class="ri-hand-heart-line"></i> Offer Help
                             </button>
@@ -148,6 +149,7 @@
                                 <i class="ri-edit-line"></i> Edit
                             </a>
                             <form action="{{ path('app_help_request_delete', {'id': request.id}) }}" method="post" onsubmit="return confirm('Delete this request?');" style="flex:1;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_help_' ~ request.id) }}">
                                 <button type="submit" class="btn danger" style="width:100%;padding:8px 14px;font-size:0.82rem;">
                                     <i class="ri-delete-bin-line"></i> Delete
                                 </button>
@@ -197,6 +199,7 @@
                                 <i class="ri-edit-line"></i> Edit
                             </a>
                             <form action="{{ path('app_help_request_delete', {'id': request.id}) }}" method="post" onsubmit="return confirm('Delete?');" style="flex:1;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_help_' ~ request.id) }}">
                                 <button type="submit" class="btn danger" style="width:100%;padding:8px 14px;font-size:0.82rem;">
                                     <i class="ri-delete-bin-line"></i> Delete
                                 </button>

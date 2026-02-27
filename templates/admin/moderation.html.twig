@@ -66,9 +66,11 @@
                                 <td style="text-align: right;">
                                     <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                         <form method="post" action="{{ path('app_admin_matiere_approve', {'id': matiere.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ matiere.id) }}">
                                             <button type="submit" class="btn success" style="padding: 6px 16px;">Approve</button>
                                         </form>
                                         <form method="post" action="{{ path('app_admin_matiere_reject', {'id': matiere.id}) }}" onsubmit="return confirm('Are you sure?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ matiere.id) }}">
                                             <button type="submit" class="btn danger" style="padding: 6px 16px;">Reject</button>
                                         </form>
                                     </div>
@@ -116,9 +118,11 @@
                                 <td style="text-align: right;">
                                     <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                         <form method="post" action="{{ path('app_admin_cours_approve', {'id': cours.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ cours.id) }}">
                                             <button type="submit" class="btn success" style="padding: 6px 16px;">Approve</button>
                                         </form>
                                         <form method="post" action="{{ path('app_admin_cours_reject', {'id': cours.id}) }}" onsubmit="return confirm('Are you sure?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ cours.id) }}">
                                             <button type="submit" class="btn danger" style="padding: 6px 16px;">Reject</button>
                                         </form>
                                     </div>
@@ -167,13 +171,15 @@
                                 <td>{{ resource.author ? resource.author.fullName : 'Unknown' }}</td>
                                 <td style="text-align: right;">
                                     <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                                        <a href="{{ resource.url }}" target="_blank" class="btn secondary" style="padding: 6px 12px;" title="Preview Resource">
+                                        <a href="{{ resource.absoluteUrl }}" target="_blank" rel="noopener noreferrer" class="btn secondary" style="padding: 6px 12px;" title="Preview Resource">
                                             <i class="ri-eye-line"></i>
                                         </a>
                                         <form method="post" action="{{ path('app_admin_resource_approve', {'id': resource.id}) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ resource.id) }}">
                                             <button type="submit" class="btn success" style="padding: 6px 16px;">Approve</button>
                                         </form>
                                         <form method="post" action="{{ path('app_admin_resource_reject', {'id': resource.id}) }}" onsubmit="return confirm('Are you sure?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ resource.id) }}">
                                             <button type="submit" class="btn danger" style="padding: 6px 16px;">Reject</button>
                                         </form>
                                     </div>

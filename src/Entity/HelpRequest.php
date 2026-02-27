@@ -60,6 +60,12 @@ class HelpRequest
     #[ORM\OneToOne(mappedBy: 'helpRequest', cascade: ['persist', 'remove'])]
     private ?Session $session = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $category = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $difficulty = null;
+
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $closeReason = null;
 
@@ -177,6 +183,28 @@ class HelpRequest
     public function setCloseReason(?string $closeReason): static
     {
         $this->closeReason = $closeReason;
+        return $this;
+    }
+
+    public function getCategory(): ?string
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?string $category): static
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+    public function getDifficulty(): ?string
+    {
+        return $this->difficulty;
+    }
+
+    public function setDifficulty(?string $difficulty): static
+    {
+        $this->difficulty = $difficulty;
         return $this;
     }
 }

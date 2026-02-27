@@ -28,6 +28,12 @@
             </div>
         {% endif %}
 
+        {% if recaptcha_error is defined and recaptcha_error %}
+            <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.1); color: #f87171; padding: 10px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;">
+                {{ recaptcha_error }}
+            </div>
+        {% endif %}
+
       <div class="input-group">
         {{ form_widget(registrationForm.fullName) }}
         <i data-lucide="user" class="input-icon"></i>
@@ -57,6 +63,11 @@
        </div>
        <div style="color: #ef4444; font-size: 0.8rem; margin-top: -10px; margin-bottom: 10px;">{{ form_errors(registrationForm.agreeTerms) }}</div>
 
+      {# Google reCAPTCHA v2 #}
+      <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+          <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}" data-theme="dark"></div>
+      </div>
+
       <button type="submit" class="btn login-btn">Create Account <i data-lucide="rocket" style="margin-left: 5px;"></i></button>
     {{ form_end(registrationForm) }}
 
@@ -66,4 +77,6 @@
   </div>
 
 </div>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 {% endblock %}

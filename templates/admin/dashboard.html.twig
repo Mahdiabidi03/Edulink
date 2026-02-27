@@ -181,9 +181,9 @@
     <div class="monitor-grid">
         <!-- Metric 1 -->
         <div class="stat-module">
-            <span class="stat-label">Total Uses</span>
-            <span class="stat-value">12,450</span>
-            <span class="stat-delta delta-up"><i class="ri-arrow-up-line"></i> 12% vs last week</span>
+            <span class="stat-label">Total Users</span>
+            <span class="stat-value">{{ userStats.totalUsers|number_format }}</span>
+            <span class="stat-delta delta-up"><i class="ri-team-line"></i> {{ userStats.totalStudents }} Students</span>
             <div class="mini-chart" style="color: var(--success);">
                 <div class="bar" style="height: 40%"></div>
                 <div class="bar" style="height: 60%"></div>
@@ -196,8 +196,8 @@
 
         <!-- Metric 2 -->
         <div class="stat-module" style="border-left: 1px solid var(--border); padding-left: var(--space-lg);">
-            <span class="stat-label">Active Sessions</span>
-            <span class="stat-value">843</span>
+            <span class="stat-label">Active Today</span>
+            <span class="stat-value">{{ activeUsers }}</span>
             <span class="stat-delta delta-up" style="color: var(--brand-accent);"><i data-lucide="activity" style="width: 14px; height: 14px; margin-right: 4px;"></i> Live</span>
              <div class="mini-chart" style="color: var(--brand-accent);">
                 <div class="bar" style="height: 60%"></div>
@@ -211,9 +211,9 @@
 
         <!-- Metric 3 -->
         <div class="stat-module" style="border-left: 1px solid var(--border); padding-left: var(--space-lg);">
-            <span class="stat-label">System Load</span>
-            <span class="stat-value">34%</span>
-            <span class="stat-delta" style="color: var(--info);"><i class="ri-cpu-line"></i> Optimal</span>
+            <span class="stat-label">Circulating XP</span>
+            <span class="stat-value">{{ userStats.totalXp|number_format }}</span>
+            <span class="stat-delta" style="color: var(--info);"><i class="ri-copper-coin-line"></i> Economy</span>
              <div class="mini-chart" style="color: var(--info);">
                 <div class="bar" style="height: 20%"></div>
                 <div class="bar" style="height: 25%"></div>
@@ -226,9 +226,9 @@
 
         <!-- Metric 4 -->
         <div class="stat-module" style="border-left: 1px solid var(--border); padding-left: var(--space-lg);">
-            <span class="stat-label">Revenue (YTD)</span>
-            <span class="stat-value">$142k</span>
-            <span class="stat-delta delta-up"><i class="ri-arrow-up-line"></i> 5%</span>
+            <span class="stat-label">Earned Today</span>
+            <span class="stat-value">+{{ dailyPoints|number_format }}</span>
+            <span class="stat-delta delta-up"><i class="ri-arrow-up-line"></i> XP Flow</span>
              <div class="mini-chart" style="color: #FCD34D;">
                 <div class="bar" style="height: 50%"></div>
                 <div class="bar" style="height: 60%"></div>
@@ -294,30 +294,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for trans in recentTransactions %}
                     <tr style="border-bottom: 1px solid var(--border-light);">
-                        <td style="padding: 16px 24px; font-family: 'Fira Code', monospace;">#LOG-9281</td>
+                        <td style="padding: 16px 24px; font-family: 'Fira Code', monospace;">#TX-{{ trans.id }}</td>
                         <td style="padding: 16px 24px; display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 24px; height: 24px; background: var(--brand-main); border-radius: 50%;"></div> Admin
+                            <div style="width: 24px; height: 24px; background: hsl({{ (trans.user.id * 40) % 360 }}, 70%, 60%); border-radius: 50%;"></div> {{ trans.user.fullName|slice(0, 15) }}
                         </td>
-                        <td style="padding: 16px 24px;">Updated global variables</td>
-                        <td style="padding: 16px 24px; text-align: right;"><span style="color: var(--success);">Success</span></td>
+                        <td style="padding: 16px 24px;">{{ trans.type|replace({'_': ' '})|capitalize }} (+{{ trans.amount }})</td>
+                        <td style="padding: 16px 24px; text-align: right;"><span style="color: var(--success);">{{ trans.date|date('H:i') }}</span></td>
                     </tr>
-                     <tr style="border-bottom: 1px solid var(--border-light);">
-                        <td style="padding: 16px 24px; font-family: 'Fira Code', monospace;">#LOG-9280</td>
-                         <td style="padding: 16px 24px; display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 24px; height: 24px; background: var(--text-muted); border-radius: 50%;"></div> User_88
-                        </td>
-                        <td style="padding: 16px 24px;">Failed login attempt</td>
-                        <td style="padding: 16px 24px; text-align: right;"><span style="color: var(--warning);">Warning</span></td>
-                    </tr>
-                     <tr>
-                        <td style="padding: 16px 24px; font-family: 'Fira Code', monospace;">#LOG-9279</td>
-                         <td style="padding: 16px 24px; display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 24px; height: 24px; background: var(--info); border-radius: 50%;"></div> System
-                        </td>
-                        <td style="padding: 16px 24px;">Daily backup completed</td>
-                        <td style="padding: 16px 24px; text-align: right;"><span style="color: var(--success);">Success</span></td>
-                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-muted);">No recent transactions</td></tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

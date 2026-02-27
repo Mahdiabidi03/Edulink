@@ -1,0 +1,111 @@
+{% extends 'auth_base.html.twig' %}
+
+{% block title %}Verify Email - EduLink{% endblock %}
+
+{% block content %}
+<!-- 3D Background -->
+<div class="auth-scene">
+    <div class="cube-container">
+        <div class="cube"></div>
+        <div class="cube"></div>
+        <div class="cube"></div>
+        <div class="cube"></div>
+        <div class="cube"></div>
+    </div>
+</div>
+
+<div class="login-container" data-aos="zoom-in" data-aos-duration="1000">
+  <div class="login-card" style="width: 420px; text-align: center;">
+    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📧</div>
+    <h2>Verify Your Email</h2>
+    <p class="subtitle">We sent a 6-digit code to <strong style="color: var(--brand-accent);">{{ email }}</strong></p>
+
+    {% if error %}
+        <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.1); color: #f87171; padding: 10px; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem;">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{{ path('verify_registration') }}" novalidate>
+      <div style="display: flex; gap: 8px; justify-content: center; margin: 2rem 0;">
+          {% for i in 0..5 %}
+          <input type="text" maxlength="1" class="otp-digit"
+                 data-index="{{ i }}"
+                 style="width: 48px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 700;
+                        background: var(--bg-card); border: 2px solid var(--border-main); border-radius: 12px;
+                        color: var(--text-main); outline: none; transition: border-color 0.2s;"
+                 onfocus="this.style.borderColor='var(--brand-accent)'"
+                 onblur="this.style.borderColor='var(--border-main)'"
+                 inputmode="numeric" pattern="[0-9]" autocomplete="off">
+          {% endfor %}
+      </div>
+      <input type="hidden" name="otp" id="otpHidden" value="">
+
+      <button type="submit" class="btn login-btn" style="width: 100%;">
+          Verify <i data-lucide="check-circle" style="margin-left: 5px;"></i>
+      </button>
+    </form>
+
+    <div style="margin-top: 1.5rem;">
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Didn't receive the code?</p>
+        <form method="post" action="{{ path('resend_verification_otp') }}" style="display: inline;">
+            <button type="submit" style="background: none; border: none; color: var(--brand-accent); cursor: pointer; font-size: 0.9rem; font-weight: 600; text-decoration: underline;">
+                Resend Code
+            </button>
+        </form>
+    </div>
+
+    <p class="register-link" style="margin-top: 1.5rem;">
+      <a href="{{ path('register') }}">← Back to Registration</a>
+    </p>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const digits = document.querySelectorAll('.otp-digit');
+    const hidden = document.getElementById('otpHidden');
+    const form = document.querySelector('form[action]');
+
+    function updateHidden() {
+        let val = '';
+        digits.forEach(d => val += d.value);
+        hidden.value = val;
+    }
+
+    // Ensure hidden field is updated on submit
+    form.addEventListener('submit', function() {
+        updateHidden();
+    });
+
+    digits.forEach((input, idx) => {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value && idx < digits.length - 1) {
+                digits[idx + 1].focus();
+            }
+            updateHidden();
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && !this.value && idx > 0) {
+                digits[idx - 1].focus();
+            }
+        });
+
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+            for (let i = 0; i < paste.length && i + idx < digits.length; i++) {
+                digits[i + idx].value = paste[i];
+            }
+            updateHidden();
+            const nextIdx = Math.min(idx + paste.length, digits.length - 1);
+            digits[nextIdx].focus();
+        });
+    });
+
+    if (digits[0]) digits[0].focus();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+PHP Fatal error:  Uncaught Symfony\Component\DependencyInjection\Exception\EnvNotFoundException: Environment variable not found: "DATABASE_URL". in C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\symfony\dependency-injection\EnvVarProcessor.php:217
+Stack trace:
+#0 C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\symfony\dependency-injection\Container.php(383): Symfony\Component\DependencyInjection\EnvVarProcessor->getEnv()
+#1 C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\symfony\dependency-injection\EnvVarProcessor.php(165): Symfony\Component\DependencyInjection\Container->getEnv()
+#2 C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\symfony\dependency-injection\Container.php(383): Symfony\Component\DependencyInjection\EnvVarProcessor->getEnv()
+#3 C:\Users\dali\Downloads\edulink5.0\edulink keml\var\cache\dev\Container15xxiO8\App_KernelDevDebugContainer.php(794): Symfony\Component\DependencyInjection\Container->getEnv()
+#4 C:\Users\dali\Downloads\edulink5.0\edulink keml\var\cache\dev\Container15xxiO8\App_KernelDevDebugContainer.php(813): Container15xxiO8\App_KernelDevDebugContainer::getDoctrine_Dbal_DefaultConnectionService()
+#5 C:\Users\dali\Downloads\edulink5.0\edulink keml\var\cache\dev\Container15xxiO8\App_KernelDevDebugContainer.php(805): Container15xxiO8\App_KernelDevDebugContainer::getDoctrine_Orm_DefaultEntityManagerService()
+#6 C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\symfony\var-exporter\Internal\LazyObjectState.php(100): Container15xxiO8\App_KernelDevDebugContainer::{closure:{closure:Container15xxiO8\App_KernelDevDebugContainer::getDoctrine_Orm_DefaultEntityManagerService():805}:805}()
+#7 C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\symfony\var-exporter\LazyGhostTrait.php(184): Symfony\Component\VarExporter\Internal\LazyObjectState->initialize()
+#8 C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\doctrine\orm\src\EntityManager.php(162): Container15xxiO8\EntityManagerGhostEbeb667->__get()
+#9 C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\doctrine\persistence\src\Persistence\AbstractManagerRegistry.php(149): Doctrine\ORM\EntityManager->getMetadataFactory()
+#10 C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\doctrine\persistence\src\Persistence\AbstractManagerRegistry.php(216): Doctrine\Persistence\AbstractManagerRegistry->getManagerForClass()
+#11 C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\doctrine\persistence\src\Persistence\AbstractManagerRegistry.php(186): Doctrine\Persistence\AbstractManagerRegistry->selectManager()
+#12 C:\Users\dali\Downloads\edulink5.0\edulink keml\test_context_manual.php(11): Doctrine\Persistence\AbstractManagerRegistry->getRepository()
+#13 {main}
+  thrown in C:\Users\dali\Downloads\edulink5.0\edulink keml\vendor\symfony\dependency-injection\EnvVarProcessor.php on line 217

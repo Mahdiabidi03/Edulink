@@ -57,6 +57,61 @@
         background: rgba(91, 42, 110, 0.05);
         border-bottom-color: rgba(91, 42, 110, 0.1);
     }
+
+    /* Stats & Filters */
+    .stat-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .stat-box {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        padding: 1.5rem;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .stat-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--text-main); line-height: 1; }
+    .stat-sub { font-size: 0.8rem; display: flex; align-items: center; gap: 4px; }
+
+    .filter-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        background: var(--bg-card);
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        align-items: center;
+    }
+    .search-input {
+        flex: 1;
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        color: var(--text-main);
+    }
+    .filter-select {
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        padding: 0.6rem 2rem 0.6rem 1rem;
+        border-radius: 8px;
+        color: var(--text-main);
+        cursor: pointer;
+    }
+    .sort-link {
+        color: var(--text-muted);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .sort-link:hover, .sort-link.active { color: var(--brand-main); }
 </style>
 
 <div class="page-header">
@@ -69,14 +124,68 @@
     </a>
 </div>
 
+<!-- Statistics -->
+<div class="stat-row">
+    <div class="stat-box">
+        <span class="stat-title">Total Users</span>
+        <span class="stat-value">{{ stats.totalUsers }}</span>
+        <span class="stat-sub" style="color: var(--success);"><i class="ri-arrow-up-line"></i> Active</span>
+    </div>
+    <div class="stat-box">
+        <span class="stat-title">Students</span>
+        <span class="stat-value">{{ stats.totalStudents }}</span>
+        <span class="stat-sub" style="color: #60a5fa;">{{ stats.totalUsers > 0 ? ((stats.totalStudents / stats.totalUsers) * 100)|round : 0 }}%</span>
+    </div>
+    <div class="stat-box">
+        <span class="stat-title">Tutors</span>
+        <span class="stat-value">{{ stats.totalTutors }}</span>
+        <span class="stat-sub" style="color: #fbbf24;">{{ stats.totalUsers > 0 ? ((stats.totalTutors / stats.totalUsers) * 100)|round : 0 }}%</span>
+    </div>
+    <div class="stat-box">
+        <span class="stat-title">Total XP</span>
+        <span class="stat-value">{{ stats.totalXp|number_format }}</span>
+        <span class="stat-sub" style="color: var(--brand-accent);">System Wide</span>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<form class="filter-bar" method="get">
+    <div style="position: relative; flex: 1;">
+        <i class="ri-search-line" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+        <input type="text" name="q" class="search-input" style="padding-left: 2.5rem;" placeholder="Search users by name or email..." value="{{ current_filters.search }}">
+    </div>
+    <select name="role" class="filter-select" onchange="this.form.submit()">
+        <option value="">All Roles</option>
+        <option value="ROLE_STUDENT" {{ current_filters.role == 'ROLE_STUDENT' ? 'selected' : '' }}>Students</option>
+        <option value="ROLE_TUTOR" {{ current_filters.role == 'ROLE_TUTOR' ? 'selected' : '' }}>Tutors</option>
+        <option value="ROLE_ADMIN" {{ current_filters.role == 'ROLE_ADMIN' ? 'selected' : '' }}>Admins</option>
+    </select>
+    <button type="submit" class="btn secondary">Filter</button>
+    {% if current_filters.search or current_filters.role %}
+        <a href="{{ path('app_admin_user_index') }}" class="btn secondary" style="color: var(--error); border-color: var(--error);">Reset</a>
+    {% endif %}
+</form>
+
 <div class="users-grid">
     <div class="table-container">
         <table class="pro-table">
             <thead>
                 <tr>
-                    <th>Identity</th>
-                    <th>Role</th>
-                    <th>Wallet</th>
+                    <th>
+                        <a href="{{ path('app_admin_user_index', app.request.query.all|merge({'sort': 'id', 'direction': (current_sort == 'id' and current_direction == 'ASC') ? 'DESC' : 'ASC'})) }}" class="sort-link {{ current_sort == 'id' ? 'active' : '' }}">
+                            Identity <i class="ri-arrow-{{ current_sort == 'id' and current_direction == 'ASC' ? 'up' : 'down' }}-s-line"></i>
+                        </a>
+                    </th>
+                    <th>
+                         <a href="{{ path('app_admin_user_index', app.request.query.all|merge({'sort': 'email', 'direction': (current_sort == 'email' and current_direction == 'ASC') ? 'DESC' : 'ASC'})) }}" class="sort-link {{ current_sort == 'email' ? 'active' : '' }}">
+                            Role <i class="ri-arrow-{{ current_sort == 'email' and current_direction == 'ASC' ? 'up' : 'down' }}-s-line"></i>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ path('app_admin_user_index', app.request.query.all|merge({'sort': 'xp', 'direction': (current_sort == 'xp' and current_direction == 'ASC') ? 'DESC' : 'ASC'})) }}" class="sort-link {{ current_sort == 'xp' ? 'active' : '' }}">
+                            Wallet (XP) <i class="ri-arrow-{{ current_sort == 'xp' and current_direction == 'ASC' ? 'up' : 'down' }}-s-line"></i>
+                        </a>
+                    </th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -89,7 +198,7 @@
                     {% set role = 'tutor' %}
                 {% endif %}
                 
-                <tr onclick="selectUser(this, '{{ user.email }}', '{{ user.email }}', '{{ role }}', '{{ user.xp }}', {{ user.id }})">
+                <tr onclick="selectUser(this, '{{ user.email }}', '{{ user.email }}', '{{ role }}', '{{ user.walletBalance }}', {{ user.id }})">
                     <td>
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <div class="user-avatar" style="background: linear-gradient(135deg, hsl({{ (user.id * 50) % 360 }}, 70%, 60%), hsl({{ (user.id * 50 + 40) % 360 }}, 70%, 50%))">
@@ -108,7 +217,7 @@
                         </span>
                     </td>
                     <td>
-                        <div style="font-weight: 600; color: var(--success);">{{ user.xp }} XP</div>
+                        <div style="font-weight: 600; color: var(--success);">{{ user.walletBalance|number_format }} XP</div>
                     </td>
                     <td>
                         <div style="display: flex; gap: 8px;">
@@ -136,7 +245,7 @@
         
         <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2rem;">
             <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">
-                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">XP Balance</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">XP Balance (Wallet)</div>
                 <div id="detailWallet" style="font-size: 1.2rem; font-weight: 700; color: var(--brand-accent);">-</div>
             </div>
              <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">

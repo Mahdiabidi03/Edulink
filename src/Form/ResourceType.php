@@ -6,8 +6,12 @@ use App\Entity\Resource;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
 
 class ResourceType extends AbstractType
 {
@@ -16,8 +20,11 @@ class ResourceType extends AbstractType
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Resource Title',
-                'required' => false,
-                'attr' => ['class' => 'form-control', 'placeholder' => 'e.g. Introduction to Python']
+                'attr' => ['class' => 'form-control', 'placeholder' => 'e.g. Introduction to Python'],
+                'constraints' => [
+                    new NotBlank(['message' => 'Resource title is required']),
+                    new Length(['max' => 255, 'maxMessage' => 'Title cannot exceed {{ limit }} characters']),
+                ],
             ])
             ->add('type', ChoiceType::class, [
                 'choices' => [
@@ -25,19 +32,24 @@ class ResourceType extends AbstractType
                     'File (PDF, Word, etc.)' => 'FILE',
                 ],
                 'attr' => ['class' => 'form-control'],
-                'required' => false,
+                'constraints' => [
+                    new NotBlank(['message' => 'Please select a resource type']),
+                ],
             ])
             ->add('url', TextType::class, [
                 'label' => 'Resource URL / Video ID',
                 'required' => false,
-                'attr' => ['class' => 'form-control', 'placeholder' => 'https://... or YouTube video ID']
+                'attr' => ['class' => 'form-control', 'placeholder' => 'https://... or YouTube video ID'],
+                'constraints' => [
+                    new Length(['max' => 2000, 'maxMessage' => 'URL cannot exceed {{ limit }} characters']),
+                ],
             ])
-            ->add('file', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
+            ->add('file', FileType::class, [
                 'label' => 'Upload File (PDF or Word)',
                 'mapped' => false,
                 'required' => false,
                 'constraints' => [
-                    new \Symfony\Component\Validator\Constraints\File([
+                    new File([
                         'maxSize' => '10M',
                         'mimeTypes' => [
                             'application/pdf',

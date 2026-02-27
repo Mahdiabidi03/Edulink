@@ -7,6 +7,7 @@ use App\Entity\Enrollment;
 use App\Repository\CoursRepository;
 use App\Repository\EnrollmentRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,14 +17,15 @@ class StudentCourseController extends AbstractController
 {
     #[Route('/', name: 'app_student_courses')]
     public function index(
-        \Symfony\Component\HttpFoundation\Request $request, 
-        CoursRepository $coursRepo, 
+        \Symfony\Component\HttpFoundation\Request $request,
+        CoursRepository $coursRepo,
         EnrollmentRepository $enrollmentRepo,
-        EntityManagerInterface $entityManager // Added EM
-    ): Response
-    {
+        EntityManagerInterface $entityManager,
+        PaginatorInterface $paginator
+    ): Response {
         $user = $this->getUser();
-        if (!$user) return $this->redirectToRoute('app_login');
+        if (!$user)
+            return $this->redirectToRoute('app_login');
 
         // Search & Sort Params
         $query = $request->query->get('q');
@@ -41,14 +43,14 @@ class StudentCourseController extends AbstractController
         $matiereQB = $matiereRepo->createQueryBuilder('m')
             ->where('m.status = :status')
             ->setParameter('status', 'APPROVED');
-            
+
         if ($sort == 'alpha_asc' || $categorySort == 'alpha') {
             $matiereQB->orderBy('m.name', 'ASC');
         } else {
             $matiereQB->orderBy('m.createdAt', 'DESC');
         }
         $matieres = $matiereQB->getQuery()->getResult();
-        
+
         $selectedCategoryId = $request->query->get('category');
         $selectedCategory = null;
         $marketplaceCourses = [];
@@ -62,20 +64,20 @@ class StudentCourseController extends AbstractController
             $selectedCategory = $entityManager->getRepository(\App\Entity\Matiere::class)->find($selectedCategoryId);
             if ($selectedCategory) {
                 $qb->andWhere('c.matiere = :matiere')
-                   ->setParameter('matiere', $selectedCategory);
+                    ->setParameter('matiere', $selectedCategory);
             }
         }
 
         // Apply Search (Global or within Category)
         if ($query) {
             $qb->andWhere('c.title LIKE :query OR c.description LIKE :query')
-               ->setParameter('query', '%' . $query . '%');
+                ->setParameter('query', '%' . $query . '%');
         }
 
         // Apply Level Filter
         if ($level) {
             $qb->andWhere('c.level = :level')
-               ->setParameter('level', $level);
+                ->setParameter('level', $level);
         }
 
         // Apply Sort
@@ -89,23 +91,49 @@ class StudentCourseController extends AbstractController
             case 'alpha_asc':
                 $qb->orderBy('c.title', 'ASC');
                 break;
+            case 'price_high':
+                $qb->orderBy('c.pricePoints', 'DESC');
+                break;
+            case 'price_low':
+                $qb->orderBy('c.pricePoints', 'ASC');
+                break;
             case 'newest':
             default:
                 $qb->orderBy('c.createdAt', 'DESC');
                 break;
         }
 
-        // If searching globally (no category), we fetch courses that match
-        if ($query || $selectedCategoryId) {
-             $marketplaceCourses = $qb->getQuery()->getResult();
+        // Contextual Pagination
+        // Remove 'sort' from query to prevent KnpPaginator from interpreting it as a DB field
+        $paginatorOptions = [
+            'defaultSortFieldName' => null,
+            'defaultSortDirection' => 'asc',
+            'sortFieldParameterName' => '_knp_sort', // Use a non-conflicting param name
+            'sortDirectionParameterName' => '_knp_dir',
+        ];
+
+        if (!$selectedCategoryId && !$query) {
+            // Main view is "All Categories" - Paginate Categories
+            $pagination = $paginator->paginate(
+                $matiereQB->getQuery(),
+                $request->query->getInt('page', 1),
+                12,
+                $paginatorOptions
+            );
         } else {
-             $marketplaceCourses = []; 
+            // Searching or browsing a category - Paginate Courses
+            $pagination = $paginator->paginate(
+                $qb->getQuery(),
+                $request->query->getInt('page', 1),
+                10,
+                $paginatorOptions
+            );
         }
 
         // Also filter categories if searching globally
         if ($query && !$selectedCategoryId) {
             $matiereQB->andWhere('m.name LIKE :query')
-                      ->setParameter('query', '%' . $query . '%');
+                ->setParameter('query', '%' . $query . '%');
             $matieres = $matiereQB->getQuery()->getResult();
         }
 
@@ -124,15 +152,15 @@ class StudentCourseController extends AbstractController
 
         return $this->render('student/courses.html.twig', [
             'myEnrollments' => $myEnrollments,
-            'marketplaceCourses' => $marketplaceCourses,
-            'matieres' => $matieres, // Pass categories
-            'selectedCategory' => $selectedCategory, // Pass selected category
+            'pagination' => $pagination,
+            'matieres' => (!$selectedCategoryId && !$query) ? $pagination : $matieres,
+            'selectedCategory' => $selectedCategory,
             'myCreatedCourses' => $myCreatedCourses,
             'myCreatedMatieres' => $myCreatedMatieres,
             'myCreatedResources' => $myCreatedResources,
             'searchQuery' => $query,
             'currentSort' => $sort,
-            'currentLevel' => $level, // Pass current level
+            'currentLevel' => $level,
             'currentTab' => $currentTab
         ]);
     }
@@ -141,11 +169,12 @@ class StudentCourseController extends AbstractController
     public function enroll(Cours $cours, EntityManagerInterface $em, EnrollmentRepository $enrollRepo): Response
     {
         $user = $this->getUser();
-        if (!$user) return $this->redirectToRoute('app_login');
+        if (!$user)
+            return $this->redirectToRoute('app_login');
 
         // Check if already enrolled
         $existing = $enrollRepo->findOneBy(['student' => $user, 'cours' => $cours]);
-        
+
         if (!$existing) {
             $enrollment = new Enrollment();
             $enrollment->setStudent($user);
@@ -177,16 +206,17 @@ class StudentCourseController extends AbstractController
     }
 
     #[Route('/complete/{id}', name: 'app_student_complete_course', methods: ['POST'])]
-    public function complete(Cours $cours, EntityManagerInterface $em, EnrollmentRepository $enrollRepo): Response
+    public function complete(Cours $cours, EntityManagerInterface $em, EnrollmentRepository $enrollRepo, \App\Service\BadgeService $badgeService): Response
     {
         /** @var User $user */
         $user = $this->getUser();
-        if (!$user) return $this->redirectToRoute('app_login');
+        if (!$user)
+            return $this->redirectToRoute('app_login');
 
         $enrollment = $enrollRepo->findOneBy(['student' => $user, 'cours' => $cours]);
         if (!$enrollment) {
-             $this->addFlash('error', 'Not enrolled in this course.');
-             return $this->redirectToRoute('app_student_courses');
+            $this->addFlash('error', 'Not enrolled in this course.');
+            return $this->redirectToRoute('app_student_courses');
         }
 
         $resources = $cours->getResources()->filter(fn($r) => $r->getStatus() === 'APPROVED');
@@ -201,13 +231,32 @@ class StudentCourseController extends AbstractController
         if ($enrollment->getCompletedAt() === null) {
             $enrollment->setProgress(100);
             $enrollment->setCompletedAt(new \DateTimeImmutable());
-            
-            // Add XP
-            $currentXp = $user->getXp();
-            $user->setXp($currentXp + ($cours->getXp() ?? 0));
-            
+
+            $reward = ($cours->getXp() ?? 0);
+            if ($reward > 0) {
+                // Add to Wallet/XP (unified)
+                $user->setWalletBalance($user->getWalletBalance() + $reward);
+
+                // Create Transaction
+                $transaction = new \App\Entity\Transaction();
+                $transaction->setUser($user);
+                $transaction->setAmount($reward);
+                $transaction->setType('COURSE_COMPLETION');
+                $transaction->setDate(new \DateTime());
+                $em->persist($transaction);
+            }
+
+            // Check for new badges after XP change
+            $newBadges = $badgeService->checkBadges($user);
+
             $em->flush();
-            $this->addFlash('success', 'Course completed! You earned ' . ($cours->getXp() ?? 0) . ' XP.');
+
+            $badgeMsg = '';
+            if (!empty($newBadges)) {
+                $badgeNames = array_map(fn($badge) => $badge->getName(), $newBadges);
+                $badgeMsg = ' 🏅 New badge(s): ' . implode(', ', $badgeNames) . '!';
+            }
+            $this->addFlash('success', 'Course completed! You earned ' . $reward . ' XP.' . $badgeMsg);
         }
 
         return $this->redirectToRoute('app_student_course_detail', ['id' => $cours->getId()]);
@@ -217,7 +266,8 @@ class StudentCourseController extends AbstractController
     public function completeResource(\App\Entity\Resource $resource, EntityManagerInterface $em, EnrollmentRepository $enrollRepo): Response
     {
         $user = $this->getUser();
-        if (!$user) return $this->json(['success' => false, 'message' => 'Auth required'], 403);
+        if (!$user)
+            return $this->json(['success' => false, 'message' => 'Auth required'], 403);
 
         $cours = $resource->getCours();
         $enrollment = $enrollRepo->findOneBy(['student' => $user, 'cours' => $cours]);
@@ -233,7 +283,7 @@ class StudentCourseController extends AbstractController
         $resources = $cours->getResources()->filter(fn($r) => $r->getStatus() === 'APPROVED');
         $total = count($resources);
         $done = count($enrollment->getCompletedResources());
-        
+
         $percentage = $total > 0 ? floor(($done / $total) * 100) : 100;
         $enrollment->setProgress($percentage);
 

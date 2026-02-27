@@ -16,7 +16,7 @@ class UserBadge
     #[ORM\Column(nullable: true)]
     private ?\DateTime $unlockedAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'badge')]
+    #[ORM\ManyToOne(inversedBy: 'userBadges')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 

@@ -46,6 +46,7 @@ security:
          - { path: ^/api/auth/reset, roles: PUBLIC_ACCESS }
          - { path: ^/api/face, roles: PUBLIC_ACCESS }
          - { path: ^/register, roles: PUBLIC_ACCESS }
+         - { path: ^/verify-email, roles: PUBLIC_ACCESS }
 
 when@test:
     security:

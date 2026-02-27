@@ -20,4 +20,21 @@ class MessageRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Message::class);
     }
+
+    /**
+     * @return Message[] All messages flagged as toxic, newest first
+     */
+    public function findToxicMessages(): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.isToxic = :toxic')
+            ->setParameter('toxic', true)
+            ->leftJoin('m.sender', 's')
+            ->addSelect('s')
+            ->leftJoin('m.session', 'sess')
+            ->addSelect('sess')
+            ->orderBy('m.timestamp', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

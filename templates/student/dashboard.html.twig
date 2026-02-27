@@ -5,7 +5,8 @@
 <div class="profile-header card" style="display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem;">
   <div class="profile-avatar-lg" style="position: relative;">
     <img src="https://ui-avatars.com/api/?name={{ app.user.fullName|url_encode }}&size=128&background=random" alt="Student" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--brand-accent); box-shadow: var(--shadow-md);">
-    <div class="level-badge" style="position: absolute; bottom: -5px; right: -5px; background: var(--brand-gradient); color: white; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: bold; font-size: 0.9rem; border: 2px solid var(--bg-card);">1</div>
+    {% set current_level = ((app.user.walletBalance / 100)|round(0, 'floor')) + 1 %}
+    <div class="level-badge" style="position: absolute; bottom: -5px; right: -5px; background: var(--brand-gradient); color: white; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: bold; font-size: 0.9rem; border: 2px solid var(--bg-card);">{{ current_level }}</div>
   </div>
   
   <div class="profile-info" style="flex: 1;">
@@ -18,8 +19,8 @@
             <i data-lucide="sparkles" style="color: var(--success);"></i>
         </div>
         <div>
-          <div style="font-size: 1.2rem; font-weight: 800;">{{ app.user.xp }} XP</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Current XP</div>
+          <div style="font-size: 1.2rem; font-weight: 800;">{{ app.user.walletBalance|number_format }} XP</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Current Balance</div>
         </div>
       </div>
     </div>
@@ -29,6 +30,34 @@
     <button class="btn secondary" style="width: 100%; margin-bottom: 0.75rem;" onclick="openEditModal()"><i data-lucide="user-cog"></i> Edit Profile</button>
     <a href="{{ path('student_face_setup') }}" class="btn secondary" style="width: 100%; margin-bottom: 0.75rem;"><i data-lucide="scan-face"></i> Setup Face ID</a>
     <button class="btn" style="width: 100%;"><i data-lucide="share"></i> View Profile</button>
+  </div>
+</div>
+
+<!-- Badges Section -->
+<div class="card" style="margin-bottom: 2rem; padding: 1.5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2 style="font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 10px;">
+      <i data-lucide="award" style="color: var(--brand-main);"></i>
+      Mes Badges & Succès
+    </h2>
+    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">{{ app.user.userBadges|length }} DÉBLOQUÉS</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem;">
+    {% for ub in app.user.userBadges %}
+      <div class="badge-item" style="text-align: center; background: var(--bg-main); padding: 1rem; border-radius: 16px; border: 1px solid var(--border); transition: all 0.3s ease; cursor: default;">
+        <div style="width: 50px; height: 50px; background: var(--brand-gradient); border-radius: 50%; display: grid; place-items: center; margin: 0 auto 0.75rem; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
+          <i data-lucide="{{ ub.badge.icon|default('medal') }}" style="color: white; width: 24px; height: 24px;"></i>
+        </div>
+        <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-main); line-height: 1.2;">{{ ub.badge.name }}</div>
+        <div style="font-size: 0.7rem; color: var(--success); margin-top: 4px; font-weight: 600;">DÉBLOQUÉ</div>
+      </div>
+    {% else %}
+      <div style="grid-column: 1 / -1; text-align: center; padding: 1rem; color: var(--text-muted); font-style: italic; border: 2px dashed var(--border); border-radius: 12px;">
+        <i data-lucide="lock" style="width: 20px; height: 20px; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+        <p style="margin: 0;">Complète des challenges pour débloquer tes premiers badges !</p>
+      </div>
+    {% endfor %}
   </div>
 </div>
 

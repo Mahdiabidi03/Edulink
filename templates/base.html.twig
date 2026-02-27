@@ -32,16 +32,14 @@
 </script>
 
 </head>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>
-  AOS.init();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
 <body>
 
-
+{% if is_granted('ROLE_ADMIN') %}
+    <div style="background: var(--brand-main); color: white; text-align: center; padding: 8px; font-size: 0.85rem; font-weight: 600; z-index: 9999; position: relative;">
+        <i class="ri-admin-fill"></i> You are viewing the Student Frontend. 
+        <a href="{{ path('admin_dashboard') }}" style="color: white; text-decoration: underline; margin-left: 10px;">Return to Admin Backend</a>
+    </div>
+{% endif %}
 {% include 'components/topbar.html.twig' %}
 
 <div class="app">
@@ -87,6 +85,10 @@
     {% endfor %}
   {% endfor %}
 </script>
-
+    {% include 'components/chatbot.html.twig' %}
+    {% block javascripts %}{% endblock %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>try { AOS.init(); } catch(e) {}</script>
 </body>
 </html>

@@ -23,13 +23,13 @@
                      <div style="font-weight: 500; font-size: 1.05rem; margin-bottom: 4px;">
                         {{ resource.title ?? 'Untitled' }}
                      </div>
-                     <a href="{{ resource.url }}" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;">{{ resource.url|slice(0, 60) }}...</a>
+                     <a href="{{ resource.absoluteUrl }}" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;">{{ resource.url|slice(0, 60) }}...</a>
                 </div>
                 {% if resource.status == 'PENDING' %}
                     <span class="badge" style="background: var(--warning); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px;">Pending Approval</span>
                 {% endif %}
                 <div style="display: flex; gap: 8px;">
-                    <a href="{{ resource.url }}" target="_blank" class="btn secondary" style="padding: 6px 12px;"><i class="ri-eye-line"></i></a>
+                    <a href="{{ resource.absoluteUrl }}" target="_blank" class="btn secondary" style="padding: 6px 12px;"><i class="ri-eye-line"></i></a>
                     <a href="{{ path('app_admin_resource_edit', {'id': resource.id}) }}" class="btn secondary" style="padding: 6px 12px;"><i class="ri-edit-line"></i></a>
                 </div>
             </li>

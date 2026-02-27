@@ -5,8 +5,10 @@ namespace App\Entity;
 use App\Repository\ResourceRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: ResourceRepository::class)]
+#[UniqueEntity(fields: ['title', 'cours'], message: 'This resource title already exists for this course.')]
 class Resource
 {
     #[ORM\Id]
@@ -87,6 +89,21 @@ class Resource
         $this->url = $url;
 
         return $this;
+    }
+
+    /**
+     * Returns the URL with a protocol prefix.
+     * Prevents relative URL issues when rendering links in templates.
+     */
+    public function getAbsoluteUrl(): ?string
+    {
+        if ($this->url === null) {
+            return null;
+        }
+        if (str_starts_with($this->url, 'http://') || str_starts_with($this->url, 'https://') || str_starts_with($this->url, '/')) {
+            return $this->url;
+        }
+        return 'https://' . $this->url;
     }
 
     public function getType(): ?string

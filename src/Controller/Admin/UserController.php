@@ -16,10 +16,28 @@ use Symfony\Component\Routing\Attribute\Route;
 class UserController extends AbstractController
 {
     #[Route('/', name: 'app_admin_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository): Response
+    public function index(Request $request, UserRepository $userRepository): Response
     {
+        // 1. Get Filters from Request
+        $filters = [
+            'search' => $request->query->get('q'),
+            'role' => $request->query->get('role'),
+        ];
+        $sort = $request->query->get('sort', 'id');
+        $direction = $request->query->get('direction', 'DESC');
+
+        // 2. Get Users based on filters
+        $users = $userRepository->findByFilter($filters, $sort, $direction);
+
+        // 3. Get Statistics
+        $stats = $userRepository->getUserStatistics();
+
         return $this->render('admin/user/index.html.twig', [
-            'users' => $userRepository->findAll(),
+            'users' => $users,
+            'stats' => $stats,
+            'current_filters' => $filters,
+            'current_sort' => $sort,
+            'current_direction' => $direction,
         ]);
     }
 
@@ -28,7 +46,7 @@ class UserController extends AbstractController
     {
         $user = new User();
         // Set default/initial values
-        $user->setXp(0); 
+        $user->setWalletBalance(0); 
         
         $form = $this->createForm(UserType::class, $user, ['is_new' => true]);
         $form->handleRequest($request);

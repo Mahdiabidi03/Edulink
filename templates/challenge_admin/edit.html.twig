@@ -18,9 +18,61 @@
   </div>
 
   <div class="card" style="padding: 2rem;">
+    {# Show validation errors #}
+    {% if form.vars.submitted and not form.vars.valid %}
+      <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: var(--error);">
+        <strong><i data-lucide="alert-triangle"></i> Validation errors:</strong>
+        {{ form_errors(form) }}
+        {% for child in form %}
+          {% if child.vars.errors|length > 0 %}
+            <div>{{ child.vars.name }}: {{ form_errors(child) }}</div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
     {{ include('challenge_admin/_form.html.twig', { form: form, button_label: 'Update' }) }}
 
-    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+    <hr style="margin: 2.5rem 0;">
+
+    <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: var(--text-main);"><i data-lucide="list-checks"></i> Tasks for this challenge</h3>
+        <a href="{{ path('app_challenge_admin_task_new', {id: challenge.id}) }}" class="btn">
+            <i data-lucide="plus"></i> Add Task
+        </a>
+    </div>
+
+    {% set saved_tasks = challenge.tasks|filter(t => t.id is not null) %}
+    {% if saved_tasks is empty %}
+        <div style="padding: 2rem; text-align: center; color: var(--text-muted); border: 1px dashed var(--border); border-radius: 12px;">
+            No tasks yet. Every challenge needs at least one task!
+        </div>
+    {% else %}
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for task in saved_tasks %}
+                <div style="display:flex; justify-content: space-between; align-items:center; padding: 12px 16px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px;">
+                    <div>
+                        <span style="display: inline-block; width: 25px; height: 25px; line-height: 25px; text-align: center; border-radius: 50%; background: var(--brand-main); color: white; font-size: 0.8rem; margin-right: 12px;">{{ loop.index }}</span>
+                        <strong style="color: var(--text-main);">{{ task.title }}</strong>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <span style="color: var(--text-muted); font-size: 0.9rem; margin-right: 10px;">{{ task.points }} pts</span>
+                        <a href="{{ path('app_challenge_admin_task_edit', {id: task.id}) }}" class="btn secondary" style="padding: 6px; min-width: auto;">
+                            <i data-lucide="edit-3" style="width: 16px; height: 16px;"></i>
+                        </a>
+                        <form method="post" action="{{ path('app_challenge_admin_task_delete', {id: task.id}) }}" style="display: inline;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_task' ~ task.id) }}">
+                            <button type="submit" class="btn secondary" style="padding: 6px; min-width: auto; color: var(--error);" onclick="return confirm('Delete this task?')">
+                                <i data-lucide="trash-2" style="width: 16px; height: 16px;"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <span style="color: var(--error); font-size: 0.9rem;">Danger Zone: deleting this challenge will also remove all student participations.</span>
         {{ include('challenge_admin/_delete_form.html.twig') }}

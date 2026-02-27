@@ -4,280 +4,308 @@
 
 {% block content %}
 <style>
-    /* Event Page Layout */
-    .events-layout {
+    /* Stats & Filters */
+    .stat-row {
         display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: var(--space-lg);
-        height: calc(100vh - 140px);
-    }
-
-    /* Tabs Styling */
-    .event-tabs {
-        display: flex;
+        grid-template-columns: repeat(4, 1fr);
         gap: 1rem;
-        margin-bottom: var(--space-lg);
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 0.5rem;
+        margin-bottom: 2rem;
     }
-
-    .tab-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-secondary);
-        font-family: 'Fira Sans', sans-serif;
-        font-weight: 600;
-        font-size: 1rem;
-        padding: 0.5rem 1rem;
-        cursor: pointer;
-        position: relative;
-        transition: 0.3s;
-    }
-
-    .tab-btn.active {
-        color: var(--brand-main);
-    }
-
-    .tab-btn.active::after {
-        content: '';
-        position: absolute;
-        bottom: -0.6rem;
-        left: 0;
-        width: 100%;
-        height: 3px;
-        background: var(--brand-main);
-        border-radius: 3px 3px 0 0;
-    }
-
-    /* Event Card (Admin Version) */
-    .event-card-admin {
+    .stat-box {
         background: var(--bg-card);
         border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 1.25rem;
-        margin-bottom: 1rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: all 0.2s;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .event-card-admin:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-        border-color: var(--brand-light);
-    }
-
-    .event-info h3 {
-        margin: 0;
-        font-size: 1.1rem;
-        color: var(--text-main);
-    }
-
-    .event-meta {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        display: flex;
-        gap: 15px;
-        margin-top: 5px;
-    }
-
-    .event-badge {
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
-    
-    .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
-    .status-approved { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.2); }
-
-    /* Right Panel: Create/Edit Form */
-    .event-editor {
-        background: var(--bg-card);
-        border-left: 1px solid var(--border);
         padding: 1.5rem;
+        border-radius: 12px;
         display: flex;
         flex-direction: column;
+        gap: 0.5rem;
+    }
+    .stat-title { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--text-main); line-height: 1; }
+    .stat-sub { font-size: 0.8rem; display: flex; align-items: center; gap: 4px; }
+
+    .filter-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        background: var(--bg-card);
+        padding: 1rem;
         border-radius: 12px;
+        border: 1px solid var(--border);
+        align-items: center;
+    }
+    .search-input {
+        flex: 1;
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        padding: 0.6rem 1rem;
+        border-radius: 8px;
+        color: var(--text-main);
+    }
+    .filter-select {
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        padding: 0.6rem 2rem 0.6rem 1rem;
+        border-radius: 8px;
+        color: var(--text-main);
+        cursor: pointer;
+    }
+    .sort-link {
+        color: var(--text-muted);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .sort-link:hover, .sort-link.active { color: var(--brand-main); }
+
+    /* Event Grid Layout */
+    .events-grid {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: var(--space-lg);
+        align-items: start;
+    }
+
+    .pro-table tr { cursor: pointer; }
+    .pro-table tr.active td {
+        background: rgba(91, 42, 110, 0.05);
+        border-bottom-color: rgba(91, 42, 110, 0.1);
+    }
+
+    /* Event badges */
+    .event-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .badge-online { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .badge-physical { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .badge-upcoming { background: rgba(245, 158, 11, 0.15); color: #d97706; } /* Darkened for better contrast */
+    .badge-past { background: rgba(107, 114, 128, 0.15); color: #9ca3af; }
+
+    /* Detail Panel */
+    .event-detail-panel {
+        position: sticky;
+        top: 2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
         box-shadow: var(--shadow-lg);
     }
-
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    .form-label {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin-bottom: 4px;
-        display: block;
-    }
-    .form-input {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid var(--border);
-        background: var(--bg-main);
-        color: var(--text-main);
-        border-radius: 8px;
-    }
-    .form-input:focus {
-        outline: none;
-        border-color: var(--brand-main);
-    }
-
 </style>
 
 <!-- Header -->
-<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-xl);">
+<div class="page-header">
     <div>
-        <h1 style="margin: 0; font-size: 2rem;">Event Control</h1>
-        <p style="color: var(--text-muted); font-family: 'Fira Code', monospace; margin-top: 5px;">Manage platform listings & approvals</p>
+        <h1 class="page-title">Event Control</h1>
+        <p class="page-subtitle">Manage platform events, reservations & listings</p>
     </div>
-    <button onclick="createNewEvent()" class="btn btn-primary"><i class="ri-add-circle-line"></i> Create Global Event</button>
+    <a href="{{ path('admin_event_preview') }}" class="btn">
+        <i class="ri-eye-line"></i> Preview Student View
+    </a>
 </div>
 
-<div class="events-layout">
-    
-    <!-- LEFT: Event Lists -->
-    <div>
-        <div class="event-tabs">
-            <button class="tab-btn active" onclick="switchTab('pending')">Pending Approval <span style="background: var(--warning); color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem;">3</span></button>
-            <button class="tab-btn" onclick="switchTab('live')">Live Events</button>
-            <button class="tab-btn" onclick="switchTab('past')">Past History</button>
-        </div>
+<!-- Statistics -->
+<div class="stat-row">
+    <div class="stat-box">
+        <span class="stat-title">Total Events</span>
+        <span class="stat-value">{{ stats.totalEvents }}</span>
+        <span class="stat-sub" style="color: var(--brand-accent);"><i class="ri-calendar-event-line"></i> All Time</span>
+    </div>
+    <div class="stat-box">
+        <span class="stat-title">Upcoming</span>
+        <span class="stat-value">{{ stats.upcomingEvents }}</span>
+        <span class="stat-sub" style="color: var(--success);"><i class="ri-arrow-up-line"></i> Scheduled</span>
+    </div>
+    <div class="stat-box">
+        <span class="stat-title">Past</span>
+        <span class="stat-value">{{ stats.pastEvents }}</span>
+        <span class="stat-sub" style="color: var(--text-muted);"><i class="ri-history-line"></i> Completed</span>
+    </div>
+    <div class="stat-box">
+        <span class="stat-title">Total Reservations</span>
+        <span class="stat-value">{{ stats.totalReservations }}</span>
+        <span class="stat-sub" style="color: #60a5fa;"><i class="ri-ticket-line"></i> Bookings</span>
+    </div>
+</div>
 
-        <!-- Pending List -->
-        <div id="pendingWaitlist">
-            <div class="event-card-admin">
-                <div class="event-info">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <h3>React Native Hackathon</h3>
-                        <span class="event-badge status-pending">User Event</span>
-                    </div>
-                    <div class="event-meta">
-                        <span><i class="ri-user-line"></i> Host: Alex Morgan (Student)</span>
-                        <span><i class="ri-calendar-line"></i> Feb 22, 2026</span>
-                    </div>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 8px 0 0;">
-                        "A 24-hour hackathon for building mobile apps with Expo. Requesting 500 points for prize pool."
-                    </p>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                     <button class="icon-btn" style="color: var(--success); background: rgba(34, 197, 94, 0.1);" title="Approve"><i class="ri-check-line"></i></button>
-                     <button class="icon-btn" style="color: var(--error); background: rgba(239, 68, 68, 0.1);" title="Reject"><i class="ri-close-line"></i></button>
-                </div>
-            </div>
+<!-- Filter Bar -->
+<form class="filter-bar" method="get">
+    <div style="position: relative; flex: 1;">
+        <i class="ri-search-line" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+        <input type="text" name="q" class="search-input" style="padding-left: 2.5rem;" placeholder="Search events by title or organizer..." value="{{ current_filters.search }}">
+    </div>
+    <select name="filter" class="filter-select" onchange="this.form.submit()">
+        <option value="">All Events</option>
+        <option value="upcoming" {{ current_filters.dateFilter == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+        <option value="past" {{ current_filters.dateFilter == 'past' ? 'selected' : '' }}>Past</option>
+    </select>
+    <button type="submit" class="btn secondary">Filter</button>
+    {% if current_filters.search or current_filters.dateFilter %}
+        <a href="{{ path('admin_events') }}" class="btn secondary" style="color: var(--error); border-color: var(--error);">Reset</a>
+    {% endif %}
+</form>
 
-            <div class="event-card-admin">
-                 <div class="event-info">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <h3>Study Group: Data Structures</h3>
-                        <span class="event-badge status-pending">User Event</span>
-                    </div>
-                    <div class="event-meta">
-                        <span><i class="ri-user-line"></i> Host: Sarah Smith (Tutor)</span>
-                        <span><i class="ri-calendar-line"></i> Feb 15, 2026</span>
-                    </div>
-                </div>
-                 <div style="display: flex; gap: 8px;">
-                     <button class="icon-btn" style="color: var(--success); background: rgba(34, 197, 94, 0.1);" title="Approve"><i class="ri-check-line"></i></button>
-                     <button class="icon-btn" style="color: var(--error); background: rgba(239, 68, 68, 0.1);" title="Reject"><i class="ri-close-line"></i></button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Live List (Hidden by default in this mockup logic) -->
-        <div id="liveList" style="display: none;">
-             <div class="event-card-admin" style="border-left: 4px solid var(--brand-main);">
-                <div class="event-info">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <h3>Global AI Summit</h3>
-                        <span class="event-badge status-approved">Official</span>
-                    </div>
-                     <div class="event-meta">
-                        <span><i class="ri-map-pin-line"></i> Main Hall A</span>
-                        <span><i class="ri-time-line"></i> Live Now</span>
-                    </div>
-                </div>
-                 <div style="display: flex; gap: 8px;">
-                     <button class="btn secondary" style="font-size: 0.8rem; padding: 5px 10px;" onclick="loadEventToEdit('Global AI Summit')">Modify</button>
-                     <button class="icon-btn" style="color: var(--error);" title="Cancel Event"><i class="ri-delete-bin-line"></i></button>
-                </div>
-            </div>
-        </div>
-
+<div class="events-grid">
+    <div class="table-container">
+        <table class="pro-table">
+            <thead>
+                <tr>
+                    <th>
+                        <a href="{{ path('admin_events', app.request.query.all|merge({'sort': 'title', 'direction': (current_sort == 'title' and current_direction == 'ASC') ? 'DESC' : 'ASC'})) }}" class="sort-link {{ current_sort == 'title' ? 'active' : '' }}">
+                            Event <i class="ri-arrow-{{ current_sort == 'title' and current_direction == 'ASC' ? 'up' : 'down' }}-s-line"></i>
+                        </a>
+                    </th>
+                    <th>Organizer</th>
+                    <th>
+                        <a href="{{ path('admin_events', app.request.query.all|merge({'sort': 'dateStart', 'direction': (current_sort == 'dateStart' and current_direction == 'ASC') ? 'DESC' : 'ASC'})) }}" class="sort-link {{ current_sort == 'dateStart' ? 'active' : '' }}">
+                            Date <i class="ri-arrow-{{ current_sort == 'dateStart' and current_direction == 'ASC' ? 'up' : 'down' }}-s-line"></i>
+                        </a>
+                    </th>
+                    <th>Type</th>
+                    <th>
+                        <a href="{{ path('admin_events', app.request.query.all|merge({'sort': 'maxCapacity', 'direction': (current_sort == 'maxCapacity' and current_direction == 'ASC') ? 'DESC' : 'ASC'})) }}" class="sort-link {{ current_sort == 'maxCapacity' ? 'active' : '' }}">
+                            Capacity <i class="ri-arrow-{{ current_sort == 'maxCapacity' and current_direction == 'ASC' ? 'up' : 'down' }}-s-line"></i>
+                        </a>
+                    </th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for event in events %}
+                {% set isPast = event.dateEnd < date() %}
+                <tr onclick="selectEvent(this, {{ event.id }}, '{{ event.title|e('js') }}', '{{ event.organizer ? event.organizer.email : 'N/A' }}', '{{ event.dateStart|date('M d, Y H:i') }}', '{{ event.dateEnd|date('M d, Y H:i') }}', '{{ event.location ?? (event.isOnline ? 'Online' : 'N/A') }}', {{ event.maxCapacity }}, {{ event.reservations|length }}, '{{ event.isOnline ? 'Online' : 'Physical' }}', {{ isPast ? 'true' : 'false' }})">
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, hsl({{ (event.id * 60) % 360 }}, 70%, 60%), hsl({{ (event.id * 60 + 40) % 360 }}, 70%, 50%)); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.9rem;">
+                                <i class="ri-calendar-event-fill"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">{{ event.title }}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">ID: #{{ event.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.85rem;">{{ event.organizer ? event.organizer.email : 'N/A' }}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 500;">{{ event.dateStart|date('M d, Y') }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">{{ event.dateStart|date('H:i') }} - {{ event.dateEnd|date('H:i') }}</div>
+                    </td>
+                    <td>
+                        {% if event.isOnline %}
+                            <span class="event-type-badge badge-online"><i class="ri-global-line"></i> Online</span>
+                        {% else %}
+                            <span class="event-type-badge badge-physical"><i class="ri-map-pin-line"></i> Physical</span>
+                        {% endif %}
+                        {% if isPast %}
+                            <span class="event-type-badge badge-past"><i class="ri-time-line"></i> Past</span>
+                        {% else %}
+                            <span class="event-type-badge badge-upcoming"><i class="ri-flashlight-line"></i> Live</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">{{ event.reservations|length }}/{{ event.maxCapacity }}</div>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{{ path('app_event_edit', {'id': event.id}) }}" class="icon-btn" title="Edit">
+                                <i class="ri-pencil-line"></i>
+                            </a>
+                            <form method="post" action="{{ path('app_event_delete', {'id': event.id}) }}" onsubmit="return confirm('Delete this event?');" style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
+                                <button type="submit" class="icon-btn" style="color: var(--error);" title="Delete">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem;">No events found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <!-- RIGHT: Editor Panel -->
-    <div class="event-editor">
-        <h3 id="formTitle" style="margin-top: 0; margin-bottom: 1.5rem;">Create New Event</h3>
-        
-        <form>
-            <div class="form-group">
-                <label class="form-label">Event Title</label>
-                <input type="text" class="form-input" placeholder="Ex. Spring Coding Bootcamp">
-            </div>
+    <!-- Event Detail Panel -->
+    <div class="event-detail-panel">
+        <div id="detailIcon" style="width: 80px; height: 80px; border-radius: 16px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; background: var(--brand-gradient); box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);">
+            <i class="ri-calendar-event-line"></i>
+        </div>
 
-            <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div>
-                     <label class="form-label">Date</label>
-                     <input type="date" class="form-input">
-                </div>
-                <div>
-                     <label class="form-label">Time</label>
-                     <input type="time" class="form-input">
-                </div>
-            </div>
+        <h2 id="detailTitle" style="margin: 0; font-size: 1.3rem;">Select Event</h2>
+        <p id="detailOrganizer" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">...</p>
 
-            <div class="form-group">
-                <label class="form-label">Description</label>
-                <textarea class="form-input" rows="4" style="resize: none;" placeholder="Event details..."></textarea>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Starts</div>
+                <div id="detailStart" style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">-</div>
             </div>
+            <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Ends</div>
+                <div id="detailEnd" style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">-</div>
+            </div>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label">Entry Fee (Points)</label>
-                <input type="number" class="form-input" value="0">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Location</div>
+                <div id="detailLocation" style="font-size: 0.9rem; font-weight: 600; color: var(--text-main);">-</div>
             </div>
-             <div class="form-group">
-                <label class="form-label">Max Participants</label>
-                <input type="number" class="form-input" value="100">
+            <div style="background: var(--bg-main); padding: 1rem; border-radius: 12px;">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Reservations</div>
+                <div id="detailCapacity" style="font-size: 1.2rem; font-weight: 700; color: var(--brand-accent);">-</div>
             </div>
+        </div>
 
-            <div style="margin-top: auto; display: flex; gap: 10px;">
-                <button type="button" class="btn secondary" style="flex: 1;">Reset</button>
-                <button type="submit" class="btn btn-primary" style="flex: 1;">Publish Event</button>
-            </div>
-        </form>
+        <div id="detailStatus" style="margin-bottom: 1.5rem;"></div>
+
+        <a id="detailEditBtn" href="#" class="btn" style="width: 100%; border: 1px solid var(--border); background: transparent; pointer-events: none; opacity: 0.5;">Edit Event</a>
     </div>
-
 </div>
 
 <script>
-    function switchTab(tabName) {
-        // Simple DOM toggle for demo purposes
-        const btns = document.querySelectorAll('.tab-btn');
-        btns.forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
+    function selectEvent(row, id, title, organizer, start, end, location, capacity, reservations, type, isPast) {
+        document.querySelectorAll('.pro-table tr').forEach(tr => tr.classList.remove('active'));
+        row.classList.add('active');
 
-        if(tabName === 'live') {
-            document.getElementById('pendingWaitlist').style.display = 'none';
-            document.getElementById('liveList').style.display = 'block';
+        document.getElementById('detailTitle').innerText = title;
+        document.getElementById('detailOrganizer').innerText = organizer;
+        document.getElementById('detailStart').innerText = start;
+        document.getElementById('detailEnd').innerText = end;
+        document.getElementById('detailLocation').innerText = location;
+        document.getElementById('detailCapacity').innerText = reservations + ' / ' + capacity;
+
+        const statusEl = document.getElementById('detailStatus');
+        if (isPast) {
+            statusEl.innerHTML = '<span class="event-type-badge badge-past" style="font-size: 0.85rem; padding: 6px 14px;"><i class="ri-time-line"></i> Past Event</span>';
         } else {
-            document.getElementById('pendingWaitlist').style.display = 'block';
-             document.getElementById('liveList').style.display = 'none';
+            statusEl.innerHTML = '<span class="event-type-badge badge-upcoming" style="font-size: 0.85rem; padding: 6px 14px;"><i class="ri-flashlight-line"></i> Upcoming</span>';
         }
-    }
 
-    function createNewEvent() {
-        document.getElementById('formTitle').innerText = "Create New Event";
-        // Reset form logic here
-    }
+        if (type === 'Online') {
+            statusEl.innerHTML += ' <span class="event-type-badge badge-online" style="font-size: 0.85rem; padding: 6px 14px;"><i class="ri-global-line"></i> Online</span>';
+        }
 
-    function loadEventToEdit(title) {
-        document.getElementById('formTitle').innerText = "Edit: " + title;
-        // Pre-fill form logic here
+        const icon = document.getElementById('detailIcon');
+        const hue = (id * 60) % 360;
+        icon.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 60%), hsl(${hue+40}, 70%, 50%))`;
+
+        const editBtn = document.getElementById('detailEditBtn');
+        editBtn.href = "{{ path('app_event_edit', {'id': '__ID__'})|e('js') }}".replace('__ID__', id);
+        editBtn.style.pointerEvents = 'auto';
+        editBtn.style.opacity = '1';
     }
 </script>
 {% endblock %}

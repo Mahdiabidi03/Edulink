@@ -16,6 +16,19 @@
   </div>
 
   <div class="card" style="padding: 2rem;">
+    {# Show validation errors #}
+    {% if form.vars.submitted and not form.vars.valid %}
+      <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: var(--error);">
+        <strong><i data-lucide="alert-triangle"></i> Validation errors:</strong>
+        {{ form_errors(form) }}
+        {% for child in form %}
+          {% if child.vars.errors|length > 0 %}
+            <div>{{ child.vars.name }}: {{ form_errors(child) }}</div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
     {{ include('challenge_admin/_form.html.twig', { form: form, button_label: 'Create' }) }}
   </div>
 </div>

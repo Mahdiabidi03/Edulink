@@ -3,15 +3,18 @@
 {% block title %}Edit Note - EduLink{% endblock %}
 
 {% block content %}
+{# Quill.js CDN #}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+
 <div style="max-width: 800px; margin: 2rem auto;">
     <a href="{{ path('student_journal') }}" style="color: var(--brand-main); text-decoration: none; margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 6px;">
         <i class="ri-arrow-left-line"></i> Back to Journal
     </a>
 
     <div class="card" style="padding: 2rem;">
-        <h1 style="margin-top: 0; margin-bottom: 1.5rem;">Edit Note</h1>
+        <h1 style="margin-top: 0; margin-bottom: 1.5rem;">{{ form.vars.value.id ? 'Edit Note' : 'New Note' }}</h1>
 
-        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'note-form'}}) }}
             <div style="margin-bottom: 1.5rem;">
                 {{ form_label(form.title, 'Note Title') }}
                 {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
@@ -25,8 +28,13 @@
             </div>
 
             <div style="margin-bottom: 1.5rem;">
-                {{ form_label(form.content, 'Note Content') }}
-                {{ form_widget(form.content, {'attr': {'class': 'form-control', 'rows': 10}}) }}
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main);">Note Content</label>
+                {# Quill Editor Container #}
+                <div id="quill-editor" style="min-height: 250px; border-radius: 0 0 8px 8px;"></div>
+                {# Hidden textarea — Quill syncs content here on submit #}
+                <div style="display: none;">
+                    {{ form_widget(form.content, {'attr': {'id': 'note-content-hidden'}}) }}
+                </div>
                 {% if form.content.vars.errors %}
                     <div style="color: #ff6b6b; font-size: 0.9rem; margin-top: 5px;">
                         {% for error in form.content.vars.errors %}
@@ -64,10 +72,6 @@
     .form-control::placeholder {
         color: var(--text-muted);
     }
-    textarea.form-control {
-        resize: vertical;
-        min-height: 200px;
-    }
 
     form > div > label {
         display: block;
@@ -75,5 +79,74 @@
         font-weight: 600;
         color: var(--text-main);
     }
+
+    /* Quill dark theme overrides */
+    .ql-toolbar.ql-snow {
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border);
+        border-radius: 8px 8px 0 0;
+    }
+    .ql-container.ql-snow {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid var(--border);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+    }
+    .ql-editor {
+        min-height: 200px;
+    }
+    .ql-editor.ql-blank::before {
+        color: var(--text-muted) !important;
+        font-style: normal !important;
+    }
+    .ql-snow .ql-stroke { stroke: var(--text-muted) !important; }
+    .ql-snow .ql-fill { fill: var(--text-muted) !important; }
+    .ql-snow .ql-picker-label { color: var(--text-muted) !important; }
+    .ql-snow .ql-picker-options { background: var(--bg-card) !important; border-color: var(--border) !important; }
+    .ql-snow .ql-picker-item { color: var(--text-main) !important; }
+    .ql-snow .ql-active .ql-stroke { stroke: var(--brand-main) !important; }
+    .ql-snow .ql-active .ql-fill { fill: var(--brand-main) !important; }
+    .ql-snow .ql-active { color: var(--brand-main) !important; }
+    .ql-toolbar button:hover .ql-stroke { stroke: var(--brand-main) !important; }
+    .ql-toolbar button:hover .ql-fill { fill: var(--brand-main) !important; }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hiddenTextarea = document.getElementById('note-content-hidden');
+
+    const quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        placeholder: 'Write something beautiful...',
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ color: [] }, { background: [] }],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['blockquote', 'code-block'],
+                ['link'],
+                ['clean']
+            ]
+        }
+    });
+
+    // Load existing content into Quill
+    if (hiddenTextarea && hiddenTextarea.value.trim()) {
+        quill.root.innerHTML = hiddenTextarea.value;
+    }
+
+    // Sync Quill content to hidden textarea before form submit
+    const form = document.getElementById('note-form');
+    form.addEventListener('submit', function() {
+        const html = quill.root.innerHTML;
+        // If editor is empty, set empty string
+        hiddenTextarea.value = (html === '<p><br></p>') ? '' : html;
+    });
+});
+</script>
 {% endblock %}

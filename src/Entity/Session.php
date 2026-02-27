@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\SessionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SessionRepository::class)]
@@ -37,6 +38,12 @@ class Session
 
     #[ORM\OneToOne(mappedBy: 'session', cascade: ['persist', 'remove'])]
     private ?Review $review = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $summary = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $jitsiRoomId = null;
 
     public function __construct()
     {
@@ -158,6 +165,28 @@ class Session
 
         $this->review = $review;
 
+        return $this;
+    }
+
+    public function getSummary(): ?string
+    {
+        return $this->summary;
+    }
+
+    public function setSummary(?string $summary): static
+    {
+        $this->summary = $summary;
+        return $this;
+    }
+
+    public function getJitsiRoomId(): ?string
+    {
+        return $this->jitsiRoomId;
+    }
+
+    public function setJitsiRoomId(?string $jitsiRoomId): static
+    {
+        $this->jitsiRoomId = $jitsiRoomId;
         return $this;
     }
 }

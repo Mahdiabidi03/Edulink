@@ -37,8 +37,8 @@
     </li>
     <li>
       <a href="{{ path('student_ai_tools') }}" class="{{ app.request.get('_route') == 'student_ai_tools' ? 'active' : '' }}">
-        <i data-lucide="bot"></i>
-        <span>AI Tools</span>
+        <i data-lucide="zap"></i>
+        <span>Study Tools</span>
       </a>
     </li>
     <li>
@@ -54,7 +54,7 @@
       </a>
     </li>
     <li>
-      <a href="{{ path('app_logout') }}" style="color: var(--error);">
+      <a href="{{ path('app_logout') }}" style="color: var(--error);" onclick="localStorage.removeItem('chat_history'); localStorage.removeItem('chat_is_open');">
         <i data-lucide="log-out"></i>
         <span>Logout</span>
       </a>

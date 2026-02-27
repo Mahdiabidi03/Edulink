@@ -8,7 +8,8 @@ use App\Form\CoursType;
 use App\Form\ResourceType;
 use App\Repository\CoursRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController; // <--- This is crucial
+use App\Service\CategoryImageService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,6 +17,12 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/creator')]
 class CreatorController extends AbstractController
 {
+    private CategoryImageService $imageService;
+
+    public function __construct(CategoryImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
     // 1. DASHBOARD REDIRECT
     #[Route('/', name: 'app_creator_dashboard')]
     public function index(): Response
@@ -61,6 +68,15 @@ class CreatorController extends AbstractController
                         $newMatiere->setStatus('PENDING');
                         $newMatiere->setCreator($this->getUser());
                         $newMatiere->setCreatedAt(new \DateTimeImmutable());
+                        
+                        // Auto-generate AI image
+                        try {
+                            $aiUrl = $this->imageService->generateAiImageUrl($newMatiere->getName());
+                            $newMatiere->setImageUrl($aiUrl);
+                        } catch (\Exception $e) {
+                            $newMatiere->setImageUrl($this->imageService->getPlaceholderUrl($newMatiere->getName()));
+                        }
+                        
                         $em->persist($newMatiere);
                         $cours->setMatiere($newMatiere);
                     }
@@ -76,6 +92,10 @@ class CreatorController extends AbstractController
             
             $this->addFlash('success', 'Course proposed successfully! Now you can add resources.');
             return $this->redirectToRoute('app_creator_course_manage', ['id' => $cours->getId()]);
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('creator/new_course.html.twig', [
@@ -136,6 +156,10 @@ class CreatorController extends AbstractController
             $this->addFlash('success', 'Resource added successfully! Waiting for moderation.');
             
             return $this->redirectToRoute('app_creator_course_manage', ['id' => $cours->getId()]);
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('creator/resource_new.html.twig', [
@@ -169,6 +193,14 @@ class CreatorController extends AbstractController
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Category image upload failed');
                 }
+            } else {
+                // Auto-generate AI image if none uploaded
+                try {
+                    $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+                    $matiere->setImageUrl($aiUrl);
+                } catch (\Exception $e) {
+                    $matiere->setImageUrl($this->imageService->getPlaceholderUrl($matiere->getName()));
+                }
             }
             $matiere->setCreator($this->getUser());
             
@@ -178,6 +210,10 @@ class CreatorController extends AbstractController
             // Redirect back to courses, maybe with a flash message saying "Waiting for approval"
             $this->addFlash('success', 'Category proposed successfully! Waiting for admin approval.');
             return $this->redirectToRoute('app_student_courses');
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('creator/new_matiere.html.twig', [

@@ -189,6 +189,7 @@
                 {% set reactionTypes = {like: '👍', love: '❤️', insightful: '💡', funny: '😂', support: '🙏'} %}
                 {% for rType, emoji in reactionTypes %}
                     <form action="{{ path('app_community_react', {id: p.id, type: rType}) }}" method="post" style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('react_post_' ~ p.id) }}">
                         <button type="submit" class="react-btn {{ item.userReaction == rType ? 'active' : '' }}">
                             {{ emoji }}
                             {% if item.reactions[rType] is defined and item.reactions[rType] > 0 %}
@@ -217,6 +218,7 @@
 
                 {% if p.author == app.user %}
                     <form action="{{ path('app_community_delete', {id: p.id}) }}" method="post" style="display:inline;" onsubmit="return confirm('Delete this post?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_post_' ~ p.id) }}">
                         <button type="submit" class="fi-act danger"><i class="ri-delete-bin-line"></i> Delete</button>
                     </form>
                 {% endif %}
@@ -235,6 +237,7 @@
                         </div>
                         {% if c.author == app.user %}
                             <form action="{{ path('app_community_comment_delete', {id: c.id}) }}" method="post">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_comment_' ~ c.id) }}">
                                 <button type="submit" class="comment-del" title="Delete"><i class="ri-close-line"></i></button>
                             </form>
                         {% endif %}
@@ -242,6 +245,7 @@
                     {% endfor %}
                 </div>
                 <form class="comment-form" action="{{ path('app_community_comment', {id: p.id}) }}" method="post">
+                    <input type="hidden" name="_token" value="{{ csrf_token('comment_post_' ~ p.id) }}">
                     <input type="text" name="comment_content" placeholder="Write a comment..." required maxlength="1000">
                     <button type="submit"><i class="ri-send-plane-line"></i></button>
                 </form>
@@ -255,6 +259,7 @@
                         <button class="report-dialog-close" onclick="this.closest('.report-overlay').classList.remove('show')">&times;</button>
                     </div>
                     <form action="{{ path('app_community_report', {id: p.id}) }}" method="post" class="report-form">
+                        <input type="hidden" name="_token" value="{{ csrf_token('report_post_' ~ p.id) }}">
                         <div class="report-dialog-body">
                             <label>Reason</label>
                             <select name="report_reason">

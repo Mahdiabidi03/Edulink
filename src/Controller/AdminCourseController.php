@@ -8,6 +8,8 @@ use App\Form\CoursType;
 use App\Form\ResourceType;
 use App\Repository\CoursRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\CategoryImageService;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,10 +18,33 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/admin/courses')]
 class AdminCourseController extends AbstractController
 {
-    #[Route('/', name: 'app_admin_courses')]
-    public function index(): Response
+    private PaginatorInterface $paginator;
+
+    public function __construct(CategoryImageService $imageService, PaginatorInterface $paginator)
     {
-        return $this->redirectToRoute('app_admin_categories');
+        $this->imageService = $imageService;
+        $this->paginator = $paginator;
+    }
+
+    #[Route('/', name: 'app_admin_courses')]
+    public function index(Request $request, CoursRepository $courseRepo): Response
+    {
+        $sort = $request->query->get('sort', 'c.createdAt');
+        $direction = $request->query->get('direction', 'desc');
+
+        $query = $courseRepo->createQueryBuilder('c')
+            ->orderBy($sort, $direction)
+            ->getQuery();
+
+        $pagination = $this->paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            10
+        );
+
+        return $this->render('admin/courses.html.twig', [
+            'pagination' => $pagination,
+        ]);
     }
 
     // 2. CREATE NEW OFFICIAL COURSE
@@ -41,6 +66,15 @@ class AdminCourseController extends AbstractController
                     $matiere = new \App\Entity\Matiere();
                     $matiere->setName($matiereName);
                     $matiere->setStatus('APPROVED'); // Admin created, so approved
+                    
+                    // Auto-generate AI image
+                    try {
+                        $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+                        $matiere->setImageUrl($aiUrl);
+                    } catch (\Exception $e) {
+                        $matiere->setImageUrl($this->imageService->getPlaceholderUrl($matiere->getName()));
+                    }
+                    
                     $em->persist($matiere);
                 }
                 $cours->setMatiere($matiere);
@@ -53,7 +87,12 @@ class AdminCourseController extends AbstractController
             $em->persist($cours);
             $em->flush();
 
+            $this->addFlash('success', 'Course created successfully!');
             return $this->redirectToRoute('app_admin_courses');
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         // Points to templates/admin/new_course.html.twig

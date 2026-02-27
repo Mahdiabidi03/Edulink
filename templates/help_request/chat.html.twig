@@ -253,6 +253,240 @@
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
     }
+
+    /* ===== VIDEO CALL ===== */
+    .video-call-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 10px;
+        border: none;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+        text-decoration: none;
+        animation: pulse-glow 2s infinite;
+    }
+    .video-call-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
+    @keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.3); }
+        50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    }
+    .video-call-btn.hangup { background: linear-gradient(135deg, #ef4444, #dc2626); animation: none; }
+
+    /* Video overlay */
+    .video-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.92);
+        z-index: 10000;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+    }
+    .video-overlay.active { display: flex; }
+    .video-grid {
+        display: flex;
+        gap: 16px;
+        max-width: 90vw;
+    }
+    .video-box {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #1e293b;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .video-box video {
+        width: 420px;
+        height: 315px;
+        object-fit: cover;
+        display: block;
+    }
+    .video-box .video-label {
+        position: absolute;
+        bottom: 10px;
+        left: 12px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+    .video-controls {
+        display: flex;
+        gap: 12px;
+    }
+    .video-controls button {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+    .video-controls .ctrl-hangup { background: #ef4444; }
+    .video-controls .ctrl-mute { background: rgba(255,255,255,0.15); }
+    .video-controls .ctrl-mute.muted { background: #f59e0b; }
+    .video-controls .ctrl-cam { background: rgba(255,255,255,0.15); }
+    .video-controls .ctrl-cam.off { background: #ef4444; }
+    .video-controls button:hover { transform: scale(1.1); }
+
+    /* Incoming call alert */
+    .incoming-call {
+        display: none;
+        position: fixed;
+        top: 80px;
+        right: 24px;
+        background: var(--bg-card);
+        border: 2px solid #10b981;
+        border-radius: 16px;
+        padding: 20px;
+        z-index: 10001;
+        box-shadow: 0 8px 32px rgba(16,185,129,0.3);
+        animation: slideIn 0.3s ease;
+        text-align: center;
+        min-width: 260px;
+    }
+    .incoming-call.show { display: block; }
+    .incoming-call h4 { margin: 0 0 4px; color: var(--text-main); font-size: 1rem; }
+    .incoming-call p { margin: 0 0 14px; color: var(--text-muted); font-size: 0.85rem; }
+    .incoming-call .call-actions { display: flex; gap: 12px; justify-content: center; }
+    .incoming-call .call-actions button {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .btn-answer { background: #10b981; color: white; }
+    .btn-decline { background: #ef4444; color: white; }
+    @keyframes ring {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(15deg); }
+        75% { transform: rotate(-15deg); }
+    }
+
+    /* Call notification message in chat */
+    .msg-row.system { justify-content: center; }
+    .msg-row.system .msg-bubble {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        font-weight: 600;
+        font-size: 0.82rem;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    /* ===== AI SUGGESTIONS ===== */
+    .ai-suggestions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 8px 0;
+    }
+    .ai-suggestions:empty { display: none; }
+    .ai-suggestion-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.25s;
+        font-family: inherit;
+        white-space: nowrap;
+    }
+    .ai-suggestion-chip:hover {
+        border-color: var(--brand-main);
+        color: var(--brand-main);
+        background: rgba(99, 102, 241, 0.08);
+        transform: translateY(-1px);
+    }
+    .ai-suggestion-chip i { font-size: 0.9rem; }
+    .ai-suggestions-label {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    /* ===== ATTACHMENTS IN MESSAGES ===== */
+    .msg-attachment {
+        margin-top: 8px;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+    }
+    .msg-attachment img {
+        max-width: 260px;
+        max-height: 200px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .msg-attachment img:hover { transform: scale(1.02); }
+    .msg-attachment-file {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.82rem;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .msg-row.sent .msg-attachment-file { background: rgba(255,255,255,0.15); color: white; }
+    .msg-row.received .msg-attachment-file { background: rgba(99,102,241,0.08); color: var(--brand-main); }
+    .msg-attachment-file:hover { transform: translateY(-1px); }
+    .msg-attachment-file i { font-size: 1.1rem; }
+
+    /* File upload in input bar */
+    .file-upload-btn {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: all 0.2s;
+        flex-shrink: 0;
+    }
+    .file-upload-btn:hover { border-color: var(--brand-main); color: var(--brand-main); }
+    .file-name-display {
+        font-size: 0.72rem;
+        color: var(--brand-main);
+        margin-top: 4px;
+        display: none;
+    }
 </style>
 
 <div class="chat-wrapper">
@@ -274,8 +508,13 @@
 
         {% if session.isActive %}
         <div class="close-actions">
+            {# VIDEO CALL — PeerJS (WebRTC) #}
+            <button id="videoCallBtn" class="video-call-btn" onclick="startVideoCall()">
+                <i class="ri-vidicon-line"></i> Video Call
+            </button>
             <form action="{{ path('app_help_request_close', {'id': session.id}) }}" method="post"
                   onsubmit="return confirm('Close session and transfer bounty?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('close_session_' ~ session.id) }}">
                 <input type="hidden" name="close_reason" value="RESOLVED">
                 <button type="submit" class="close-btn close-btn-resolve">
                     <i class="ri-check-double-line"></i> Done (Pay)
@@ -283,6 +522,7 @@
             </form>
             <form action="{{ path('app_help_request_close', {'id': session.id}) }}" method="post"
                   onsubmit="return confirm('Cancel without paying bounty?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('close_session_' ~ session.id) }}">
                 <input type="hidden" name="close_reason" value="CANCELLED">
                 <button type="submit" class="close-btn close-btn-cancel">
                     <i class="ri-close-line"></i> Cancel
@@ -290,6 +530,7 @@
             </form>
             <form action="{{ path('app_help_request_close', {'id': session.id}) }}" method="post"
                   onsubmit="return confirm('Report this session to admin?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('close_session_' ~ session.id) }}">
                 <input type="hidden" name="close_reason" value="REPORTED">
                 <button type="submit" class="close-btn close-btn-report">
                     <i class="ri-flag-line"></i> Report
@@ -308,6 +549,25 @@
                         <div class="toxic-warn"><i class="ri-alert-line"></i> Toxicity Detected</div>
                     {% endif %}
                     <div>{{ message.content }}</div>
+                    {# ===== ATTACHMENT DISPLAY ===== #}
+                    {% if message.attachmentName %}
+                        <div class="msg-attachment">
+                            {% set ext = message.attachmentName|split('.')|last|lower %}
+                            {% if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
+                                <a href="/uploads/chat/{{ message.attachmentName }}" target="_blank">
+                                    <img src="/uploads/chat/{{ message.attachmentName }}" alt="Attachment">
+                                </a>
+                            {% else %}
+                                <a href="/uploads/chat/{{ message.attachmentName }}" target="_blank" class="msg-attachment-file">
+                                    <i class="ri-file-download-line"></i>
+                                    {{ message.attachmentName|length > 30 ? message.attachmentName[:27] ~ '...' : message.attachmentName }}
+                                    {% if message.attachmentSize %}
+                                        <span style="opacity:0.6;">({{ (message.attachmentSize / 1024)|round(0) }}KB)</span>
+                                    {% endif %}
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     <div class="msg-footer">
                         <span>{{ message.timestamp|date('H:i') }}</span>
                         {% if message.sender == app.user and session.isActive %}
@@ -326,13 +586,30 @@
         {% endfor %}
     </div>
 
+    {# ======================== AI SUGGESTIONS ======================== #}
+    {% if session.isActive %}
+        <div id="ai-suggestions-wrapper" style="padding: 0 4px;">
+            <div class="ai-suggestions-label"><i class="ri-sparkling-line"></i> AI Suggested Replies</div>
+            <div class="ai-suggestions" id="ai-suggestions"></div>
+        </div>
+    {% endif %}
+
     {# ======================== INPUT ======================== #}
     {% if session.isActive %}
         <div class="chat-input-bar">
-            {{ form_start(form, {'attr': {'style': 'display: flex; gap: var(--space-md); width: 100%; align-items: flex-end;'}}) }}
+            {{ form_start(form, {'attr': {'style': 'display: flex; gap: var(--space-md); width: 100%; align-items: flex-end;', 'enctype': 'multipart/form-data'}}) }}
                 <div style="flex: 1;">
-                    {{ form_widget(form.content, {'attr': {'placeholder': 'Type your message...', 'rows': 1}}) }}
+                    {{ form_widget(form.content, {'attr': {'placeholder': 'Type your message...', 'rows': 1, 'id': 'chat-message-input'}}) }}
+                    {% if form.attachmentFile is defined %}
+                        <div class="file-name-display" id="fileNameDisplay"></div>
+                    {% endif %}
                 </div>
+                {% if form.attachmentFile is defined %}
+                    <label class="file-upload-btn" for="{{ form.attachmentFile.vars.id }}" title="Attach file">
+                        <i class="ri-attachment-2"></i>
+                    </label>
+                    <div style="display:none;">{{ form_widget(form.attachmentFile, {'attr': {'onchange': 'showFileName(this)'}}) }}</div>
+                {% endif %}
                 <button type="submit" class="send-btn" title="Send">
                     <i class="ri-send-plane-fill"></i>
                 </button>
@@ -345,12 +622,268 @@
     {% endif %}
 </div>
 
+{# ======================== VIDEO CALL OVERLAY ======================== #}
+<div class="video-overlay" id="videoOverlay">
+    <div class="video-grid">
+        <div class="video-box">
+            <video id="localVideo" autoplay muted playsinline></video>
+            <span class="video-label">You</span>
+        </div>
+        <div class="video-box">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <span class="video-label" id="remoteLabel">Connecting...</span>
+        </div>
+    </div>
+    <div class="video-controls">
+        <button class="ctrl-mute" id="muteBtn" onclick="toggleMute()" title="Toggle Microphone">
+            <i class="ri-mic-line"></i>
+        </button>
+        <button class="ctrl-hangup" onclick="hangUp()" title="End Call">
+            <i class="ri-phone-off-line"></i>
+        </button>
+        <button class="ctrl-cam" id="camBtn" onclick="toggleCamera()" title="Toggle Camera">
+            <i class="ri-camera-line"></i>
+        </button>
+    </div>
+</div>
+
+{# ======================== INCOMING CALL ALERT ======================== #}
+<div class="incoming-call" id="incomingCall">
+    <i class="ri-phone-fill" style="font-size: 2rem; color: #10b981; animation: ring 0.5s infinite; display: block; margin-bottom: 8px;"></i>
+    <h4>📞 Incoming Video Call</h4>
+    <p id="callerName">The other participant is calling...</p>
+    <div class="call-actions">
+        <button class="btn-answer" onclick="answerCall()"><i class="ri-phone-fill"></i> Answer</button>
+        <button class="btn-decline" onclick="declineCall()"><i class="ri-phone-off-fill"></i> Decline</button>
+    </div>
+</div>
+
 {% for message in app.flashes('warning') %}
     <div class="flash-toast flash-warning"><i class="ri-alert-line"></i> {{ message }}</div>
 {% endfor %}
 
+{# PeerJS Library #}
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
 <script>
+    // Auto-scroll chat
     const chatContainer = document.getElementById('chat-messages');
     if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // File upload display
+    function showFileName(input) {
+        const display = document.getElementById('fileNameDisplay');
+        if (display && input.files.length > 0) {
+            display.textContent = '📎 ' + input.files[0].name;
+            display.style.display = 'block';
+        }
+    }
+
+    // ===== PEERJS VIDEO CALL =====
+    {% if session.isActive %}
+    const SESSION_ID = {{ session.id }};
+    const MY_USER_ID = {{ app.user.id }};
+    const MY_PEER_ID = 'edulink_session_' + SESSION_ID + '_user_' + MY_USER_ID;
+    const MY_NAME = '{{ app.user.fullName|default(app.user.email)|e('js') }}';
+
+    // Figure out the other user's peer ID
+    const studentId = {{ session.helpRequest.student.id }};
+    const tutorId = {{ session.tutor.id }};
+    const otherUserId = (MY_USER_ID === studentId) ? tutorId : studentId;
+    const REMOTE_PEER_ID = 'edulink_session_' + SESSION_ID + '_user_' + otherUserId;
+
+    let peer = null;
+    let localStream = null;
+    let currentCall = null;
+    let pendingCall = null;
+    let isMuted = false;
+    let isCamOff = false;
+
+    // Initialize PeerJS
+    function initPeer() {
+        peer = new Peer(MY_PEER_ID);
+
+        peer.on('open', (id) => {
+            console.log('[PeerJS] Connected with ID:', id);
+        });
+
+        // Listen for incoming calls
+        peer.on('call', (call) => {
+            pendingCall = call;
+            document.getElementById('incomingCall').classList.add('show');
+            // Play ring sound (optional)
+        });
+
+        peer.on('error', (err) => {
+            console.warn('[PeerJS] Error:', err.type, err.message);
+            if (err.type === 'unavailable-id') {
+                // ID already taken — reconnect with suffix
+                peer = new Peer(MY_PEER_ID + '_' + Date.now());
+            }
+        });
+    }
+
+    // Start a video call
+    async function startVideoCall() {
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('localVideo').srcObject = localStream;
+            document.getElementById('videoOverlay').classList.add('active');
+
+            // Call the other peer
+            const call = peer.call(REMOTE_PEER_ID, localStream);
+            if (!call) {
+                document.getElementById('remoteLabel').textContent = 'Waiting for them to join...';
+                // Add a system message in chat
+                addSystemMessage('📹 ' + MY_NAME + ' started a video call');
+                return;
+            }
+            handleCall(call);
+            addSystemMessage('📹 ' + MY_NAME + ' started a video call');
+
+            // Update button to hangup
+            const btn = document.getElementById('videoCallBtn');
+            btn.classList.add('hangup');
+            btn.innerHTML = '<i class="ri-phone-off-line"></i> End Call';
+            btn.onclick = hangUp;
+        } catch (err) {
+            console.error('[PeerJS] Camera/mic error:', err);
+            alert('Could not access camera/microphone. Please allow permissions.');
+        }
+    }
+
+    // Answer incoming call
+    async function answerCall() {
+        if (!pendingCall) return;
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('localVideo').srcObject = localStream;
+            document.getElementById('videoOverlay').classList.add('active');
+            document.getElementById('incomingCall').classList.remove('show');
+
+            pendingCall.answer(localStream);
+            handleCall(pendingCall);
+
+            // Update button
+            const btn = document.getElementById('videoCallBtn');
+            btn.classList.add('hangup');
+            btn.innerHTML = '<i class="ri-phone-off-line"></i> End Call';
+            btn.onclick = hangUp;
+        } catch (err) {
+            console.error('[PeerJS] Camera/mic error:', err);
+            alert('Could not access camera/microphone.');
+        }
+    }
+
+    function declineCall() {
+        if (pendingCall) pendingCall.close();
+        pendingCall = null;
+        document.getElementById('incomingCall').classList.remove('show');
+    }
+
+    function handleCall(call) {
+        currentCall = call;
+        call.on('stream', (remoteStream) => {
+            document.getElementById('remoteVideo').srcObject = remoteStream;
+            document.getElementById('remoteLabel').textContent = (MY_USER_ID === studentId) ? '{{ session.tutor.fullName|e('js') }}' : '{{ session.helpRequest.student.fullName|e('js') }}';
+        });
+        call.on('close', () => {
+            hangUp();
+        });
+        call.on('error', (err) => {
+            console.warn('[PeerJS] Call error:', err);
+            hangUp();
+        });
+    }
+
+    function hangUp() {
+        if (currentCall) currentCall.close();
+        currentCall = null;
+        if (localStream) {
+            localStream.getTracks().forEach(t => t.stop());
+            localStream = null;
+        }
+        document.getElementById('videoOverlay').classList.remove('active');
+        document.getElementById('localVideo').srcObject = null;
+        document.getElementById('remoteVideo').srcObject = null;
+
+        const btn = document.getElementById('videoCallBtn');
+        btn.classList.remove('hangup');
+        btn.innerHTML = '<i class="ri-vidicon-line"></i> Video Call';
+        btn.onclick = startVideoCall;
+    }
+
+    function toggleMute() {
+        if (!localStream) return;
+        isMuted = !isMuted;
+        localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+        const btn = document.getElementById('muteBtn');
+        btn.classList.toggle('muted', isMuted);
+        btn.innerHTML = isMuted ? '<i class="ri-mic-off-line"></i>' : '<i class="ri-mic-line"></i>';
+    }
+
+    function toggleCamera() {
+        if (!localStream) return;
+        isCamOff = !isCamOff;
+        localStream.getVideoTracks().forEach(t => t.enabled = !isCamOff);
+        const btn = document.getElementById('camBtn');
+        btn.classList.toggle('off', isCamOff);
+        btn.innerHTML = isCamOff ? '<i class="ri-camera-off-line"></i>' : '<i class="ri-camera-line"></i>';
+    }
+
+    // Add a system message to the chat (visual only, not persisted)
+    function addSystemMessage(text) {
+        const row = document.createElement('div');
+        row.className = 'msg-row system';
+        row.innerHTML = '<div class="msg-bubble"><i class="ri-vidicon-line"></i> ' + text + '</div>';
+        chatContainer.appendChild(row);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Initialize PeerJS on page load
+    initPeer();
+    {% endif %}
+
+    // ===== AI SUGGESTION CHIPS =====
+    {% if session.isActive %}
+    (function() {
+        const suggestionsContainer = document.getElementById('ai-suggestions');
+        const suggestionsWrapper = document.getElementById('ai-suggestions-wrapper');
+        const messageInput = document.querySelector('#chat-message-input, textarea[name*="content"]');
+
+        async function loadSuggestions() {
+            try {
+                const res = await fetch('{{ path("app_help_request_chat_messages", {id: session.id}) }}?after=0');
+                if (!res.ok) throw new Error('Failed to load');
+                const data = await res.json();
+                
+                if (data.suggestions && data.suggestions.length > 0) {
+                    suggestionsContainer.innerHTML = '';
+                    data.suggestions.forEach(text => {
+                        const chip = document.createElement('button');
+                        chip.type = 'button';
+                        chip.className = 'ai-suggestion-chip';
+                        chip.innerHTML = '<i class="ri-sparkling-line"></i> ' + text;
+                        chip.addEventListener('click', () => {
+                            if (messageInput) {
+                                messageInput.value = text;
+                                messageInput.focus();
+                            }
+                        });
+                        suggestionsContainer.appendChild(chip);
+                    });
+                    suggestionsWrapper.style.display = 'block';
+                } else {
+                    suggestionsWrapper.style.display = 'none';
+                }
+            } catch (e) {
+                console.warn('AI suggestions unavailable:', e);
+                suggestionsWrapper.style.display = 'none';
+            }
+        }
+
+        loadSuggestions();
+    })();
+    {% endif %}
 </script>
 {% endblock %}

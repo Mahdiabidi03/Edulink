@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\HelpRequest;
 use App\Repository\HelpRequestRepository;
+use App\Repository\MessageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,6 +28,18 @@ class AssistanceController extends AbstractController
             'tickets' => $helpRequestRepository->findSupportTickets(),
             'all_requests' => $helpRequestRepository->findBy([], ['createdAt' => 'DESC']),
             'stats' => $helpRequestRepository->getAssistanceStats(),
+        ]);
+    }
+
+    #[Route('/stats-dashboard', name: 'app_admin_assistance_stats', methods: ['GET'])]
+    public function statsDashboard(HelpRequestRepository $helpRequestRepository): Response
+    {
+        return $this->render('admin/assistance/stats.html.twig', [
+            'stats' => $helpRequestRepository->getAssistanceStats(),
+            'monthlyData' => $helpRequestRepository->getMonthlyRequestCounts(),
+            'categoryData' => $helpRequestRepository->getCategoryDistribution(),
+            'resolutionData' => $helpRequestRepository->getResolutionBreakdown(),
+            'topTutors' => $helpRequestRepository->getTopTutors(),
         ]);
     }
 
@@ -162,5 +175,47 @@ class AssistanceController extends AbstractController
             return '"' . $value . '"';
         }
         return $value;
+    }
+
+    #[Route('/toxic', name: 'app_admin_assistance_toxic', methods: ['GET'])]
+    public function toxicMessages(MessageRepository $messageRepository, EntityManagerInterface $em): Response
+    {
+        $toxicMessages = $messageRepository->findToxicMessages();
+
+        $totalMessages = (int) $em->createQuery('SELECT COUNT(m.id) FROM App\Entity\Message m')
+            ->getSingleScalarResult();
+
+        return $this->render('admin/assistance/toxic.html.twig', [
+            'toxic_messages' => $toxicMessages,
+            'totalMessages' => $totalMessages,
+        ]);
+    }
+
+    #[Route('/export/toxic', name: 'app_admin_assistance_export_toxic', methods: ['GET'])]
+    public function exportToxicMessages(MessageRepository $messageRepository): Response
+    {
+        $toxicMessages = $messageRepository->findToxicMessages();
+
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="toxic_messages_' . date('Y-m-d_His') . '.csv"');
+
+        $output = "\xEF\xBB\xBF"; // UTF-8 BOM
+        $output .= "ID,Sender,Email,Content,Session ID,Timestamp\n";
+
+        foreach ($toxicMessages as $msg) {
+            $output .= sprintf(
+                "%d,%s,%s,%s,%s,%s\n",
+                $msg->getId(),
+                $this->csvEscape($msg->getSender()?->getFullName() ?? 'N/A'),
+                $this->csvEscape($msg->getSender()?->getEmail() ?? 'N/A'),
+                $this->csvEscape(mb_substr($msg->getContent(), 0, 300)),
+                $msg->getSession()?->getId() ?? 'N/A',
+                $msg->getTimestamp()?->format('Y-m-d H:i:s') ?? 'N/A'
+            );
+        }
+
+        $response->setContent($output);
+        return $response;
     }
 }

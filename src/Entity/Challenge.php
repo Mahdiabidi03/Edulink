@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: ChallengeRepository::class)]
 class Challenge
@@ -15,6 +16,12 @@ class Challenge
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    /**
+     * @var Collection<int, Task>
+     */
+    #[ORM\OneToMany(mappedBy: 'challenge', targetEntity: Task::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $tasks;
 
     #[Assert\NotBlank(message: 'Le titre est obligatoire.')]
     #[Assert\Length(
@@ -59,6 +66,7 @@ class Challenge
     public function __construct()
     {
         $this->userChallenges = new ArrayCollection();
+        $this->tasks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -126,5 +134,51 @@ class Challenge
         }
 
         return $this;
+    }
+    /**
+     * @return Collection<int, Task>
+     */
+    public function getTasks(): Collection
+    {
+        return $this->tasks;
+    }
+
+    public function addTask(Task $task): static
+    {
+        if (!$this->tasks->contains($task)) {
+            $this->tasks->add($task);
+            $task->setChallenge($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTask(Task $task): static
+    {
+        if ($this->tasks->removeElement($task)) {
+            // set the owning side to null (unless already changed)
+            if ($task->getChallenge() === $this) {
+                $task->setChallenge(null);
+            }
+        }
+
+        return $this;
+    }
+
+    #[Assert\Callback]
+    public function validatePoints(ExecutionContextInterface $context): void
+    {
+        $totalTaskPoints = 0;
+        foreach ($this->tasks as $task) {
+            $totalTaskPoints += $task->getPoints();
+        }
+
+        if ($totalTaskPoints > $this->rewardPoints) {
+            $context->buildViolation('La somme des points des tâches ({{ current }}) ne peut pas dépasser les points du challenge ({{ limit }}).')
+                ->setParameter('{{ current }}', (string)$totalTaskPoints)
+                ->setParameter('{{ limit }}', (string)$this->rewardPoints)
+                ->atPath('rewardPoints')
+                ->addViolation();
+        }
     }
 }

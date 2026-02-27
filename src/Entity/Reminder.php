@@ -38,7 +38,7 @@ class Reminder
     private ?string $description = null;
 
     #[ORM\Column(type: 'datetime')]
-    #[Assert\NotBlank(message: 'Reminder date/time cannot be empty')]
+    #[Assert\NotNull(message: 'Reminder date/time cannot be empty')]
     private ?\DateTimeInterface $reminderTime = null;
 
     #[ORM\Column(type: 'string', length: 50)]
@@ -51,17 +51,6 @@ class Reminder
     {
         $this->createdAt = new \DateTime();
     }
-
-    // Validation callback disabled to allow editing existing reminders
-    // #[Assert\Callback]
-    // public function validateReminderTime(ExecutionContextInterface $context): void
-    // {
-    //     if ($this->reminderTime instanceof \DateTimeInterface && $this->reminderTime <= new \DateTime()) {
-    //         $context->buildViolation('Reminder date must be in the future')
-    //             ->atPath('reminderTime')
-    //             ->addViolation();
-    //     }
-    // }
 
     public function getId(): ?int
     {
@@ -106,7 +95,7 @@ class Reminder
         return $this->reminderTime;
     }
 
-    public function setReminderTime(\DateTimeInterface $reminderTime): static
+    public function setReminderTime(?\DateTimeInterface $reminderTime): static
     {
         $this->reminderTime = $reminderTime;
         return $this;

@@ -4,7 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Challenge;
 use App\Entity\UserChallenge;
+use App\Entity\Task;
 use App\Form\ChallengeType;
+use App\Form\TaskType;
 use App\Repository\ChallengeRepository;
 use App\Repository\UserChallengeRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,10 +14,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Service\BadgeService;
 
-#[Route('/challenge/admin')]
+#[Route('/admin/challenge')]
 final class ChallengeAdminController extends AbstractController
 {
+    private BadgeService $badgeService;
+
+    public function __construct(BadgeService $badgeService)
+    {
+        $this->badgeService = $badgeService;
+    }
     /* ========================
        CHALLENGE CRUD
     ======================== */
@@ -30,7 +39,7 @@ final class ChallengeAdminController extends AbstractController
 
         if ($q !== '') {
             $qb->andWhere('c.title LIKE :q OR c.goal LIKE :q')
-               ->setParameter('q', '%'.$q.'%');
+                ->setParameter('q', '%' . $q . '%');
         }
 
         switch ($order) {
@@ -69,6 +78,7 @@ final class ChallengeAdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($challenge);
             $entityManager->flush();
+            $this->addFlash('success', 'Challenge créé avec ' . count($challenge->getTasks()) . ' tâche(s).');
             return $this->redirectToRoute('app_challenge_admin_index');
         }
 
@@ -85,7 +95,8 @@ final class ChallengeAdminController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-            return $this->redirectToRoute('app_challenge_admin_index');
+            $this->addFlash('success', 'Challenge mis à jour avec ' . count($challenge->getTasks()) . ' tâche(s).');
+            return $this->redirectToRoute('app_challenge_admin_edit', ['id' => $challenge->getId()]);
         }
 
         return $this->render('challenge_admin/edit.html.twig', [
@@ -97,12 +108,73 @@ final class ChallengeAdminController extends AbstractController
     #[Route('/{id}', name: 'app_challenge_admin_delete', methods: ['POST'])]
     public function delete(Request $request, Challenge $challenge, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$challenge->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $challenge->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($challenge);
             $entityManager->flush();
         }
 
         return $this->redirectToRoute('app_challenge_admin_index');
+    }
+
+    /* ========================
+       TASK CRUD
+    ======================== */
+
+    #[Route('/{id}/task/new', name: 'app_challenge_admin_task_new', methods: ['GET', 'POST'])]
+    public function newTask(Request $request, Challenge $challenge, EntityManagerInterface $entityManager): Response
+    {
+        $task = new Task();
+        $task->setChallenge($challenge);
+
+        $form = $this->createForm(TaskType::class, $task);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($task);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Tâche ajoutée avec succès.');
+            return $this->redirectToRoute('app_challenge_admin_edit', ['id' => $challenge->getId()]);
+        }
+
+        return $this->render('challenge_admin/task_new.html.twig', [
+            'challenge' => $challenge,
+            'task' => $task,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/task/{id}/edit', name: 'app_challenge_admin_task_edit', methods: ['GET', 'POST'])]
+    public function editTask(Request $request, Task $task, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(TaskType::class, $task);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Tâche mise à jour.');
+            return $this->redirectToRoute('app_challenge_admin_edit', ['id' => $task->getChallenge()->getId()]);
+        }
+
+        return $this->render('challenge_admin/task_edit.html.twig', [
+            'task' => $task,
+            'challenge' => $task->getChallenge(),
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/task/{id}/delete', name: 'app_challenge_admin_task_delete', methods: ['POST'])]
+    public function deleteTask(Request $request, Task $task, EntityManagerInterface $entityManager): Response
+    {
+        $challengeId = $task->getChallenge()->getId();
+        if ($this->isCsrfTokenValid('delete_task' . $task->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($task);
+            $entityManager->flush();
+            $this->addFlash('success', 'Tâche supprimée.');
+        }
+
+        return $this->redirectToRoute('app_challenge_admin_edit', ['id' => $challengeId]);
     }
 
     /* ========================
@@ -129,7 +201,7 @@ final class ChallengeAdminController extends AbstractController
         EntityManagerInterface $em
     ): Response {
 
-        if (!$this->isCsrfTokenValid('validate_'.$userChallenge->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('validate_' . $userChallenge->getId(), $request->request->get('_token'))) {
             return $this->redirectToRoute('admin_submissions');
         }
 
@@ -141,17 +213,31 @@ final class ChallengeAdminController extends AbstractController
         $user = $userChallenge->getUser();
         $reward = $userChallenge->getChallenge()->getRewardPoints() ?? 0;
 
-        // Mise à jour de l'XP (pour affichage et progression)
-        $user->setXp(($user->getXp() ?? 0) + $reward);
-        
-        // Mise à jour du wallet (pour les transactions/paiements si nécessaire)
+        // Mise à jour Unisifiée (XP = Wallet Balance)
         $user->setWalletBalance(($user->getWalletBalance() ?? 0) + $reward);
+
+        // Log transaction
+        $transaction = new \App\Entity\Transaction();
+        $transaction->setUser($user);
+        $transaction->setAmount($reward);
+        $transaction->setType('CHALLENGE_COMPLETION');
+        $transaction->setDate(new \DateTime());
+        $em->persist($transaction);
 
         $userChallenge->setStatus(UserChallenge::STATUS_COMPLETED);
 
+        // ✅ Check for new badges
+        $newBadges = $this->badgeService->checkBadges($user);
+
         $em->flush();
 
-        $this->addFlash('success', 'Challenge validé. Points crédités.');
+        $msg = 'Challenge validé. Points crédités.';
+        if (!empty($newBadges)) {
+            $badgeNames = array_map(fn($b) => $b->getName(), $newBadges);
+            $msg .= ' 🎉 Nouveaux badges débloqués : ' . implode(', ', $badgeNames);
+        }
+
+        $this->addFlash('success', $msg);
         return $this->redirectToRoute('admin_submissions');
     }
 
@@ -162,7 +248,7 @@ final class ChallengeAdminController extends AbstractController
         EntityManagerInterface $em
     ): Response {
 
-        if (!$this->isCsrfTokenValid('reject_'.$userChallenge->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('reject_' . $userChallenge->getId(), $request->request->get('_token'))) {
             return $this->redirectToRoute('admin_submissions');
         }
 

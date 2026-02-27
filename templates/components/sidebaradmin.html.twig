@@ -60,7 +60,7 @@
       </a>
     </li>
     <li>
-      <a href="{{ path('app_logout') }}" style="color: var(--error);">
+      <a href="{{ path('app_logout') }}" style="color: var(--error);" onclick="localStorage.removeItem('chat_history'); localStorage.removeItem('chat_is_open');">
         <i data-lucide="log-out"></i>
         <span>Logout</span>
       </a>

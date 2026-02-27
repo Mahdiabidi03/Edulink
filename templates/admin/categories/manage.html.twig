@@ -54,7 +54,7 @@
     <div class="card">
         <h2 style="margin-top: 0; padding-bottom: 1rem; border-bottom: 2px solid var(--border);">Courses in this Category</h2>
         
-        {% if courses is not empty %}
+        {% if pagination is not empty %}
             <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
                 <thead>
                     <tr style="border-bottom: 2px solid var(--border);">
@@ -66,7 +66,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for course in courses %}
+                    {% for course in pagination %}
                     <tr style="border-bottom: 1px solid var(--border-light);">
                         <td style="padding: 15px; font-weight: 600;">{{ course.title }}</td>
                         <td style="padding: 15px;">
@@ -88,6 +88,11 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <div class="navigation" style="margin-top: 2rem;">
+                <div class="pagination">
+                    {{ knp_pagination_render(pagination) }}
+                </div>
+            </div>
         {% else %}
             <p style="text-align: center; padding: 2rem; color: var(--text-muted);">No courses in this category yet.</p>
         {% endif %}

@@ -1,0 +1,18 @@
+﻿php : PHP Fatal error:
+Stack trace:
+#0 C:\Users\dali\Downlo
+#1 C:\Users\dali\Downlo
+#2 C:\Users\dali\Downlo
+#3 C:\Users\dali\Downlo
+#4 C:\Users\dali\Downlo
+#5 C:\Users\dali\Downlo
+#6 C:\Users\dali\Downlo
+#7 C:\Users\dali\Downlo
+#8 C:\Users\dali\Downlo
+#9 C:\Users\dali\Downlo
+#10 C:\Users\dali\Downl
+#11 C:\Users\dali\Downl
+#12 C:\Users\dali\Downl
+#13 C:\Users\dali\Downl
+#14 C:\Users\dali\Downl
+#15 {main}

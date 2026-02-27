@@ -1,40 +1,250 @@
 {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-<div style="display:grid; gap: 20px;">
   <div style="display:grid; gap: 15px;">
+    {# ... existing fields ... #}
     <div class="form-group">
       {{ form_label(form.title, null, {'label_attr': {'class': 'form-label'}}) }}
       {{ form_widget(form.title, {'attr': {'class': 'form-input', 'placeholder': 'Ex: Master React Hooks'}}) }}
-      <div style="color: var(--error); font-size: 0.8rem; margin-top: 4px;">
-        {{ form_errors(form.title) }}
-      </div>
+      <div style="color: var(--error); font-size: 0.8rem; margin-top: 4px;">{{ form_errors(form.title) }}</div>
     </div>
 
     <div class="form-group">
       {{ form_label(form.goal, null, {'label_attr': {'class': 'form-label'}}) }}
       {{ form_widget(form.goal, {'attr': {'class': 'form-input', 'placeholder': 'Describe what needs to be done...', 'rows': 4}}) }}
-      <div style="color: var(--error); font-size: 0.8rem; margin-top: 4px;">
-        {{ form_errors(form.goal) }}
-      </div>
+      <div style="color: var(--error); font-size: 0.8rem; margin-top: 4px;">{{ form_errors(form.goal) }}</div>
     </div>
 
     <div class="form-group">
       {{ form_label(form.rewardPoints, null, {'label_attr': {'class': 'form-label'}}) }}
       {{ form_widget(form.rewardPoints, {'attr': {'class': 'form-input', 'placeholder': 'Points to earn'}}) }}
-      <div style="color: var(--error); font-size: 0.8rem; margin-top: 4px;">
-        {{ form_errors(form.rewardPoints) }}
-      </div>
+      <div style="color: var(--error); font-size: 0.8rem; margin-top: 4px;">{{ form_errors(form.rewardPoints) }}</div>
+    </div>
+
+    <hr style="margin: 1rem 0; border-color: var(--border);">
+
+    <div class="form-group">
+        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 10px;">
+            <label class="form-label" style="margin:0;">Tasks Collection</label>
+            <div style="display:flex; gap: 8px;">
+                <button type="button" class="btn secondary" id="ai-toggle" style="padding: 4px 12px; font-size: 0.8rem; background: var(--bg-main); border: 1px solid var(--brand-main); color: var(--brand-main);">
+                    <i data-lucide="sparkles"></i> AI Generator
+                </button>
+                <button type="button" class="btn secondary" id="add-task" style="padding: 4px 12px; font-size: 0.8rem;">
+                    <i data-lucide="plus"></i> Add Task
+                </button>
+            </div>
+        </div>
+
+        {# AI Generator Panel #}
+        <div id="ai-panel" style="display:none; background: var(--bg-main); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--brand-main); margin-bottom: 20px; box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);">
+            <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 1rem;">
+                <i data-lucide="cpu" style="color: var(--brand-main); width: 20px; height: 20px;"></i>
+                <h4 style="margin: 0; font-size: 0.9rem; font-weight: 700;">AI Mission Suggéstions</h4>
+            </div>
+            
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">Based on your challenge Title & Goal, I can suggest practical missions.</p>
+
+            <div style="display:grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+                <div>
+                    <label class="form-label" style="font-size: 0.75rem;">Number of missions</label>
+                    <input type="number" id="ai-amount" class="form-input" value="3" min="1" max="10" style="padding: 6px; font-size: 0.85rem;">
+                </div>
+                <button type="button" class="btn" id="ai-generate" style="padding: 8px 16px; background: var(--brand-gradient);">
+                    <i data-lucide="wand-2"></i> Generate
+                </button>
+            </div>
+            
+            <div id="ai-results" style="margin-top: 1rem; display:none;">
+                <div id="ai-list" style="display: grid; gap: 8px; margin-bottom: 1rem;"></div>
+                <button type="button" class="btn" id="ai-import" style="width: 100%; border: 1px dashed var(--brand-main); background: transparent; color: var(--brand-main); font-weight: 700;">
+                    Import Selected Missions
+                </button>
+            </div>
+        </div>
+
+        <div id="tasks-wrapper" 
+             data-prototype="{{ form_widget(form.tasks.vars.prototype)|e('html_attr') }}"
+             data-index="{{ form.tasks|length }}"
+             style="display: grid; gap: 15px;">
+            {% for taskForm in form.tasks %}
+                <div class="task-item-form card" style="padding: 1.5rem; position: relative; border: 1px solid var(--border);">
+                    <button type="button" class="remove-task" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--error); cursor: pointer;">
+                        <i data-lucide="x"></i>
+                    </button>
+                    {{ form_widget(taskForm) }}
+                </div>
+            {% endfor %}
+        </div>
     </div>
   </div>
 
-  <div style="display:flex; justify-content:flex-end; gap: 12px; margin-top: 10px;">
-    <a href="{{ path('app_challenge_admin_index') }}" class="btn secondary">
-      Cancel
-    </a>
+  <div style="display:flex; justify-content:flex-end; gap: 12px; margin-top: 20px;">
+    <a href="{{ path('app_challenge_admin_index') }}" class="btn secondary">Cancel</a>
     <button type="submit" class="btn">
       <i data-lucide="save"></i> {{ button_label|default('Save') }}
     </button>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const wrapper = document.querySelector('#tasks-wrapper');
+    const addButton = document.querySelector('#add-task');
+    
+    if (addButton && wrapper) {
+        addButton.addEventListener('click', function() {
+            const prototype = wrapper.dataset.prototype;
+            const index = parseInt(wrapper.dataset.index);
+            const newForm = prototype.replace(/__name__/g, index);
+            
+            wrapper.dataset.index = index + 1;
+            
+            const div = document.createElement('div');
+            div.className = 'task-item-form card';
+            div.style.padding = '1.5rem';
+            div.style.position = 'relative';
+            div.style.border = '1px solid var(--border)';
+            div.innerHTML = `
+                <button type="button" class="remove-task" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--error); cursor: pointer;">
+                    <i data-lucide="x"></i>
+                </button>
+                ${newForm}
+            `;
+            
+            wrapper.appendChild(div);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        });
+    }
+
+    // --- AI GENERATOR LOGIC ---
+    const aiToggle = document.querySelector('#ai-toggle');
+    const aiPanel = document.querySelector('#ai-panel');
+    const aiGenerate = document.querySelector('#ai-generate');
+    const aiResults = document.querySelector('#ai-results');
+    const aiList = document.querySelector('#ai-list');
+    const aiImport = document.querySelector('#ai-import');
+
+    const challengeTitleInput = document.querySelector('input[name*="[title]"]');
+    const challengeGoalInput = document.querySelector('textarea[name*="[goal]"]');
+
+    if (aiToggle) {
+        aiToggle.addEventListener('click', () => {
+            aiPanel.style.display = aiPanel.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+
+    if (aiGenerate) {
+        aiGenerate.addEventListener('click', async () => {
+            const title = challengeTitleInput.value;
+            const goal = challengeGoalInput.value;
+            
+            if (!title) {
+                alert('Veuillez d\'abord saisir un titre pour le challenge.');
+                return;
+            }
+
+            aiGenerate.disabled = true;
+            aiGenerate.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Generating...';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            
+            try {
+                const amount = document.querySelector('#ai-amount').value;
+                
+                const res = await fetch('{{ path("admin_ai_generate_missions") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, goal, count: amount })
+                });
+                
+                const text = await res.text();
+                
+                if (!res.ok) {
+                    console.error('Server response:', text);
+                    throw new Error(text.substring(0, 100) || 'Erreur inconnue lors de la génération.');
+                }
+                
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (jsonErr) {
+                    console.error('JSON Parse Error. Body:', text);
+                    const snippet = text.substring(0, 500).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    throw new Error('Format de réponse invalide (HTML reçu). Début : ' + snippet);
+                }
+
+                const missions = data;
+                
+                aiList.innerHTML = '';
+                missions.forEach((m, i) => {
+                    const item = document.createElement('div');
+                    item.style.cssText = 'background: var(--bg-card); padding: 12px; border-radius: 10px; border: 1px solid var(--border); display: flex; gap: 12px; align-items: center; transition: all 0.2s;';
+                    item.innerHTML = `
+                        <input type="checkbox" class="ai-select" checked data-mission="${encodeURIComponent(JSON.stringify(m))}" style="width: 18px; height: 18px; accent-color: var(--brand-main);">
+                        <div style="flex:1;">
+                            <div style="font-weight: 600; font-size: 0.9rem;">${m.title}</div>
+                        </div>
+                    `;
+                    aiList.appendChild(item);
+                });
+                
+                aiResults.style.display = 'block';
+            } catch (e) {
+                console.error(e);
+                alert('Erreur lors de la génération : ' + e.message);
+            } finally {
+                aiGenerate.disabled = false;
+                aiGenerate.innerHTML = '<i data-lucide="wand-2"></i> Generate';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        });
+    }
+
+    if (aiImport) {
+        aiImport.addEventListener('click', () => {
+            const selected = document.querySelectorAll('.ai-select:checked');
+            if (selected.length === 0) return;
+
+            selected.forEach((sel, i) => {
+                const mission = JSON.parse(decodeURIComponent(sel.dataset.mission));
+                
+                // Add new task form via prototype
+                const prototype = wrapper.dataset.prototype;
+                const index = parseInt(wrapper.dataset.index);
+                let newForm = prototype.replace(/__name__/g, index);
+                
+                const div = document.createElement('div');
+                div.className = 'task-item-form card';
+                div.style.padding = '1.5rem'; div.style.position = 'relative'; div.style.border = '1px solid var(--border)';
+                div.innerHTML = `
+                    <button type="button" class="remove-task" style="position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--error); cursor: pointer;">
+                        <i data-lucide="x"></i>
+                    </button>
+                    ${newForm}
+                `;
+                
+                wrapper.appendChild(div);
+                
+                const titleInput = div.querySelector('input[name*="[title]"]');
+                if (titleInput) titleInput.value = mission.title;
+                
+                // Points stay at 0 — total XP is on the Challenge, not individual tasks
+                const pointsInput = div.querySelector('input[name*="[points]"]');
+                if (pointsInput) pointsInput.value = 0;
+                
+                wrapper.dataset.index = index + 1;
+            });
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            aiPanel.style.display = 'none';
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-task')) {
+            e.target.closest('.task-item-form').remove();
+        }
+    });
+});
+</script>
 
 {{ form_end(form) }}

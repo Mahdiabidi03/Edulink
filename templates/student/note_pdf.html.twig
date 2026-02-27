@@ -73,7 +73,7 @@
     </div>
 
     <div class="content">
-        {{ note.content }}
+        {{ note.content|raw }}
     </div>
 
     {% if note.attachment %}
@@ -87,7 +87,10 @@
                    For dompdf with local files, absolute path is best.
                 #}
                 <div style="margin-top:10px;">
-                    <img src="{{ absolute_url(asset('uploads/notes/' ~ note.attachment)) }}" class="attachment-img" alt="Attachment">
+                <div style="margin-top:10px;">
+                    {# Dompdf requires absolute filesystem paths for local images when running in CLI/Localhost #}
+                    <img src="{{ kernel_project_dir }}/public/uploads/notes/{{ note.attachment }}" class="attachment-img" alt="Attachment">
+                </div>
                 </div>
             {% else %}
                 <p><em>(File attachment not previewable in PDF)</em></p>

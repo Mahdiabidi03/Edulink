@@ -11,9 +11,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
 
 class NoteType extends AbstractType
 {
@@ -25,7 +26,11 @@ class NoteType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Note Title...',
                     'class' => 'form-control'
-                ]
+                ],
+                'constraints' => [
+                    new NotBlank(['message' => 'Note title cannot be empty']),
+                    new Length(['max' => 255, 'maxMessage' => 'Title cannot exceed {{ limit }} characters']),
+                ],
             ])
             ->add('content', TextareaType::class, [
                 'label' => 'Note Content',
@@ -33,7 +38,11 @@ class NoteType extends AbstractType
                     'placeholder' => 'Write something...',
                     'class' => 'form-control',
                     'rows' => 6
-                ]
+                ],
+                'constraints' => [
+                    new NotBlank(['message' => 'Note content cannot be empty']),
+                    new Length(['max' => 50000, 'maxMessage' => 'Content cannot exceed {{ limit }} characters']),
+                ],
             ])
             ->add('attachment', FileType::class, [
                 'label' => 'Attachment (PDF, Image)',
@@ -42,7 +51,14 @@ class NoteType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'accept' => '.pdf,.jpg,.jpeg,.png'
-                ]
+                ],
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M',
+                        'mimeTypes' => ['application/pdf', 'image/jpeg', 'image/png'],
+                        'mimeTypesMessage' => 'Please upload a valid file (PDF, JPG, PNG)',
+                    ]),
+                ],
             ])
             ->add('category', EntityType::class, [
                 'class' => Category::class,
@@ -55,7 +71,7 @@ class NoteType extends AbstractType
                     if (!empty($options['user'])) {
                         $qb->andWhere('c.owner = :owner')->setParameter('owner', $options['user']);
                     } else {
-                        $qb->andWhere('1 = 0'); // no options provided -> no categories
+                        $qb->andWhere('1 = 0');
                     }
                     return $qb;
                 },

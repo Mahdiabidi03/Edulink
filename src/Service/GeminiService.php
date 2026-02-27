@@ -5,86 +5,154 @@ namespace App\Service;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * GeminiService — Google Gemini AI integration
+ *
+ * Responsibilities (Gemini API only):
+ *   - summarizeSession()      -> AI summary of a chat session
+ *   - classifyHelpRequest()   -> Auto-categorize & set difficulty
+ *   - suggestReplies()        -> AI-suggested quick replies for tutors
+ */
 class GeminiService
 {
-    private string $apiKey;
-    private HttpClientInterface $httpClient;
-    private LoggerInterface $logger;
-    private const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent';
+    private const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
-    public function __construct(string $geminiApiKey, HttpClientInterface $httpClient, LoggerInterface $logger)
-    {
-        $this->apiKey = $geminiApiKey;
-        $this->httpClient = $httpClient;
-        $this->logger = $logger;
+    public function __construct(
+        private HttpClientInterface $client,
+        private string $geminiApiKey,
+        private ?LoggerInterface $logger = null
+    ) {
     }
 
-    public function generateContent(string $prompt): string
+    /**
+     * Summarizes a chat session into 2-3 sentences.
+     */
+    public function summarizeSession(array $messages): string
     {
-        if (empty($this->apiKey)) {
-            // Ideally should assume it's set in env, or handle proactively.
-            // For now, let's log error or return a message.
-            return "Error: GEMINI_API_KEY is not configured.";
+        if (empty($messages)) {
+            return 'No messages in this session.';
         }
+
+        $conversation = implode("\n", array_map(fn($m) => "- {$m}", $messages));
+        $prompt = "Summarize this tutoring chat session in 2-3 sentences. Focus on what was discussed and whether the problem was resolved.\n\nConversation:\n$conversation";
 
         try {
-            $response = $this->httpClient->request('POST', self::API_URL . '?key=' . $this->apiKey, [
-                'json' => [
-                    'contents' => [
-                        [
-                            'parts' => [
-                                ['text' => $prompt]
-                            ]
-                        ]
-                    ]
-                ]
-            ]);
-
-            $statusCode = $response->getStatusCode();
-            if ($statusCode !== 200) {
-                $content = $response->getContent(false);
-                $this->logger->error("Gemini API Error ($statusCode): " . $content);
-                return "Error: AI Service Failed ($statusCode) - " . substr($content, 0, 200);
-            }
-
-            $data = $response->toArray();
-            return $data['candidates'][0]['content']['parts'][0]['text'] ?? 'No content generated.';
-
+            return $this->callGemini($prompt);
         } catch (\Exception $e) {
-            $this->logger->error('Gemini Exception: ' . $e->getMessage());
-            return "Error: " . $e->getMessage();
+            $this->log('Session summary failed: ' . $e->getMessage());
+            return 'Session completed with ' . count($messages) . ' messages exchanged.';
         }
     }
 
-    // Specialized methods
-    public function generateQuiz(string $text): string
+    /**
+     * Auto-classifies a help request by subject category and difficulty.
+     * @return array{category: string, difficulty: string}
+     */
+    public function classifyHelpRequest(string $title, string $description): array
     {
-        $prompt = "Generate a multiple-choice quiz (5 questions) based on the following text. " .
-                  "Format the output as JSON with keys: question, options (array), answer (index). " .
-                  "Just return the JSON array, no markdown formatting. Text: \n\n" . substr($text, 0, 30000); // Limit context slightly
-        
-        return $this->generateContent($prompt);
-    }
+        $default = ['category' => 'General', 'difficulty' => 'Medium'];
 
-    public function generateSummary(string $text): string
-    {
-        $prompt = "Summarize the following text in 3-5 bullet points. Text: \n\n" . substr($text, 0, 30000);
-        return $this->generateContent($prompt);
-    }
-
-    public function isToxic(string $text): bool
-    {
-        $bad = [
-            'hate', 'racist', 'homophobic', 'sexist',
-            'kill', 'bomb', 'terror', 'harass',
-            'slur', 'offensive', 'insult',
-        ];
-        $lower = mb_strtolower($text);
-        foreach ($bad as $w) {
-            if (str_contains($lower, $w)) {
-                return true;
-            }
+        if (empty(trim($title))) {
+            return $default;
         }
-        return false;
+
+        $prompt = "Classify this student help request into a category and difficulty level.
+
+Title: \"$title\"
+Description: \"$description\"
+
+Categories: Math, Physics, Chemistry, Biology, Computer Science, Languages, History, Geography, Philosophy, Economics, General
+Difficulty levels: Easy, Medium, Hard
+
+Reply in EXACTLY this format (nothing else):
+Category: [category]
+Difficulty: [level]";
+
+        try {
+            $response = $this->callGemini($prompt);
+            return $this->parseClassification($response, $default);
+        } catch (\Exception $e) {
+            $this->log('Classification failed: ' . $e->getMessage());
+            return $default;
+        }
+    }
+
+    /**
+     * Suggests 3 quick reply options based on the recent conversation.
+     */
+    public function suggestReplies(array $recentMessages): array
+    {
+        $fallback = ['I understand, let me help.', 'Can you explain more?', 'I think the answer is...'];
+
+        if (empty($recentMessages)) {
+            return $fallback;
+        }
+
+        $conversation = implode("\n", array_map(fn($m) => "- {$m}", array_slice($recentMessages, -5)));
+        $prompt = "Based on this tutoring conversation, suggest exactly 3 short reply options (max 15 words each) that a helpful tutor might send next. Output ONLY the 3 replies, one per line, no numbering.\n\nRecent messages:\n$conversation";
+
+        try {
+            $response = $this->callGemini($prompt);
+            $lines = array_filter(array_map('trim', explode("\n", $response)));
+            $suggestions = array_values(array_slice($lines, 0, 3));
+            return count($suggestions) >= 3 ? $suggestions : $fallback;
+        } catch (\Exception $e) {
+            $this->log('Suggest replies failed: ' . $e->getMessage());
+            return $fallback;
+        }
+    }
+
+    /**
+     * Calls the Gemini API with a text prompt.
+     */
+    private function callGemini(string $prompt): string
+    {
+        if ($this->geminiApiKey === 'placeholder_key' || empty($this->geminiApiKey)) {
+            throw new \RuntimeException('Gemini API key not configured');
+        }
+
+        $response = $this->client->request('POST', self::API_URL . '?key=' . $this->geminiApiKey, [
+            'json' => [
+                'contents' => [
+                    ['parts' => [['text' => $prompt]]]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.3,
+                    'maxOutputTokens' => 256,
+                ],
+            ],
+            'timeout' => 10,
+        ]);
+
+        $data = $response->toArray();
+        return $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+    }
+
+    private function parseClassification(string $response, array $default): array
+    {
+        $result = $default;
+        if (preg_match('/Category:\s*(.+)/i', $response, $m)) {
+            $result['category'] = trim($m[1]);
+        }
+        if (preg_match('/Difficulty:\s*(.+)/i', $response, $m)) {
+            $result['difficulty'] = trim($m[1]);
+        }
+
+        $validCategories = ['Math', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Languages', 'History', 'Geography', 'Philosophy', 'Economics', 'General'];
+        if (!in_array($result['category'], $validCategories)) {
+            $result['category'] = 'General';
+        }
+
+        $validDifficulties = ['Easy', 'Medium', 'Hard'];
+        if (!in_array($result['difficulty'], $validDifficulties)) {
+            $result['difficulty'] = 'Medium';
+        }
+
+        return $result;
+    }
+
+    private function log(string $message): void
+    {
+        $this->logger?->warning('[GeminiService] ' . $message);
     }
 }

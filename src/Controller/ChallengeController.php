@@ -3,8 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\UserChallenge;
+use App\Entity\UserTask;
+use App\Entity\Task;
 use App\Repository\ChallengeRepository;
 use App\Repository\UserChallengeRepository;
+use App\Repository\UserTaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -24,7 +27,7 @@ class ChallengeController extends AbstractController
 
         if ($q !== '') {
             $qb->andWhere('c.title LIKE :q OR c.goal LIKE :q')
-               ->setParameter('q', '%'.$q.'%');
+                ->setParameter('q', '%' . $q . '%');
         }
 
         switch ($order) {
@@ -78,7 +81,7 @@ class ChallengeController extends AbstractController
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        if (!$this->isCsrfTokenValid('join_challenge_'.$id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('join_challenge_' . $id, $request->request->get('_token'))) {
             $this->addFlash('error', 'Action invalide (CSRF).');
             return $this->redirectToRoute('challenge_index');
         }
@@ -101,8 +104,19 @@ class ChallengeController extends AbstractController
         $uc->setUser($user);
         $uc->setChallenge($challenge);
         $uc->setStatus(UserChallenge::STATUS_IN_PROGRESS);
-        $uc->setProgress('0/3'); // total fixe
         $uc->setProofFileName(null);
+
+        // ✅ Create UserTask placeholders for each challenge task
+        foreach ($challenge->getTasks() as $task) {
+            $ut = new UserTask();
+            $ut->setTask($task);
+            $ut->setUserChallenge($uc);
+            $ut->setIsCompleted(false);
+            $em->persist($ut);
+            $uc->addUserTask($ut);
+        }
+
+        $uc->updateProgress(); // Initial progress (0/X)
 
         $em->persist($uc);
         $em->flush();
@@ -112,7 +126,7 @@ class ChallengeController extends AbstractController
     }
 
     #[Route('/my-challenges', name: 'my_challenges', methods: ['GET'])]
-    public function myChallenges(UserChallengeRepository $ucRepo): Response
+    public function myChallenges(UserChallengeRepository $ucRepo, EntityManagerInterface $em): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
@@ -120,6 +134,38 @@ class ChallengeController extends AbstractController
             ['user' => $this->getUser()],
             ['id' => 'DESC']
         );
+
+        // ✅ Self-healing: ensure all UserTask placeholders exist for joined challenges
+        $needsFlush = false;
+        foreach ($participations as $p) {
+            $challenge = $p->getChallenge();
+            if (!$challenge)
+                continue;
+
+            $existingTaskIds = [];
+            foreach ($p->getUserTasks() as $ut) {
+                $existingTaskIds[] = $ut->getTask()->getId();
+            }
+
+            foreach ($challenge->getTasks() as $task) {
+                if (!in_array($task->getId(), $existingTaskIds, true)) {
+                    $newUt = new UserTask();
+                    $newUt->setTask($task);
+                    $newUt->setUserChallenge($p);
+                    $newUt->setIsCompleted(false);
+                    $em->persist($newUt);
+                    $p->addUserTask($newUt);
+                    $needsFlush = true;
+                }
+            }
+        }
+
+        if ($needsFlush) {
+            foreach ($participations as $p) {
+                $p->updateProgress();
+            }
+            $em->flush();
+        }
 
         return $this->render('challenge/my_challenges.html.twig', [
             'participations' => $participations,
@@ -135,79 +181,73 @@ class ChallengeController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         // CSRF
-        if (!$this->isCsrfTokenValid('update_progress_'.$userChallenge->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('update_progress_' . $userChallenge->getId(), $request->request->get('_token'))) {
             $this->addFlash('error', 'Action invalide (CSRF).');
             return $this->redirectToRoute('my_challenges');
         }
 
-        // sécurité : l'étudiant ne modifie que ses propres participations
         if ($userChallenge->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
 
-        // Si déjà COMPLETED, on bloque (déjà validé par admin)
         if ($userChallenge->getStatus() === UserChallenge::STATUS_COMPLETED) {
             $this->addFlash('info', 'Challenge déjà validé.');
             return $this->redirectToRoute('my_challenges');
         }
 
-        $progress = (string) $request->request->get('progress', '0/3');
-
-        // Normaliser progress
-        $parts = explode('/', $progress);
+        // Recalculate progress from actual UserTask completion (don't trust form input)
+        $userChallenge->updateProgress();
+        $parts = explode('/', $userChallenge->getProgress());
         $current = (int) ($parts[0] ?? 0);
-        $total   = (int) ($parts[1] ?? 3);
+        $total = (int) ($parts[1] ?? 0);
 
-        if ($total <= 0) { $total = 3; }
-        if ($current < 0) { $current = 0; }
-        if ($current > $total) { $current = $total; }
-
-        $normalized = $current.'/'.$total;
-        $userChallenge->setProgress($normalized);
-
-        // ✅ Si 3/3 → obligation d’uploader une preuve → statut PENDING
         if ($current >= $total) {
             $uploadedFile = $request->files->get('proof_file');
 
-            if (!$uploadedFile) {
+            if (!$uploadedFile && !$userChallenge->getProofFileName()) {
                 $this->addFlash('error', 'Pour terminer, tu dois joindre un fichier de preuve.');
                 return $this->redirectToRoute('my_challenges');
             }
 
-            // Sécurité simple : limite extensions (tu peux ajuster)
-            $allowedExt = ['pdf', 'png', 'jpg', 'jpeg'];
-            $ext = strtolower((string) $uploadedFile->getClientOriginalExtension());
-            if (!in_array($ext, $allowedExt, true)) {
-                $this->addFlash('error', 'Format invalide. Autorisés: PDF, PNG, JPG, JPEG.');
-                return $this->redirectToRoute('my_challenges');
+            if ($uploadedFile) {
+                $userChallenge->setProofFile($uploadedFile);
+                $userChallenge->setStatus(UserChallenge::STATUS_PENDING);
+                $this->addFlash('success', 'Preuve envoyée ! En attente de validation admin.');
             }
-
-            // Nom unique
-            $safeName = 'proof_'.$userChallenge->getId().'_'.uniqid('', true).'.'.$ext;
-
-            // Dossier uploads
-            $targetDir = $this->getParameter('kernel.project_dir') . '/public/uploads/proofs';
-
-            try {
-                $uploadedFile->move($targetDir, $safeName);
-            } catch (FileException $e) {
-                $this->addFlash('error', 'Erreur upload fichier.');
-                return $this->redirectToRoute('my_challenges');
-            }
-
-            $userChallenge->setProofFileName($safeName);
-            $userChallenge->setStatus(UserChallenge::STATUS_PENDING);
-
-            $this->addFlash('success', 'Preuve envoyée. En attente de validation admin.');
         } else {
-            // Si pas terminé → IN_PROGRESS, et on supprime la preuve si elle existait
-            $userChallenge->setStatus(UserChallenge::STATUS_IN_PROGRESS);
-            $userChallenge->setProofFileName(null);
-
-            $this->addFlash('success', 'Progress updated!');
+            $this->addFlash('error', 'Complete all tasks before uploading proof (' . $current . '/' . $total . ' done).');
+            return $this->redirectToRoute('my_challenges');
         }
 
         $em->flush();
         return $this->redirectToRoute('my_challenges');
+    }
+    #[Route('/my-challenges/task/{id}/toggle', name: 'challenge_task_toggle', methods: ['POST'])]
+    public function toggleTask(
+        UserTask $userTask,
+        EntityManagerInterface $em
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $uc = $userTask->getUserChallenge();
+        if ($uc->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($uc->getStatus() === UserChallenge::STATUS_COMPLETED) {
+            $this->addFlash('info', 'Challenge déjà validé.');
+            return $this->redirectToRoute('my_challenges');
+        }
+
+        $userTask->setIsCompleted(!$userTask->isCompleted());
+        $uc->updateProgress();
+
+        $em->flush();
+
+        return $this->json([
+            'success' => true,
+            'completed' => $userTask->isCompleted(),
+            'progress' => $uc->getProgress()
+        ]);
     }
 }

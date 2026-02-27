@@ -9,8 +9,11 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
@@ -19,15 +22,21 @@ class UserType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('fullName', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
+            ->add('fullName', TextType::class, [
                 'attr' => ['class' => 'form-input', 'placeholder' => 'Full Name'],
                 'label_attr' => ['class' => 'form-label'],
-                'required' => false,
-             ])
+                'constraints' => [
+                    new NotBlank(['message' => 'Full name is required']),
+                    new Length(['min' => 2, 'max' => 255]),
+                ],
+            ])
             ->add('email', EmailType::class, [
                 'attr' => ['class' => 'form-input', 'placeholder' => 'example@email.com'],
                 'label_attr' => ['class' => 'form-label'],
-                'required' => false,
+                'constraints' => [
+                    new NotBlank(['message' => 'Email is required']),
+                    new Email(['message' => 'Please enter a valid email']),
+                ],
             ])
             ->add('roles', ChoiceType::class, [
                 'choices' => [
@@ -45,7 +54,7 @@ class UserType extends AbstractType
                 'type' => PasswordType::class,
                 'mapped' => false,
                 'required' => $options['is_new'],
-                'first_options'  => [
+                'first_options' => [
                     'label' => 'Password',
                     'attr' => ['class' => 'form-input', 'autocomplete' => 'new-password'],
                     'label_attr' => ['class' => 'form-label'],
@@ -58,9 +67,7 @@ class UserType extends AbstractType
                     'row_attr' => ['class' => 'form-group']
                 ],
                 'constraints' => $options['is_new'] ? [
-                    new NotBlank([
-                        'message' => 'Please enter a password',
-                    ]),
+                    new NotBlank(['message' => 'Please enter a password']),
                     new Length([
                         'min' => 6,
                         'minMessage' => 'Your password should be at least {{ limit }} characters',
@@ -72,6 +79,9 @@ class UserType extends AbstractType
                 'attr' => ['class' => 'form-input'],
                 'label' => 'Total XP points',
                 'label_attr' => ['class' => 'form-label'],
+                'constraints' => [
+                    new GreaterThanOrEqual(['value' => 0, 'message' => 'XP cannot be negative']),
+                ],
             ])
         ;
     }

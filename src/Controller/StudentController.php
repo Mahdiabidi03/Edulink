@@ -7,15 +7,15 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Transaction;
 use App\Entity\User;
 use App\Entity\Note;
-use App\Entity\Task;
+use App\Entity\PersonalTask;
 use App\Entity\Reminder;
 use App\Form\TransferPointsType;
 use App\Form\EditProfileFormType;
 use App\Form\NoteType;
-use App\Form\TaskType;
+use App\Form\PersonalTaskType;
 use App\Form\ReminderType;
 use App\Repository\NoteRepository;
-use App\Repository\TaskRepository;
+use App\Repository\PersonalTaskRepository;
 use App\Repository\ReminderRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,7 +41,15 @@ class StudentController extends AbstractController
     #[Route('/student/dashboard', name: 'student_dashboard')]
     public function dashboard(Request $request, EntityManagerInterface $entityManager): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
+
+        // --- Logic Fix: Sync Legacy XP to Wallet Balance if out of sync ---
+        if ($user->getXp() > 0 && $user->getWalletBalance() == 0) {
+            $user->setWalletBalance((float) $user->getXp());
+            $entityManager->flush();
+        }
+
         $form = $this->createForm(EditProfileFormType::class, $user);
         $form->handleRequest($request);
 
@@ -69,7 +77,7 @@ class StudentController extends AbstractController
     ): JsonResponse {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if (!$user) {
             return new JsonResponse(['reminders' => [], 'debug' => 'No user']);
         }
@@ -114,13 +122,13 @@ class StudentController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         NoteRepository $noteRepository,
-        TaskRepository $taskRepository,
+        PersonalTaskRepository $taskRepository,
         ReminderRepository $reminderRepository,
         SluggerInterface $slugger
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if (!$user) {
             return $this->redirectToRoute('login');
         }
@@ -135,7 +143,7 @@ class StudentController extends AbstractController
             }
         }
         $noteForm = $this->createForm(NoteType::class, $noteSeed, ['user' => $user]);
-        $taskForm = $this->createForm(TaskType::class, new Task());
+        $taskForm = $this->createForm(PersonalTaskType::class, new PersonalTask());
         $reminderForm = $this->createForm(ReminderType::class, new Reminder());
 
         // Handle Note Form
@@ -144,18 +152,20 @@ class StudentController extends AbstractController
             $note = $noteForm->getData();
             $note->setUser($user);
 
-            /** @var UploadedFile $attachmentFile */
+            // Sanitize HTML content from Quill editor (XSS prevention)
+            $allowedTags = '<p><br><strong><em><u><s><ol><ul><li><h1><h2><h3><a><blockquote><pre><code><span>';
+            $note->setContent(strip_tags($note->getContent(), $allowedTags));
             $attachmentFile = $noteForm->get('attachment')->getData();
 
             if ($attachmentFile) {
                 $originalFilename = pathinfo($attachmentFile->getClientOriginalName(), PATHINFO_FILENAME);
                 // this is needed to safely include the file name as part of the URL
                 $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$attachmentFile->getClientOriginalExtension();
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $attachmentFile->getClientOriginalExtension();
 
                 try {
                     $attachmentFile->move(
-                        $this->getParameter('kernel.project_dir').'/public/uploads/notes',
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/notes',
                         $newFilename
                     );
                     $note->setAttachment($newFilename);
@@ -171,14 +181,14 @@ class StudentController extends AbstractController
             return $this->redirectToRoute('student_journal');
         }
 
-        // Handle Task Form
+        // Handle PersonalTask Form
         $taskForm->handleRequest($request);
         if ($taskForm->isSubmitted() && $taskForm->isValid()) {
             $task = $taskForm->getData();
             $task->setUser($user);
             $entityManager->persist($task);
             $entityManager->flush();
-            $this->addFlash('success', 'Task created successfully!');
+            $this->addFlash('success', 'Personal task created successfully!');
             return $this->redirectToRoute('student_journal');
         }
 
@@ -197,7 +207,7 @@ class StudentController extends AbstractController
         $query = $request->query->get('q');
         $categoryId = $request->query->get('category');
 
-        $notes = $noteRepository->findByUserWithFilters($user, $query, $categoryId ? (int)$categoryId : null);
+        $notes = $noteRepository->findByUserWithFilters($user, $query, $categoryId ? (int) $categoryId : null);
         $tasks = $taskRepository->findByUserOrderedByDate($user);
         $reminders = $reminderRepository->findByUserOrderedByDate($user);
         $userCategories = $entityManager->getRepository(\App\Entity\Category::class)->findAllOrderedByName($user);
@@ -234,7 +244,7 @@ class StudentController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if (!$user) {
             return $this->redirectToRoute('login');
         }
@@ -258,7 +268,7 @@ class StudentController extends AbstractController
             } else {
                 // Validation 2: Find Recipient
                 $recipient = $entityManager->getRepository(User::class)->findOneBy(['email' => $recipientEmail]);
-                
+
                 if (!$recipient) {
                     $this->addFlash('error', 'Recipient not found.');
                 } else {
@@ -269,22 +279,22 @@ class StudentController extends AbstractController
                     $tSender->setAmount(-$amount);
                     $tSender->setType('TRANSFER_SENT');
                     $tSender->setDate(new \DateTime());
-                    
+
                     // 2. Recipient Transaction
                     $tRecipient = new Transaction();
                     $tRecipient->setUser($recipient);
                     $tRecipient->setAmount($amount);
                     $tRecipient->setType('TRANSFER_RECEIVED');
                     $tRecipient->setDate(new \DateTime());
-                    
+
                     // 3. Update Balances
                     $user->setWalletBalance($user->getWalletBalance() - $amount);
                     $recipient->setWalletBalance(($recipient->getWalletBalance() ?? 0) + $amount);
-                    
+
                     $entityManager->persist($tSender);
                     $entityManager->persist($tRecipient);
                     $entityManager->flush(); // User updates are cascaded or auto-tracked
-                    
+
                     $this->addFlash('success', "Successfully sent $amount PTS to $recipientEmail!");
                     return $this->redirectToRoute('student_wallet');
                 }
@@ -293,7 +303,7 @@ class StudentController extends AbstractController
 
         // --- Get Transactions & Stats ---
         $transactions = $user->getTransactions();
-        
+
         $breakdown = [
             'COURSES' => 0,
             'EVENTS' => 0,
@@ -309,7 +319,7 @@ class StudentController extends AbstractController
             if ($amount < 0) {
                 $absAmount = abs($amount);
                 $totalSpent += $absAmount;
-                
+
                 if (str_contains($type, 'COURSE')) {
                     $breakdown['COURSES'] += $absAmount;
                 } elseif (str_contains($type, 'EVENT')) {
@@ -321,7 +331,7 @@ class StudentController extends AbstractController
                 $totalEarned += $amount;
             }
         }
-        
+
         $transactionsParams = $transactions->toArray();
         usort($transactionsParams, fn($a, $b) => $b->getDate() <=> $a->getDate());
 
@@ -404,7 +414,7 @@ class StudentController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if ($note->getUser() !== $user) {
             throw $this->createAccessDeniedException('You cannot edit this note');
         }
@@ -413,6 +423,9 @@ class StudentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Sanitize HTML content from Quill editor (XSS prevention)
+            $allowedTags = '<p><br><strong><em><u><s><ol><ul><li><h1><h2><h3><a><blockquote><pre><code><span>';
+            $note->setContent(strip_tags($note->getContent(), $allowedTags));
             $note->setUpdatedAt(new \DateTime());
             $entityManager->flush();
             $this->addFlash('success', 'Note updated successfully!');
@@ -432,7 +445,7 @@ class StudentController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if ($note->getUser() !== $user) {
             throw $this->createAccessDeniedException('You cannot delete this note');
         }
@@ -464,7 +477,8 @@ class StudentController extends AbstractController
         // Retrieve the HTML generated in our twig file
         $html = $this->renderView('student/note_pdf.html.twig', [
             'note' => $note,
-            'title' => "Note Export"
+            'title' => "Note Export",
+            'kernel_project_dir' => $this->getParameter('kernel.project_dir')
         ]);
 
         // Load HTML to Dompdf
@@ -479,20 +493,20 @@ class StudentController extends AbstractController
         // Output the generated PDF to Browser (force download)
         return new Response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="note-'.$note->getId().'.pdf"',
+            'Content-Disposition' => 'attachment; filename="note-' . $note->getId() . '.pdf"',
         ]);
     }
 
-    // ===== TASK CRUD ROUTES =====
-    #[Route('/student/task/{id}/toggle', name: 'student_task_toggle', methods: ['POST'])]
-    public function toggleTask(
+    // ===== PERSONAL TASK CRUD ROUTES =====
+    #[Route('/student/personal-task/{id}/toggle', name: 'student_personal_task_toggle', methods: ['POST'])]
+    public function togglePersonalTask(
         Request $request,
-        Task $task,
+        PersonalTask $task,
         EntityManagerInterface $entityManager
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if ($task->getUser() !== $user) {
             throw $this->createAccessDeniedException('You cannot toggle this task');
         }
@@ -513,14 +527,14 @@ class StudentController extends AbstractController
         return $this->redirectToRoute('student_journal');
     }
 
-    #[Route('/student/task/{id}/delete', name: 'student_task_delete', methods: ['POST'])]
-    public function deleteTask(
-        Task $task,
+    #[Route('/student/personal-task/{id}/delete', name: 'student_personal_task_delete', methods: ['POST'])]
+    public function deletePersonalTask(
+        PersonalTask $task,
         EntityManagerInterface $entityManager
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if ($task->getUser() !== $user) {
             throw $this->createAccessDeniedException('You cannot delete this task');
         }
@@ -539,7 +553,7 @@ class StudentController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if ($reminder->getUser() !== $user) {
             throw $this->createAccessDeniedException('You cannot edit this reminder');
         }
@@ -566,7 +580,7 @@ class StudentController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if ($reminder->getUser() !== $user) {
             throw $this->createAccessDeniedException('You cannot delete this reminder');
         }
@@ -584,7 +598,7 @@ class StudentController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if ($reminder->getUser() !== $user) {
             throw $this->createAccessDeniedException('You cannot dismiss this reminder');
         }
@@ -602,26 +616,26 @@ class StudentController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         if ($reminder->getUser() !== $user) {
             throw $this->createAccessDeniedException('You cannot defer this reminder');
         }
 
         // Get the defer minutes from request (default 30 minutes)
         $deferMinutes = (int) $request->request->get('defer_minutes', 30);
-        
+
         // Update reminder time by adding defer minutes
         $originalTime = $reminder->getReminderTime();
         $newTime = \DateTime::createFromInterface($originalTime)
             ->modify("+{$deferMinutes} minutes");
-        
+
         $reminder->setReminderTime($newTime);
-        
+
         // Set status back to pending if it was dismissed
         if ($reminder->getStatus() === 'dismissed') {
             $reminder->setStatus('pending');
         }
-        
+
         $entityManager->flush();
         $this->addFlash('success', "Reminder moved to {$newTime->format('H:i')}");
         return $this->redirectToRoute('student_journal');
@@ -636,14 +650,14 @@ class StudentController extends AbstractController
         ValidatorInterface $validator
     ): JsonResponse {
         $reminder = $reminderRepository->find($id);
-        
+
         if (!$reminder) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Reminder not found'
             ], Response::HTTP_NOT_FOUND);
         }
-        
+
         // Check if the reminder belongs to the current user
         if ($reminder->getUser() !== $this->getUser()) {
             return new JsonResponse([
@@ -654,23 +668,23 @@ class StudentController extends AbstractController
 
         try {
             $data = json_decode($request->getContent(), true);
-            
+
             if (!$data) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'Invalid JSON data'
                 ], Response::HTTP_BAD_REQUEST);
             }
-            
+
             // Update fields from request data
             if (isset($data['title']) && !empty($data['title'])) {
                 $reminder->setTitle($data['title']);
             }
-            
+
             if (isset($data['description'])) {
                 $reminder->setDescription($data['description']);
             }
-            
+
             if (isset($data['reminderTime']) && !empty($data['reminderTime'])) {
                 // Try to parse the datetime - JavaScript sends YYYY-MM-DDTHH:mm format
                 try {
@@ -683,10 +697,10 @@ class StudentController extends AbstractController
                     ], Response::HTTP_BAD_REQUEST);
                 }
             }
-            
+
             // Validate the reminder entity before flushing
             $violations = $validator->validate($reminder);
-            
+
             if (count($violations) > 0) {
                 $errors = [];
                 foreach ($violations as $violation) {
@@ -695,16 +709,16 @@ class StudentController extends AbstractController
                         'message' => $violation->getMessage()
                     ];
                 }
-                
+
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'Validation failed',
                     'errors' => $errors
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
-            
+
             $entityManager->flush();
-            
+
             return new JsonResponse([
                 'success' => true,
                 'message' => 'Reminder updated successfully',
@@ -732,6 +746,45 @@ class StudentController extends AbstractController
                 'message' => 'Error updating reminder: ' . $e->getMessage()
             ], Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    // ===== SENTIMENT ANALYSIS ROUTE =====
+    #[Route('/student/note/analyze-sentiment', name: 'student_note_analyze_sentiment', methods: ['POST'])]
+    public function analyzeSentiment(Request $request, \App\Service\SentimentService $sentimentService): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $text = trim($data['text'] ?? '');
+
+        if (empty($text)) {
+            return new JsonResponse(['sentiment' => 'neutral', 'score' => 0.0, 'motivational_phrase' => null]);
+        }
+
+        $result = $sentimentService->analyze($text);
+
+        return new JsonResponse($result);
+    }
+
+    // ===== AI STUDY ADVISOR ROUTE =====
+    #[Route('/student/study-advice', name: 'student_study_advice', methods: ['GET'])]
+    public function getStudyAdvice(\App\Service\StudyAdvisorService $studyAdvisorService): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $result = $studyAdvisorService->getWeeklyAdvice($user);
+
+        return new JsonResponse($result);
     }
 }
 

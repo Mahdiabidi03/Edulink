@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use App\Entity\PersonalTask;
 use Doctrine\ORM\Mapping as ORM;
 
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -29,12 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $fullName = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: "Password is required.")]
-    #[Assert\Length(min: 6, minMessage: "Your password must be at least {{ limit }} characters long.")]
     private ?string $password = null;
-
-    #[ORM\Column]
-    private array $roles = [];
 
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $xp = 0;
@@ -42,14 +38,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'float', options: ['default' => 0])]
     private float $walletBalance = 0;
 
+    #[ORM\Column]
+    private array $roles = [];
+
     #[ORM\Column(nullable: true)]
     private ?array $faceDescriptor = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $isVerified = false;
 
     /**
      * @var Collection<int, UserBadge>
      */
     #[ORM\OneToMany(targetEntity: UserBadge::class, mappedBy: 'user', orphanRemoval: true)]
-    private Collection $badge;
+    private Collection $userBadges;
 
     /**
      * @var Collection<int, Transaction>
@@ -57,11 +59,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Transaction::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $transactions;
 
-    /**
-     * @var Collection<int, UserMatiereStat>
-     */
-    #[ORM\OneToMany(targetEntity: UserMatiereStat::class, mappedBy: 'user', orphanRemoval: true)]
-    private Collection $userMatiereStats;
+
 
     /**
      * @var Collection<int, Event>
@@ -75,11 +73,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'user')]
     private Collection $reservations;
 
+    /**
+     * @var Collection<int, UserChallenge>
+     */
+    #[ORM\OneToMany(targetEntity: UserChallenge::class, mappedBy: 'user')]
+    private Collection $userChallenges;
+
+    /**
+     * @var Collection<int, UserMatiereStat>
+     */
+    #[ORM\OneToMany(targetEntity: UserMatiereStat::class, mappedBy: 'user')]
+    private Collection $userMatiereStats;
+
     public function __construct()
     {
-        $this->badge = new ArrayCollection();
+        $this->userBadges = new ArrayCollection();
         $this->transactions = new ArrayCollection();
-        $this->userMatiereStats = new ArrayCollection();
         $this->enrollments = new ArrayCollection();
         $this->cours = new ArrayCollection();
         $this->createdMatieres = new ArrayCollection();
@@ -92,6 +101,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->tasks = new ArrayCollection();
         $this->events = new ArrayCollection();
         $this->reservations = new ArrayCollection();
+        $this->userChallenges = new ArrayCollection();
+        $this->userMatiereStats = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -145,15 +156,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, UserBadge>
      */
-    public function getBadge(): Collection
+    public function getUserBadges(): Collection
     {
-        return $this->badge;
+        return $this->userBadges;
+    }
+
+    public function addUserBadge(UserBadge $userBadge): static
+    {
+        if (!$this->userBadges->contains($userBadge)) {
+            $this->userBadges->add($userBadge);
+            $userBadge->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserBadge(UserBadge $userBadge): static
+    {
+        if ($this->userBadges->removeElement($userBadge)) {
+            // set the owning side to null (unless already changed)
+            if ($userBadge->getUser() === $this) {
+                $userBadge->setUser(null);
+            }
+        }
+
+        return $this;
     }
 
     public function addBadge(UserBadge $badge): static
     {
-        if (!$this->badge->contains($badge)) {
-            $this->badge->add($badge);
+        if (!$this->userBadges->contains($badge)) {
+            $this->userBadges->add($badge);
             $badge->setUser($this);
         }
 
@@ -168,13 +201,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setXp(int $xp): static
     {
         $this->xp = $xp;
+        $this->walletBalance = (float) $xp;
 
         return $this;
     }
 
     public function removeBadge(UserBadge $badge): static
     {
-        if ($this->badge->removeElement($badge)) {
+        if ($this->userBadges->removeElement($badge)) {
             // set the owning side to null (unless already changed)
             if ($badge->getUser() === $this) {
                 $badge->setUser(null);
@@ -214,35 +248,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, UserMatiereStat>
-     */
-    public function getUserMatiereStats(): Collection
-    {
-        return $this->userMatiereStats;
-    }
 
-    public function addUserMatiereStat(UserMatiereStat $userMatiereStat): static
-    {
-        if (!$this->userMatiereStats->contains($userMatiereStat)) {
-            $this->userMatiereStats->add($userMatiereStat);
-            $userMatiereStat->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserMatiereStat(UserMatiereStat $userMatiereStat): static
-    {
-        if ($this->userMatiereStats->removeElement($userMatiereStat)) {
-            // set the owning side to null (unless already changed)
-            if ($userMatiereStat->getUser() === $this) {
-                $userMatiereStat->setUser(null);
-            }
-        }
-
-        return $this;
-    }
     /**
      * A visual identifier that represents this user.
      *
@@ -346,9 +352,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $sessionsAsTutor;
 
     /**
-     * @var Collection<int, Task>
+     * @var Collection<int, PersonalTask>
      */
-    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'user', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: PersonalTask::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $tasks;
 
     public function getResetOtp(): ?string
@@ -549,6 +555,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setWalletBalance(float $walletBalance): static
     {
         $this->walletBalance = $walletBalance;
+        $this->xp = (int) $walletBalance;
 
         return $this;
     }
@@ -604,6 +611,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $reservation->setUser(null);
             }
         }
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
         return $this;
     }
 }

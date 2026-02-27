@@ -34,17 +34,17 @@ class HelpRequestRepository extends ServiceEntityRepository
 
         if (!empty($filters['exclude_student'])) {
             $qb->andWhere('h.student != :me')
-               ->setParameter('me', $filters['exclude_student']);
+                ->setParameter('me', $filters['exclude_student']);
         }
 
         if (!empty($filters['search'])) {
             $qb->andWhere('h.title LIKE :search OR h.description LIKE :search')
-               ->setParameter('search', '%' . $filters['search'] . '%');
+                ->setParameter('search', '%' . $filters['search'] . '%');
         }
 
         if (!empty($filters['min_bounty'])) {
             $qb->andWhere('h.bounty >= :min_bounty')
-               ->setParameter('min_bounty', $filters['min_bounty']);
+                ->setParameter('min_bounty', $filters['min_bounty']);
         }
 
         $sort = $filters['sort'] ?? 'newest';
@@ -73,7 +73,7 @@ class HelpRequestRepository extends ServiceEntityRepository
             ->orderBy('h.createdAt', 'DESC')
             ->getQuery()
             ->getResult()
-            ;
+        ;
     }
 
     public function getAssistanceStats(): array
@@ -144,5 +144,63 @@ class HelpRequestRepository extends ServiceEntityRepository
             'avgRating' => $avgRating,
             'totalReviews' => $totalReviews,
         ];
+    }
+
+    /**
+     * Monthly request counts for the last 6 months (for line chart)
+     */
+    public function getMonthlyRequestCounts(): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as total
+                FROM help_request
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+                GROUP BY month ORDER BY month ASC";
+        return $conn->executeQuery($sql)->fetchAllAssociative();
+    }
+
+    /**
+     * Category distribution (for doughnut chart)
+     */
+    public function getCategoryDistribution(): array
+    {
+        return $this->createQueryBuilder('h')
+            ->select("COALESCE(h.category, 'Uncategorized') as category, COUNT(h.id) as total")
+            ->groupBy('h.category')
+            ->orderBy('total', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Resolution breakdown by close reason (for bar chart)
+     */
+    public function getResolutionBreakdown(): array
+    {
+        return $this->createQueryBuilder('h')
+            ->select("COALESCE(h.closeReason, 'OPEN') as reason, COUNT(h.id) as total")
+            ->groupBy('h.closeReason')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Top tutors by completed sessions with avg rating
+     */
+    public function getTopTutors(int $limit = 5): array
+    {
+        $em = $this->getEntityManager();
+        return $em->createQuery(
+            'SELECT u.id, u.fullName, u.email, COUNT(s.id) as sessionCount,
+                    COALESCE(AVG(r.rating), 0) as avgRating
+             FROM App\Entity\Session s
+             JOIN s.tutor u
+             LEFT JOIN s.review r
+             WHERE s.isActive = false
+             GROUP BY u.id, u.fullName, u.email
+             ORDER BY sessionCount DESC'
+        )
+            ->setMaxResults($limit)
+            ->getResult();
     }
 }

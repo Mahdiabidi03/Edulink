@@ -1,0 +1,29 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Ajouter une Tâche{% endblock %}
+
+{% block content %}
+<div style="padding: 24px; max-width: 700px; margin: 0 auto;">
+  <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom: 16px;">
+    <div>
+      <h1 style="margin:0; font-size: 1.4rem; color: var(--text-main);">Ajouter une tâche</h1>
+      <div style="color: var(--text-muted); font-size: .9rem;">Pour le challenge : {{ challenge.title }}</div>
+    </div>
+
+    <div style="display:flex; gap: 10px; align-items:center;">
+      <a href="{{ path('app_challenge_admin_edit', {id: challenge.id}) }}" class="btn secondary">
+        <i data-lucide="arrow-left"></i> Retour au challenge
+      </a>
+    </div>
+  </div>
+
+  <div class="card" style="padding: 2rem;">
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <div style="margin-top: 2rem;">
+            <button class="btn" style="width: 100%;">Enregistrer la tâche</button>
+        </div>
+    {{ form_end(form) }}
+  </div>
+</div>
+{% endblock %}

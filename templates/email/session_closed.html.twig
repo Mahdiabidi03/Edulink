@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #4361ee, #3a0ca3); color: white; padding: 20px; border-radius: 8px 8px 0 0; }
+        .content { padding: 20px; background: #f8f9fa; border: 1px solid #e9ecef; }
+        .summary-box { background: white; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px; margin: 15px 0; }
+        .footer { padding: 15px; text-align: center; font-size: 0.85em; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>📋 Session Closed</h2>
+    </div>
+    <div class="content">
+        <p>Hello <strong>{{ user.fullName ?? user.email }}</strong>,</p>
+        <p>The help session for <strong>"{{ helpRequest.title }}"</strong> has been closed.</p>
+
+        <p><strong>Status:</strong> {{ helpRequest.status }}</p>
+
+        {% if summary %}
+        <div class="summary-box">
+            <h3 style="margin-top: 0;">🤖 AI Session Summary</h3>
+            <p>{{ summary }}</p>
+        </div>
+        {% endif %}
+
+        {% if helpRequest.bounty > 0 %}
+            <p>💰 Bounty transferred: <strong>{{ helpRequest.bounty }} coins</strong></p>
+        {% endif %}
+
+        <p>Thank you for using EduLink!</p>
+    </div>
+    <div class="footer">
+        <p>EduLink — Peer-to-peer learning platform</p>
+    </div>
+</body>
+</html>

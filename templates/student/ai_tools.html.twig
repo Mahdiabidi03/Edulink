@@ -1,13 +1,13 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}AI Study Companion - EduLink{% endblock %}
+{% block title %}Study Assistant - EduLink{% endblock %}
 
 {% block content %}
 <div class="row">
     <!-- Sidebar / Tools Selection -->
     <div class="col-md-4 mb-4">
         <div class="card h-100">
-            <h2 class="mb-4" style="color: var(--brand-main); display: flex; align-items: center; gap: 10px;"><i data-lucide="bot"></i> AI Tools</h2>
+            <h2 class="mb-4" style="color: var(--brand-main); display: flex; align-items: center; gap: 10px;"><i data-lucide="zap"></i> Study Tools</h2>
             
             <div class="tool-selector">
                 <div class="tool-option active" onclick="selectTool('summary', this)" style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;">
@@ -21,14 +21,14 @@
                     <div style="font-weight: 600; display: flex; align-items: center; gap: 10px;">
                         <i data-lucide="help-circle" style="color: var(--brand-accent); width: 20px; height: 20px;"></i> Generate Quiz
                     </div>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0;">Test your knowledge with AI-generated questions.</p>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0;">Test your knowledge with custom-generated questions.</p>
                 </div>
 
                 <div class="tool-option" onclick="selectTool('video_script', this)" style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
                     <div style="font-weight: 600; display: flex; align-items: center; gap: 10px;">
-                        <i data-lucide="video" style="color: var(--success); width: 20px; height: 20px;"></i> Explain Like a Video
+                        <i data-lucide="clapperboard" style="color: var(--success); width: 20px; height: 20px;"></i> Video Script Gen
                     </div>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0;">Get a script/explanation style as if watching a YouTube video.</p>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0;">Generate a professional production script with scenes and narration.</p>
                 </div>
             </div>
         </div>
@@ -48,19 +48,29 @@
             </div>
 
             <button id="generateBtn" class="btn" style="width: 100%; display: none;" onclick="processPdf()">
-                <i data-lucide="zap"></i> Generate Magic
+                <i data-lucide="zap"></i> Generate Content
             </button>
 
             <!-- Loading State -->
             <div id="loadingState" style="display: none; text-align: center; margin-top: 2rem;">
                 <div class="spinner" style="width: 40px; height: 40px; border: 4px solid rgba(139, 92, 246, 0.1); border-top: 4px solid var(--brand-main); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
-                <p>AI is analyzing your document...</p>
+                <p>System is analyzing your document...</p>
             </div>
 
             <!-- Results -->
             <div id="resultSection" style="display: none; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
-                <h3>Result</h3>
-                <div id="resultContent" style="background: var(--bg-main); padding: 1.5rem; border-radius: 8px; white-space: pre-wrap; line-height: 1.6;"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>Result</h3>
+                    <button class="btn btn-sm secondary" onclick="copyResult()"><i data-lucide="copy" style="width: 14px;"></i> Copy</button>
+                </div>
+                <div id="resultContent" style="background: var(--bg-main); padding: 1.5rem; border-radius: 12px; line-height: 1.6; border: 1px solid var(--border);"></div>
+                
+                <div id="scriptTip" style="display: none; margin-top: 1.5rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px dashed var(--success);">
+                    <p style="margin: 0; font-size: 0.9rem; color: #065f46;">
+                        <i data-lucide="info" style="width: 16px; display: inline-block; vertical-align: middle;"></i>
+                        <strong>Pro-tip:</strong> You can copy this script into tools like <strong>Canva</strong>, <strong>HeyGen</strong>, or <strong>Pictory</strong> to generate the actual video in minutes!
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -72,13 +82,25 @@ let currentTool = 'summary';
 function selectTool(tool, element) {
     currentTool = tool;
     
-    // Update basic UI
+    // Clear previous view state
+    document.getElementById('resultSection').style.display = 'none';
+    document.getElementById('resultContent').innerHTML = '';
+    document.getElementById('scriptTip').style.display = 'none';
+    document.getElementById('pdfInput').value = '';
+    document.getElementById('fileName').innerText = '';
+    document.getElementById('generateBtn').style.display = 'none';
+    document.getElementById('uploadSection').style.display = 'block';
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+    // Update Sidebar UI
     document.querySelectorAll('.tool-option').forEach(el => {
         el.style.borderColor = 'var(--border)';
         el.style.background = 'transparent';
+        el.classList.remove('active');
     });
     element.style.borderColor = 'var(--brand-main)';
     element.style.background = 'rgba(139, 92, 246, 0.05)';
+    element.classList.add('active');
     
     document.getElementById('toolTitle').innerText = element.querySelector('div').innerText;
 }
@@ -87,6 +109,10 @@ function handleFileSelect(input) {
     if (input.files && input.files[0]) {
         document.getElementById('fileName').innerText = "Selected: " + input.files[0].name;
         document.getElementById('generateBtn').style.display = 'block';
+        
+        // Quick visual feedback
+        input.parentElement.style.borderColor = 'var(--brand-main)';
+        input.parentElement.style.background = 'rgba(139, 92, 246, 0.02)';
     }
 }
 
@@ -103,6 +129,7 @@ async function processPdf() {
     document.getElementById('generateBtn').style.display = 'none';
     document.getElementById('loadingState').style.display = 'block';
     document.getElementById('resultSection').style.display = 'none';
+    document.getElementById('scriptTip').style.display = 'none';
 
     try {
         const response = await fetch('{{ path('api_ai_process_pdf') }}', {
@@ -116,10 +143,12 @@ async function processPdf() {
         
         if (data.success) {
             document.getElementById('resultSection').style.display = 'block';
-            document.getElementById('uploadSection').style.display = 'block'; // Show upload again for next time
+            document.getElementById('uploadSection').style.display = 'block';
             
-            // Format result if it's JSON (quiz)
-            if (currentTool === 'quiz' && typeof data.result === 'string' && (data.result.trim().startsWith('[') || data.result.trim().startsWith('{'))) {
+            if (currentTool === 'video_script') {
+                document.getElementById('scriptTip').style.display = 'block';
+                renderScript(data.result);
+            } else if (currentTool === 'quiz') {
                 try {
                     const quizData = JSON.parse(data.result);
                     renderQuiz(quizData);
@@ -127,16 +156,26 @@ async function processPdf() {
                      document.getElementById('resultContent').innerText = data.result;
                 }
             } else {
-                document.getElementById('resultContent').innerHTML = marked.parse(data.result); // Use marked.js if available, or just text
+                document.getElementById('resultContent').innerHTML = marked.parse(data.result);
             }
 
             // Fallback if marked is not defined
-            if (typeof marked === 'undefined') {
+            if (typeof marked === 'undefined' && currentTool !== 'quiz' && currentTool !== 'video_script') {
                  document.getElementById('resultContent').innerText = data.result;
             }
 
+            lucide.createIcons();
+            
+            // Scroll to results
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
         } else {
-            alert('Error: ' + data.error);
+            Swal.fire({
+                title: 'Error',
+                text: data.error,
+                icon: 'error',
+                background: 'var(--bg-card)',
+                color: 'var(--text-main)'
+            });
             document.getElementById('uploadSection').style.display = 'block';
             document.getElementById('generateBtn').style.display = 'block';
         }
@@ -148,33 +187,104 @@ async function processPdf() {
     }
 }
 
-function renderQuiz(questions) {
-    let html = '';
-    // Handle if it's wrapped in an object or just array
-    const qArray = Array.isArray(questions) ? questions : (questions.questions || []);
+function renderScript(text) {
+    let formatted = marked.parse(text);
+    // Custom highlights for script components
+    formatted = formatted.replace(/Scene\s*\d+:?/gi, match => `<span style="background: var(--brand-main); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; display: inline-block;">${match}</span>`);
+    formatted = formatted.replace(/Narrator:?/gi, match => `<strong style="color: var(--brand-main); border-bottom: 1px dotted var(--brand-main);">${match}</strong>`);
+    formatted = formatted.replace(/Visual:?/gi, match => `<strong style="color: var(--info);">${match}</strong>`);
     
-    qArray.forEach((q, index) => {
-        html += `<div class="quiz-question" style="margin-bottom: 2rem;">
-            <p><strong>Q${index + 1}: ${q.question}</strong></p>
-            <ul style="list-style: none; padding-left: 0;">`;
-        
-        q.options.forEach((opt, optIndex) => {
-             html += `<li style="margin-bottom: 0.5rem; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">${opt}</li>`;
-        });
-        
-        html += `</ul>
-            <details style="margin-top: 0.5rem; color: var(--success); cursor: pointer;">
-                <summary>Show Answer</summary>
-                <p>Answer: Option ${q.answer + 1} (${q.options[q.answer]})</p>
-            </details>
-        </div>`;
-    });
-    
-    document.getElementById('resultContent').innerHTML = html;
+    document.getElementById('resultContent').innerHTML = formatted;
 }
 
-// Initialize simple styling for first tool
-selectTool('summary', document.querySelector('.tool-option'));
+function renderQuiz(questions) {
+    let html = '';
+    const qArray = Array.isArray(questions) ? questions : (questions.questions || []);
+    
+    html = '<div class="quiz-container" style="background: #0f172a; border-radius: 16px; padding: 2rem; color: #f1f5f9;">';
+    
+    qArray.forEach((q, qIndex) => {
+        html += `
+        <div class="quiz-item" data-qindex="${qIndex}" style="margin-bottom: 3rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2rem;">
+            <p style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 12px;">
+                <span style="background: var(--brand-main); color: white; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; font-size: 0.9rem;">${qIndex + 1}</span>
+                ${q.question}
+            </p>
+            <div class="options-grid" style="display: grid; gap: 12px;">`;
+        
+        q.options.forEach((opt, optIndex) => {
+             html += `
+                <div class="quiz-option" 
+                     onclick="checkAnswer(this, ${qIndex}, ${optIndex}, ${q.answer})" 
+                     style="padding: 1rem 1.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px;">
+                    <span style="font-weight: 700; color: #94a3b8; width: 24px;">${String.fromCharCode(65 + optIndex)}.</span>
+                    <span style="flex: 1;">${opt}</span>
+                    <i data-lucide="circle" class="status-icon" style="width: 18px; color: rgba(255,255,255,0.2);"></i>
+                </div>`;
+        });
+        
+        html += `</div></div>`;
+    });
+    
+    html += '</div>';
+    
+    document.getElementById('resultContent').innerHTML = html;
+    if (window.lucide) lucide.createIcons();
+}
+
+function checkAnswer(element, qIndex, selectedIdx, correctIdx) {
+    const parent = element.parentElement;
+    if (parent.classList.contains('answered')) return;
+    
+    parent.classList.add('answered');
+    const options = parent.querySelectorAll('.quiz-option');
+    
+    if (selectedIdx === correctIdx) {
+        element.style.borderColor = '#10b981';
+        element.style.background = 'rgba(16, 185, 129, 0.1)';
+        element.querySelector('.status-icon').innerHTML = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'; 
+        element.querySelector('.status-icon').style.color = '#10b981';
+        
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Correct!',
+                text: 'Great job!',
+                icon: 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                background: '#0f172a',
+                color: '#fff'
+            });
+        }
+    } else {
+        element.style.borderColor = '#ef4444';
+        element.style.background = 'rgba(239, 68, 68, 0.1)';
+        element.querySelector('.status-icon').innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+        element.querySelector('.status-icon').style.color = '#ef4444';
+        
+        // Highlight correct one
+        const correctOpt = options[correctIdx];
+        correctOpt.style.borderColor = '#10b981';
+        correctOpt.style.boxShadow = '0 0 15px rgba(16, 185, 129, 0.2)';
+    }
+}
+
+function copyResult() {
+    const text = document.getElementById('resultContent').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        if (window.Swal) {
+             Swal.fire({
+                title: 'Copied!',
+                text: 'Content copied to clipboard',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    });
+}
 </script>
 
 <!-- Simple CSS for spinner animation -->

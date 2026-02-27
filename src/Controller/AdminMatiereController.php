@@ -7,6 +7,8 @@ use App\Entity\Cours;
 use App\Form\MatiereType;
 use App\Repository\MatiereRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\CategoryImageService;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +17,14 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/admin/categories')]
 class AdminMatiereController extends AbstractController
 {
+    private CategoryImageService $imageService;
+    private PaginatorInterface $paginator;
+
+    public function __construct(CategoryImageService $imageService, PaginatorInterface $paginator)
+    {
+        $this->imageService = $imageService;
+        $this->paginator = $paginator;
+    }
     #[Route('/', name: 'app_admin_categories')]
     public function index(Request $request, MatiereRepository $matiereRepo): Response
     {
@@ -27,7 +37,7 @@ class AdminMatiereController extends AbstractController
 
         if ($q) {
             $qb->andWhere('m.name LIKE :q')
-               ->setParameter('q', '%'.$q.'%');
+                ->setParameter('q', '%' . $q . '%');
         }
 
         if ($sort === 'newest') {
@@ -36,8 +46,20 @@ class AdminMatiereController extends AbstractController
             $qb->orderBy('m.name', 'ASC');
         }
 
+        $paginatorOptions = [
+            'sortFieldParameterName' => '_knp_sort',
+            'sortDirectionParameterName' => '_knp_dir',
+        ];
+
+        $pagination = $this->paginator->paginate(
+            $qb->getQuery(),
+            $request->query->getInt('page', 1),
+            12,
+            $paginatorOptions
+        );
+
         return $this->render('admin/categories/index.html.twig', [
-            'matieres' => $qb->getQuery()->getResult(),
+            'pagination' => $pagination,
             'q' => $q,
             'sort' => $sort,
         ]);
@@ -57,12 +79,12 @@ class AdminMatiereController extends AbstractController
 
         if ($q) {
             $qb->andWhere('c.title LIKE :q OR c.description LIKE :q')
-               ->setParameter('q', '%'.$q.'%');
+                ->setParameter('q', '%' . $q . '%');
         }
 
         if ($level) {
             $qb->andWhere('c.level = :level')
-               ->setParameter('level', $level);
+                ->setParameter('level', $level);
         }
 
         switch ($sort) {
@@ -79,9 +101,19 @@ class AdminMatiereController extends AbstractController
                 $qb->orderBy('c.id', 'DESC');
         }
 
+        $pagination = $this->paginator->paginate(
+            $qb->getQuery(),
+            $request->query->getInt('page', 1),
+            10,
+            [
+                'sortFieldParameterName' => '_knp_sort',
+                'sortDirectionParameterName' => '_knp_dir',
+            ]
+        );
+
         return $this->render('admin/categories/manage.html.twig', [
             'matiere' => $matiere,
-            'courses' => $qb->getQuery()->getResult(),
+            'pagination' => $pagination,
             'q' => $q,
             'level' => $level,
             'sort' => $sort,
@@ -108,6 +140,10 @@ class AdminMatiereController extends AbstractController
 
             $this->addFlash('success', 'Course added successfully!');
             return $this->redirectToRoute('app_admin_category_manage', ['id' => $matiere->getId()]);
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('admin/categories/new_course.html.twig', [
@@ -129,15 +165,23 @@ class AdminMatiereController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('imageFile')->getData();
             if ($imageFile) {
-                $newFilename = uniqid().'.'.$imageFile->getClientOriginalExtension();
+                $newFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
                 try {
                     $imageFile->move(
-                        $this->getParameter('kernel.project_dir').'/public/uploads/categories',
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/categories',
                         $newFilename
                     );
-                    $matiere->setImageUrl('/uploads/categories/'.$newFilename);
+                    $matiere->setImageUrl('/uploads/categories/' . $newFilename);
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Category image upload failed');
+                }
+            } else {
+                // Auto-generate AI image if none uploaded
+                try {
+                    $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+                    $matiere->setImageUrl($aiUrl);
+                } catch (\Exception $e) {
+                    $matiere->setImageUrl($this->imageService->getPlaceholderUrl($matiere->getName()));
                 }
             }
             $em->persist($matiere);
@@ -145,6 +189,10 @@ class AdminMatiereController extends AbstractController
 
             $this->addFlash('success', 'Category created successfully!');
             return $this->redirectToRoute('app_admin_categories');
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('admin/categories/new.html.twig', [
@@ -161,15 +209,23 @@ class AdminMatiereController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('imageFile')->getData();
             if ($imageFile) {
-                $newFilename = uniqid().'.'.$imageFile->getClientOriginalExtension();
+                $newFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
                 try {
                     $imageFile->move(
-                        $this->getParameter('kernel.project_dir').'/public/uploads/categories',
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/categories',
                         $newFilename
                     );
-                    $matiere->setImageUrl('/uploads/categories/'.$newFilename);
+                    $matiere->setImageUrl('/uploads/categories/' . $newFilename);
                 } catch (\Exception $e) {
                     $this->addFlash('error', 'Category image upload failed');
+                }
+            } elseif (!$matiere->getImageUrl()) {
+                // Auto-generate AI image if none exists and no file uploaded
+                try {
+                    $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+                    $matiere->setImageUrl($aiUrl);
+                } catch (\Exception $e) {
+                    $matiere->setImageUrl($this->imageService->getPlaceholderUrl($matiere->getName()));
                 }
             }
             $em->flush();
@@ -187,11 +243,26 @@ class AdminMatiereController extends AbstractController
     #[Route('/{id}/delete', name: 'app_admin_category_delete', methods: ['POST'])]
     public function delete(Matiere $matiere, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$matiere->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $matiere->getId(), $request->request->get('_token'))) {
             $em->remove($matiere);
             $em->flush();
 
             $this->addFlash('success', 'Category deleted successfully!');
+        }
+
+        return $this->redirectToRoute('app_admin_categories');
+    }
+
+    #[Route('/{id}/refresh-image', name: 'app_admin_category_refresh_image', methods: ['POST'])]
+    public function refreshImage(Matiere $matiere, EntityManagerInterface $em): Response
+    {
+        try {
+            $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+            $matiere->setImageUrl($aiUrl);
+            $em->flush();
+            $this->addFlash('success', 'Category visual refreshed!');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Failed to refresh AI image.');
         }
 
         return $this->redirectToRoute('app_admin_categories');

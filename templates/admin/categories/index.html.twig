@@ -40,9 +40,9 @@
     {% endfor %}
 
     <!-- Categories Grid -->
-    {% if matieres is not empty %}
+    {% if pagination is not empty %}
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
-            {% for matiere in matieres %}
+            {% for matiere in pagination %}
                 {% set cover = matiere.imageUrl %}
                 {% if not cover %}
                     {% for course in matiere.cours %}
@@ -54,7 +54,7 @@
                     {% endfor %}
                 {% endif %}
                 <div class="card" style="padding: 0; overflow: hidden;">
-                    <div style="height: 120px; background: {{ cover ? 'url(' ~ cover ~ ')' : 'linear-gradient(135deg, #6c5ce7, #a29bfe)' }}; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center;">
+                    <div style="height: 120px; background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.2)), url('{{ cover ?: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800' }}'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center;">
                         {% if not cover %}
                             <i class="ri-book-open-line" style="font-size: 2.5rem; color: white; opacity: 0.5;"></i>
                         {% endif %}
@@ -70,6 +70,9 @@
                     <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem;">
                         <a href="{{ path('app_admin_category_manage', {'id': matiere.id}) }}" class="btn" style="flex: 1; min-width: 80px; text-align: center; background: var(--brand-main); color: white; text-decoration: none; padding: 8px; font-size: 0.9rem;">Manage</a>
                         <a href="{{ path('app_admin_category_edit', {'id': matiere.id}) }}" class="btn secondary" style="padding: 8px 12px; text-decoration: none; border: 1px solid var(--border);"><i class="ri-edit-line"></i></a>
+                        <form method="post" action="{{ path('app_admin_category_refresh_image', {'id': matiere.id}) }}" style="display: inline;">
+                            <button type="submit" class="btn secondary" style="padding: 8px 12px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-main);" title="Refresh Visual"><i class="ri-refresh-line"></i></button>
+                        </form>
                         <form method="post" action="{{ path('app_admin_category_delete', {'id': matiere.id}) }}" style="display: inline;" onsubmit="return confirm('Delete this category and all its courses?');">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ matiere.id) }}">
                             <button type="submit" class="btn" style="background: var(--error); color: white; padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer;"><i class="ri-delete-bin-line"></i></button>
@@ -78,6 +81,12 @@
                 </div>
             </div>
             {% endfor %}
+        </div>
+
+        <div class="navigation" style="margin-top: 2rem;">
+            <div class="pagination">
+                {{ knp_pagination_render(pagination) }}
+            </div>
         </div>
     {% else %}
         <div class="card" style="text-align: center; padding: 3rem;">

@@ -3,11 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\TaskRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
-#[ORM\Table(name: 'tasks')]
 class Task
 {
     #[ORM\Id]
@@ -17,30 +17,28 @@ class Task
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    private ?Challenge $challenge = null;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    #[Assert\NotBlank(message: 'Task title cannot be empty')]
-    #[Assert\Length(
-        min: 1,
-        max: 255,
-        minMessage: 'Title must be at least {{ limit }} character',
-        maxMessage: 'Title cannot exceed {{ limit }} characters'
-    )]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le titre est obligatoire.")]
     private ?string $title = null;
 
-    #[ORM\Column(type: 'boolean')]
-    private bool $isCompleted = false;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
-    #[ORM\Column(type: 'datetime')]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column(options: ['default' => 0])]
+    #[Assert\PositiveOrZero(message: "Les points doivent être positifs.")]
+    private int $points = 0;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $completedAt = null;
+    #[ORM\Column]
+    private bool $isRequired = true;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $createdAt;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -48,14 +46,14 @@ class Task
         return $this->id;
     }
 
-    public function getUser(): ?User
+    public function getChallenge(): ?Challenge
     {
-        return $this->user;
+        return $this->challenge;
     }
 
-    public function setUser(?User $user): static
+    public function setChallenge(?Challenge $challenge): static
     {
-        $this->user = $user;
+        $this->challenge = $challenge;
         return $this;
     }
 
@@ -70,36 +68,48 @@ class Task
         return $this;
     }
 
-    public function isCompleted(): bool
+    public function getDescription(): ?string
     {
-        return $this->isCompleted;
+        return $this->description;
     }
 
-    public function setIsCompleted(bool $isCompleted): static
+    public function setDescription(?string $description): static
     {
-        $this->isCompleted = $isCompleted;
+        $this->description = $description;
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getPoints(): int
+    {
+        return $this->points;
+    }
+
+    public function setPoints(int $points): static
+    {
+        $this->points = $points;
+        return $this;
+    }
+
+    public function isRequired(): bool
+    {
+        return $this->isRequired;
+    }
+
+    public function setIsRequired(bool $isRequired): static
+    {
+        $this->isRequired = $isRequired;
+        return $this;
+    }
+
+
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-        return $this;
-    }
-
-    public function getCompletedAt(): ?\DateTimeInterface
-    {
-        return $this->completedAt;
-    }
-
-    public function setCompletedAt(?\DateTimeInterface $completedAt): static
-    {
-        $this->completedAt = $completedAt;
         return $this;
     }
 }

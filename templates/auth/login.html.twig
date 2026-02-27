@@ -44,6 +44,11 @@
           <a href="{{ path('forgot_password') }}" style="font-size: 0.8rem; color: var(--text-muted); text-decoration: none;">Forgot Password?</a>
       </div>
 
+      {# Google reCAPTCHA v2 #}
+      <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
+          <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}" data-theme="dark"></div>
+      </div>
+
       <button type="submit" class="btn login-btn">Sign In <i data-lucide="arrow-right" style="margin-left: 5px;"></i></button>
 
       <div style="margin-top: 1rem; text-align: center;">
@@ -87,7 +92,6 @@
             const statusEl = document.getElementById('loginStatus');
             const loadingEl = document.getElementById('loginLoading');
             
-            // Load models if not loaded (or reload to be safe)
             if (!faceapi.nets.ssdMobilenetv1.params) {
                  statusEl.innerText = "Loading AI Models...";
                  try {
@@ -111,8 +115,6 @@
                 loginStream = await navigator.mediaDevices.getUserMedia({ video: {} });
                 videoEl.srcObject = loginStream;
                 statusEl.innerText = "Detecting face...";
-                
-                // Start scanning loop
                 startScanning();
             } catch (err) {
                 statusEl.innerText = "Camera denied.";
@@ -145,8 +147,6 @@
                  if (detection) {
                      statusEl.innerText = "Verifying...";
                      statusEl.style.color = "var(--brand-main)";
-                     
-                     // Stop scanning while verifying
                      clearInterval(loginInterval);
                      
                      const descriptor = Array.from(detection.descriptor);
@@ -162,12 +162,11 @@
                              statusEl.innerText = "Success! Redirecting...";
                              statusEl.style.color = "var(--success)";
                              setTimeout(() => {
-                                 window.location.href = data.redirect; // Redirect to dashboard
+                                 window.location.href = data.redirect;
                              }, 1000);
                          } else {
                              statusEl.innerText = "Face not recognized.";
                              statusEl.style.color = "var(--error)";
-                             // Restart scanning after a delay
                              setTimeout(() => startScanning(), 2000);
                          }
                      })
@@ -177,14 +176,16 @@
                          setTimeout(() => startScanning(), 2000);
                      });
                  }
-             }, 1000); // Check every 1 second
+             }, 1000);
         }
     </script>
 
     <p class="register-link">
-      Don’t have an account? <a href="{{ path('register') }}">Register</a>
+      Don't have an account? <a href="{{ path('register') }}">Register</a>
     </p>
   </div>
 
 </div>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 {% endblock %}

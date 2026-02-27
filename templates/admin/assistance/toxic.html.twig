@@ -1,0 +1,154 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Toxic Messages - Admin{% endblock %}
+
+{% block content %}
+<style>
+    .toxic-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-xl); }
+    .toxic-header h1 { margin: 0; font-size: 1.8rem; display: flex; align-items: center; gap: 10px; }
+    .toxic-header h1 i { color: var(--error); }
+    .toxic-header p { color: var(--text-muted); font-family: 'Fira Code', monospace; margin-top: 5px; font-size: 0.85rem; }
+
+    .toxic-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin-bottom: var(--space-xl); }
+    .toxic-stat { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: var(--space-lg); text-align: center; transition: border-color 0.2s; }
+    .toxic-stat:hover { border-color: var(--error); }
+    .toxic-stat .val { font-family: 'Fira Sans', sans-serif; font-size: 2.2rem; font-weight: 700; line-height: 1; }
+    .toxic-stat .lab { font-family: 'Fira Code', monospace; font-size: 0.72rem; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px; margin-top: 6px; }
+    .toxic-stat.danger { border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.03); }
+    .toxic-stat.danger .val { color: var(--error); }
+
+    .toxic-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .toxic-card-header { padding: var(--space-lg); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .toxic-card-header h3 { margin: 0; font-family: 'Fira Sans', sans-serif; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+
+    .toxic-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .toxic-table thead { background: rgba(239, 68, 68, 0.05); font-family: 'Fira Code', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+    .toxic-table th { text-align: left; padding: 12px 16px; }
+    .toxic-table td { padding: 14px 16px; border-bottom: 1px solid var(--border-light); }
+    .toxic-table tbody tr { transition: background 0.15s; }
+    .toxic-table tbody tr:hover { background: rgba(239, 68, 68, 0.03); }
+
+    .msg-content { max-width: 350px; line-height: 1.4; color: var(--error); font-size: 0.85rem; word-break: break-word; }
+    .msg-sender { display: flex; align-items: center; gap: 8px; }
+    .msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; background: rgba(239, 68, 68, 0.15); color: var(--error); flex-shrink: 0; }
+
+    .toxic-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; background: rgba(239, 68, 68, 0.12); color: var(--error); }
+
+    .empty-state { text-align: center; padding: var(--space-2xl); color: var(--text-muted); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: var(--space-md); display: block; opacity: 0.4; }
+
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); text-decoration: none; margin-bottom: var(--space-lg); font-size: 0.9rem; transition: color 0.2s; }
+    .back-link:hover { color: var(--brand-main); }
+</style>
+
+<!-- Back -->
+<a href="{{ path('app_admin_assistance_index') }}" class="back-link">
+    <i class="ri-arrow-left-line"></i> Back to Assistance Center
+</a>
+
+<!-- Header -->
+<div class="toxic-header">
+    <div>
+        <h1><i class="ri-alarm-warning-line"></i> Toxic Messages</h1>
+        <p><i class="ri-shield-check-line"></i> Content moderation &amp; flagged messages</p>
+    </div>
+    <div style="display: flex; gap: var(--space-sm);">
+        <a href="{{ path('app_admin_assistance_export_toxic') }}" class="btn" style="font-size: 0.85rem; padding: 8px 14px; background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid rgba(239,68,68,0.2); text-decoration: none; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="ri-file-download-line"></i> Export CSV
+        </a>
+    </div>
+</div>
+
+<!-- Flash -->
+{% for message in app.flashes('success') %}
+    <div style="padding: var(--space-md) var(--space-lg); border-radius: 10px; margin-bottom: var(--space-lg); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.2);">
+        <i class="ri-check-line"></i> {{ message }}
+    </div>
+{% endfor %}
+
+<!-- Stats -->
+<div class="toxic-stats">
+    <div class="toxic-stat danger">
+        <div class="val">{{ toxic_messages|length }}</div>
+        <div class="lab">Toxic Messages</div>
+    </div>
+    <div class="toxic-stat">
+        <div class="val" style="color: var(--text-main);">{{ totalMessages }}</div>
+        <div class="lab">Total Messages</div>
+    </div>
+    <div class="toxic-stat">
+        <div class="val" style="color: {{ totalMessages > 0 ? 'var(--warning)' : 'var(--text-muted)' }};">
+            {{ totalMessages > 0 ? ((toxic_messages|length / totalMessages) * 100)|round(1) : 0 }}%
+        </div>
+        <div class="lab">Toxicity Rate</div>
+    </div>
+</div>
+
+<!-- Toxic Messages Table -->
+<div class="toxic-card">
+    <div class="toxic-card-header">
+        <h3>
+            <i class="ri-error-warning-line" style="color: var(--error);"></i>
+            Flagged Messages
+        </h3>
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--text-muted);">
+            {{ toxic_messages|length }} flagged
+        </span>
+    </div>
+
+    {% if toxic_messages|length > 0 %}
+    <table class="toxic-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Sender</th>
+                <th>Message Content</th>
+                <th>Session</th>
+                <th>Timestamp</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in toxic_messages %}
+            <tr>
+                <td style="font-family: 'Fira Code', monospace; font-size: 0.82rem;">#{{ msg.id }}</td>
+                <td>
+                    <div class="msg-sender">
+                        <div class="msg-avatar">{{ msg.sender.fullName|first|upper|default('?') }}</div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.85rem;">{{ msg.sender.fullName|default('Unknown') }}</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted);">{{ msg.sender.email|default('') }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="msg-content">{{ msg.content|slice(0, 150) }}{{ msg.content|length > 150 ? '...' : '' }}</div>
+                </td>
+                <td>
+                    {% if msg.session %}
+                        <a href="{{ path('app_admin_assistance_view', {'id': msg.session.helpRequest.id}) }}" style="color: var(--brand-main); text-decoration: none; font-family: 'Fira Code', monospace; font-size: 0.82rem;">
+                            #{{ msg.session.id }}
+                        </a>
+                    {% else %}
+                        <span style="color: var(--text-muted);">—</span>
+                    {% endif %}
+                </td>
+                <td style="font-family: 'Fira Code', monospace; font-size: 0.78rem; color: var(--text-muted); white-space: nowrap;">
+                    {{ msg.timestamp|date('Y-m-d H:i') }}
+                </td>
+                <td>
+                    <span class="toxic-badge"><i class="ri-alert-line"></i> FLAGGED</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="ri-shield-check-line"></i>
+        <h4>No toxic messages detected</h4>
+        <p style="font-size: 0.85rem;">The community is clean. Great job!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

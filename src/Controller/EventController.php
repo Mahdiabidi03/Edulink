@@ -6,9 +6,12 @@ use App\Entity\Event;
 use App\Entity\Reservation;
 use App\Form\EventType;
 use App\Repository\EventRepository;
+use App\Service\GeminiEventService;
+use App\Service\GoogleMeetService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,6 +21,12 @@ final class EventController extends AbstractController
 {
     private const ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     private const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+    public function __construct(
+        private GeminiEventService $geminiService,
+        private GoogleMeetService $meetService,
+    ) {
+    }
 
     #[Route('/events', name: 'app_event_index')]
     public function index(Request $request, EventRepository $eventRepository): Response
@@ -31,15 +40,15 @@ final class EventController extends AbstractController
 
         if ($search) {
             $queryBuilder->andWhere('e.title LIKE :search')
-                        ->setParameter('search', '%' . $search . '%');
+                ->setParameter('search', '%' . $search . '%');
         }
 
         if ($filter === 'upcoming') {
             $queryBuilder->andWhere('e.dateStart >= :today')
-                        ->setParameter('today', new \DateTime());
+                ->setParameter('today', new \DateTime());
         } elseif ($filter === 'mine' && $user) {
             $queryBuilder->andWhere('e.organizer = :user')
-                        ->setParameter('user', $user);
+                ->setParameter('user', $user);
         }
 
         $events = $queryBuilder->getQuery()->getResult();
@@ -50,6 +59,33 @@ final class EventController extends AbstractController
             'events' => $events,
             'currentFilter' => $filter,
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/events/generate-description', name: 'app_event_generate_description', methods: ['POST'])]
+    public function generateDescription(Request $request): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $data = json_decode($request->getContent(), true);
+
+        $title = trim($data['title'] ?? '');
+        $dateStart = $data['dateStart'] ?? '';
+        $dateEnd = $data['dateEnd'] ?? '';
+        $maxCapacity = (int) ($data['maxCapacity'] ?? 50);
+
+        if (strlen($title) < 3) {
+            return new JsonResponse([
+                'success' => false,
+                'error' => 'Please enter an event title (at least 3 characters) before generating.',
+            ], 400);
+        }
+
+        $description = $this->geminiService->generateDescription($title, $dateStart, $dateEnd, $maxCapacity);
+
+        return new JsonResponse([
+            'success' => true,
+            'description' => $description,
         ]);
     }
 
@@ -102,11 +138,7 @@ final class EventController extends AbstractController
         $event->setIsOnline($isOnline);
 
         if ($isOnline) {
-            $meetLink = "https://calendar.google.com/calendar/render?action=TEMPLATE"
-                . "&text=" . urlencode($title)
-                . "&dates=" . $dateStart->format('Ymd\THis') . "/" . $dateEnd->format('Ymd\THis')
-                . "&details=" . urlencode($description)
-                . "&add=single";
+            $meetLink = $this->meetService->generateMeetLink($title);
             $event->setMeetLink($meetLink);
             $event->setLocation(null);
         } else {
@@ -134,24 +166,34 @@ final class EventController extends AbstractController
         return $this->redirectToRoute('app_event_index');
     }
 
-    #[Route('/events/{id}/edit', name: 'app_event_edit', methods: ['POST'])]
+    #[Route('/events/{id}/edit', name: 'app_event_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Event $event, EntityManagerInterface $entityManager): Response
     {
-        if ($event->getOrganizer() !== $this->getUser()) {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        if ($event->getOrganizer() !== $user && !in_array('ROLE_ADMIN', $user->getRoles())) {
             throw $this->createAccessDeniedException("You can only edit your own events.");
         }
 
+        // GET: show the edit form
+        if ($request->isMethod('GET')) {
+            return $this->render('event/edit.html.twig', [
+                'event' => $event,
+            ]);
+        }
+
+        // POST: process the update
         $title = trim((string) $request->request->get('title', ''));
         $description = trim((string) $request->request->get('description', ''));
         $maxCapacity = (int) $request->request->get('maxCapacity', 0);
 
         if (strlen($title) < 3) {
             $this->addFlash('error', 'Title must be at least 3 characters.');
-            return $this->redirectToRoute('app_event_index');
+            return $this->redirectToRoute('app_event_edit', ['id' => $event->getId()]);
         }
         if ($maxCapacity < 1) {
             $this->addFlash('error', 'Max capacity must be at least 1.');
-            return $this->redirectToRoute('app_event_index');
+            return $this->redirectToRoute('app_event_edit', ['id' => $event->getId()]);
         }
 
         $event->setTitle($title);
@@ -160,12 +202,19 @@ final class EventController extends AbstractController
 
         $dateStartRaw = $request->request->get('dateStart');
         $dateEndRaw = $request->request->get('dateEnd');
-        if ($dateStartRaw) { $event->setDateStart(new \DateTime($dateStartRaw)); }
-        if ($dateEndRaw) { $event->setDateEnd(new \DateTime($dateEndRaw)); }
+        if ($dateStartRaw) {
+            $event->setDateStart(new \DateTime($dateStartRaw));
+        }
+        if ($dateEndRaw) {
+            $event->setDateEnd(new \DateTime($dateEndRaw));
+        }
 
         $isOnline = $request->request->get('isOnline') === 'on';
         $event->setIsOnline($isOnline);
         if ($isOnline) {
+            if (!$event->getMeetLink()) {
+                $event->setMeetLink($this->meetService->generateMeetLink($title));
+            }
             $event->setLocation(null);
         } else {
             $event->setLocation($request->request->get('location'));
@@ -176,15 +225,18 @@ final class EventController extends AbstractController
             $error = $this->validateImage($imageFile);
             if ($error) {
                 $this->addFlash('error', $error);
-                return $this->redirectToRoute('app_event_index');
+                return $this->redirectToRoute('app_event_edit', ['id' => $event->getId()]);
             }
-            // Remove old image
             if ($event->getImage()) {
                 $oldPath = $this->getParameter('events_images_directory') . '/' . $event->getImage();
-                if (file_exists($oldPath)) { @unlink($oldPath); }
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
             }
             $newFilename = $this->uploadImage($imageFile);
-            if ($newFilename) { $event->setImage($newFilename); }
+            if ($newFilename) {
+                $event->setImage($newFilename);
+            }
         }
 
         $entityManager->flush();
@@ -201,11 +253,13 @@ final class EventController extends AbstractController
             return $this->redirectToRoute('app_event_index');
         }
 
-        if ($this->isCsrfTokenValid('delete'.$event->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $event->getId(), $request->request->get('_token'))) {
             // Remove image file
             if ($event->getImage()) {
                 $path = $this->getParameter('events_images_directory') . '/' . $event->getImage();
-                if (file_exists($path)) { @unlink($path); }
+                if (file_exists($path)) {
+                    @unlink($path);
+                }
             }
             $entityManager->remove($event);
             $entityManager->flush();

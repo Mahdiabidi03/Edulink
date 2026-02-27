@@ -3,10 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\UserChallengeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: UserChallengeRepository::class)]
+#[Vich\Uploadable]
 class UserChallenge
 {
     public const STATUS_IN_PROGRESS = 'IN_PROGRESS';
@@ -38,9 +43,16 @@ class UserChallenge
     #[ORM\Column(length: 50)]
     private string $status = self::STATUS_IN_PROGRESS;
 
-    // ✅ Nouveau champ : fichier de preuve
+    // ✅ VichUploader mapping
+    #[Vich\UploadableField(mapping: 'challenge_proofs', fileNameProperty: 'proofFileName')]
+    private ?File $proofFile = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $proofFileName = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
+
 
     #[ORM\ManyToOne(inversedBy: 'userChallenges')]
     #[ORM\JoinColumn(nullable: false)]
@@ -49,6 +61,18 @@ class UserChallenge
     #[ORM\ManyToOne(inversedBy: 'userChallenges')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Challenge $challenge = null;
+
+    /**
+     * @var Collection<int, UserTask>
+     */
+    #[ORM\OneToMany(mappedBy: 'userChallenge', targetEntity: UserTask::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $userTasks;
+
+
+    public function __construct()
+    {
+        $this->userTasks = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -88,6 +112,26 @@ class UserChallenge
         return $this;
     }
 
+    public function getProofFile(): ?File
+    {
+        return $this->proofFile;
+    }
+
+    public function setProofFile(?File $proofFile = null): void
+    {
+        $this->proofFile = $proofFile;
+
+        if (null !== $proofFile) {
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+
     public function getUser(): ?User
     {
         return $this->user;
@@ -108,5 +152,53 @@ class UserChallenge
     {
         $this->challenge = $challenge;
         return $this;
+    }
+
+    /**
+     * @return Collection<int, UserTask>
+     */
+    public function getUserTasks(): Collection
+    {
+        return $this->userTasks;
+    }
+
+    public function addUserTask(UserTask $userTask): static
+    {
+        if (!$this->userTasks->contains($userTask)) {
+            $this->userTasks->add($userTask);
+            $userTask->setUserChallenge($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserTask(UserTask $userTask): static
+    {
+        if ($this->userTasks->removeElement($userTask)) {
+            // set the owning side to null (unless already changed)
+            if ($userTask->getUserChallenge() === $this) {
+                $userTask->setUserChallenge(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function updateProgress(): void
+    {
+        $total = count($this->userTasks);
+        if ($total === 0) {
+            $this->progress = '0/0';
+            return;
+        }
+
+        $completed = 0;
+        foreach ($this->userTasks as $userTask) {
+            if ($userTask->isCompleted()) {
+                $completed++;
+            }
+        }
+
+        $this->progress = sprintf('%d/%d', $completed, $total);
     }
 }

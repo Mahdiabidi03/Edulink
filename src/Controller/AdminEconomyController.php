@@ -18,14 +18,14 @@ class AdminEconomyController extends AbstractController
     public function index(TransactionRepository $transactionRepository): Response
     {
         $transactions = $transactionRepository->findBy([], ['date' => 'DESC'], 50); // Last 50 transactions
-        
+
         $totalPoints = $transactionRepository->getTotalPointsEarned();
         $dailyPoints = $transactionRepository->getPointsEarnedToday();
         $activeUsers = $transactionRepository->countActiveUsersToday();
 
         // Calculate "Supply" as total points (or fetch from User entity if you store balance there)
         // For now, let's use Total Points Earned as a proxy for activity volume or supply
-        
+
         return $this->render('admin/economy.html.twig', [
             'transactions' => $transactions,
             'total_points' => $totalPoints,
@@ -35,7 +35,7 @@ class AdminEconomyController extends AbstractController
     }
 
     #[Route('/transfer', name: 'admin_economy_transfer', methods: ['POST'])]
-    public function transfer(Request $request, EntityManagerInterface $entityManager): Response
+    public function transfer(Request $request, EntityManagerInterface $entityManager, \App\Service\BadgeService $badgeService): Response
     {
         $email = $request->request->get('email');
         $amount = (int) $request->request->get('amount');
@@ -57,16 +57,15 @@ class AdminEconomyController extends AbstractController
         $transaction->setUser($user);
         $transaction->setDate(new \DateTime());
         $transaction->setType(strtoupper($type)); // GRANT or REFUND
-        
-        // If type is 'refund' usually it's giving money BACK, so it's positive? 
-        // User asked "grant and refund i want to send points to users" -> Both imply ADDING points.
-        // A "Charge" would be removing points. 
-        // I will treat both as adding points, but maybe Refunds are tracked differently.
-        $transaction->setAmount($amount); 
-        
-        // Update User Balance
-        $user->setXp($user->getXp() + $amount); 
-        
+
+        $transaction->setAmount($amount);
+
+        // Update User Balance (Unified XP/Wallet)
+        $user->setWalletBalance($user->getWalletBalance() + $amount);
+
+        // Check for new badges after XP change
+        $badgeService->checkBadges($user);
+
         $entityManager->persist($transaction);
 
         // Create Notification

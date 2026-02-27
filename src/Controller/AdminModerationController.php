@@ -40,8 +40,12 @@ class AdminModerationController extends AbstractController
 
     // MATIERE ACTIONS
     #[Route('/matiere/{id}/approve', name: 'app_admin_matiere_approve', methods: ['POST'])]
-    public function approveMatiere(Matiere $matiere, EntityManagerInterface $em): Response
+    public function approveMatiere(Matiere $matiere, Request $request, EntityManagerInterface $em): Response
     {
+        if (!$this->isCsrfTokenValid('approve'.$matiere->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('app_admin_moderation', ['_fragment' => 'categories']);
+        }
         $matiere->setStatus('APPROVED');
         $em->flush();
 
@@ -50,8 +54,12 @@ class AdminModerationController extends AbstractController
     }
 
     #[Route('/matiere/{id}/reject', name: 'app_admin_matiere_reject', methods: ['POST'])]
-    public function rejectMatiere(Matiere $matiere, EntityManagerInterface $em): Response
+    public function rejectMatiere(Matiere $matiere, Request $request, EntityManagerInterface $em): Response
     {
+        if (!$this->isCsrfTokenValid('reject'.$matiere->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('app_admin_moderation', ['_fragment' => 'categories']);
+        }
         $em->remove($matiere);
         $em->flush();
 
@@ -61,8 +69,12 @@ class AdminModerationController extends AbstractController
 
     // COURS ACTIONS
     #[Route('/cours/{id}/approve', name: 'app_admin_cours_approve', methods: ['POST'])]
-    public function approveCours(Cours $cours, EntityManagerInterface $em): Response
+    public function approveCours(Cours $cours, Request $request, EntityManagerInterface $em): Response
     {
+        if (!$this->isCsrfTokenValid('approve'.$cours->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('app_admin_moderation', ['_fragment' => 'courses']);
+        }
         $cours->setStatus('APPROVED');
         $em->flush();
 
@@ -71,8 +83,12 @@ class AdminModerationController extends AbstractController
     }
 
     #[Route('/cours/{id}/reject', name: 'app_admin_cours_reject', methods: ['POST'])]
-    public function rejectCours(Cours $cours, EntityManagerInterface $em): Response
+    public function rejectCours(Cours $cours, Request $request, EntityManagerInterface $em): Response
     {
+        if (!$this->isCsrfTokenValid('reject'.$cours->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('app_admin_moderation', ['_fragment' => 'courses']);
+        }
         $em->remove($cours);
         $em->flush();
 
@@ -82,8 +98,12 @@ class AdminModerationController extends AbstractController
 
     // RESOURCE ACTIONS
     #[Route('/resource/{id}/approve', name: 'app_admin_resource_approve', methods: ['POST'])]
-    public function approveResource(Resource $resource, EntityManagerInterface $em): Response
+    public function approveResource(Resource $resource, Request $request, EntityManagerInterface $em): Response
     {
+        if (!$this->isCsrfTokenValid('approve'.$resource->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('app_admin_moderation', ['_fragment' => 'resources']);
+        }
         $resource->setStatus('APPROVED');
         $em->flush();
 
@@ -92,8 +112,12 @@ class AdminModerationController extends AbstractController
     }
 
     #[Route('/resource/{id}/reject', name: 'app_admin_resource_reject', methods: ['POST'])]
-    public function rejectResource(Resource $resource, EntityManagerInterface $em): Response
+    public function rejectResource(Resource $resource, Request $request, EntityManagerInterface $em): Response
     {
+        if (!$this->isCsrfTokenValid('reject'.$resource->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('app_admin_moderation', ['_fragment' => 'resources']);
+        }
         $em->remove($resource);
         $em->flush();
 

@@ -1,0 +1,343 @@
+{% extends 'admin_base.html.twig' %}
+
+{% block title %}Assistance Statistics Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .stats-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: var(--space-xl);
+    }
+    .stats-page-header h1 { margin: 0; font-size: 2rem; }
+
+    /* Hero KPIs */
+    .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-lg);
+        margin-bottom: var(--space-xl);
+    }
+    .kpi-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: var(--space-lg);
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        transition: all 0.2s;
+    }
+    .kpi-card:hover { transform: translateY(-3px); border-color: var(--brand-main); }
+    .kpi-icon {
+        width: 50px; height: 50px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+    .kpi-value {
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+    .kpi-label {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    /* Charts grid */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: var(--space-xl);
+        margin-bottom: var(--space-xl);
+    }
+    .chart-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: var(--space-xl);
+    }
+    .chart-panel h3 {
+        margin: 0 0 var(--space-lg);
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 1rem;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .chart-canvas-wrap {
+        position: relative;
+        width: 100%;
+    }
+
+    /* Leaderboard */
+    .leaderboard {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: var(--space-xl);
+    }
+    .leaderboard h3 {
+        margin: 0 0 var(--space-lg);
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 1rem;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .leaderboard-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+    .leaderboard-item:last-child { border-bottom: none; }
+    .leaderboard-rank {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+    .rank-1 { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+    .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: white; }
+    .rank-3 { background: linear-gradient(135deg, #b45309, #92400e); color: white; }
+    .rank-default { background: rgba(255,255,255,0.08); color: var(--text-muted); }
+    .leaderboard-avatar {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-weight: 700; font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+    .leaderboard-info { flex: 1; }
+    .leaderboard-name { font-weight: 600; font-size: 0.9rem; }
+    .leaderboard-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 12px; margin-top: 2px; }
+    .leaderboard-stars { color: #f59e0b; font-size: 0.85rem; }
+
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-xl);
+    }
+</style>
+
+<!-- Header -->
+<div class="stats-page-header">
+    <div>
+        <h1><i class="ri-bar-chart-box-line" style="color: var(--brand-accent);"></i> Assistance Statistics</h1>
+        <p style="color: var(--text-muted); font-family: 'Fira Code', monospace; margin-top: 5px;">
+            Trends, categories, resolution rates & tutor leaderboard
+        </p>
+    </div>
+    <a href="{{ path('app_admin_assistance_index') }}" class="btn secondary" style="font-size: 0.85rem; padding: 8px 14px; text-decoration: none;">
+        <i class="ri-arrow-left-line"></i> Back to Assistance
+    </a>
+</div>
+
+<!-- KPI Row -->
+<div class="kpi-row">
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--brand-main);">
+            <i class="ri-questionnaire-line"></i>
+        </div>
+        <div>
+            <div class="kpi-value">{{ stats.totalRequests }}</div>
+            <div class="kpi-label">Total Requests</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+            <i class="ri-check-double-line"></i>
+        </div>
+        <div>
+            <div class="kpi-value" style="color: var(--success);">{{ stats.resolutionRate }}%</div>
+            <div class="kpi-label">Resolution Rate</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(251, 191, 36, 0.15); color: var(--warning);">
+            <i class="ri-star-smile-line"></i>
+        </div>
+        <div>
+            <div class="kpi-value">{{ stats.avgRating }}<span style="font-size: 1rem; color: var(--text-muted);">/5</span></div>
+            <div class="kpi-label">Average Rating ({{ stats.totalReviews }} reviews)</div>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--error);">
+            <i class="ri-alarm-warning-line"></i>
+        </div>
+        <div>
+            <div class="kpi-value" style="color: var(--error);">{{ stats.toxicMessages }}</div>
+            <div class="kpi-label">Toxic Messages (of {{ stats.totalMessages }})</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row: Line + Doughnut -->
+<div class="charts-grid">
+    <div class="chart-panel">
+        <h3><i class="ri-line-chart-line" style="color: var(--brand-accent);"></i> Requests Over Time</h3>
+        <div class="chart-canvas-wrap">
+            <canvas id="monthlyChart" height="260"></canvas>
+        </div>
+    </div>
+    <div class="chart-panel">
+        <h3><i class="ri-pie-chart-line" style="color: var(--brand-accent);"></i> Category Distribution</h3>
+        <div class="chart-canvas-wrap" style="display:flex;justify-content:center;">
+            <canvas id="categoryChart" height="260" width="260"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Row: Bar + Leaderboard -->
+<div class="bottom-grid">
+    <div class="chart-panel">
+        <h3><i class="ri-bar-chart-horizontal-line" style="color: var(--brand-accent);"></i> Resolution Breakdown</h3>
+        <div class="chart-canvas-wrap">
+            <canvas id="resolutionChart" height="220"></canvas>
+        </div>
+    </div>
+
+    <!-- Tutor Leaderboard -->
+    <div class="leaderboard">
+        <h3><i class="ri-trophy-line" style="color: #f59e0b;"></i> Top Tutors</h3>
+        {% if topTutors|length > 0 %}
+            {% for tutor in topTutors %}
+            <div class="leaderboard-item">
+                <div class="leaderboard-rank {{ loop.index <= 3 ? 'rank-' ~ loop.index : 'rank-default' }}">
+                    {{ loop.index }}
+                </div>
+                <div class="leaderboard-avatar">
+                    {{ tutor.fullName|default(tutor.email)|first|upper }}
+                </div>
+                <div class="leaderboard-info">
+                    <div class="leaderboard-name">{{ tutor.fullName|default(tutor.email) }}</div>
+                    <div class="leaderboard-meta">
+                        <span><i class="ri-graduation-cap-line"></i> {{ tutor.sessionCount }} sessions</span>
+                        <span class="leaderboard-stars">
+                            {% for i in 1..5 %}
+                                <i class="ri-star-{{ i <= tutor.avgRating|round ? 'fill' : 'line' }}"></i>
+                            {% endfor %}
+                            {{ tutor.avgRating|number_format(1) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align:center; padding: var(--space-xl); color: var(--text-muted);">
+                <i class="ri-user-search-line" style="font-size: 2rem; display: block; margin-bottom: 8px; opacity: 0.4;"></i>
+                <p>No tutor data yet</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    const chartDefaults = {
+        color: '#94a3b8',
+        borderColor: 'rgba(255,255,255,0.08)',
+    };
+    Chart.defaults.color = chartDefaults.color;
+    Chart.defaults.borderColor = chartDefaults.borderColor;
+
+    // === LINE CHART: Requests Over Time ===
+    const monthlyLabels = {{ monthlyData|map(m => m.month)|json_encode|raw }};
+    const monthlyValues = {{ monthlyData|map(m => m.total)|json_encode|raw }};
+
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyLabels.length > 0 ? monthlyLabels : ['No data'],
+            datasets: [{
+                label: 'Requests',
+                data: monthlyValues.length > 0 ? monthlyValues : [0],
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#6366f1',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                borderWidth: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // === DOUGHNUT CHART: Category Distribution ===
+    const catLabels = {{ categoryData|map(c => c.category)|json_encode|raw }};
+    const catValues = {{ categoryData|map(c => c.total)|json_encode|raw }};
+    const catColors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: catLabels.length > 0 ? catLabels : ['No data'],
+            datasets: [{
+                data: catValues.length > 0 ? catValues : [1],
+                backgroundColor: catColors.slice(0, Math.max(catLabels.length, 1)),
+                borderWidth: 0,
+                hoverOffset: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            cutout: '60%',
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } }
+            }
+        }
+    });
+
+    // === BAR CHART: Resolution Breakdown ===
+    const resLabels = {{ resolutionData|map(r => r.reason)|json_encode|raw }};
+    const resValues = {{ resolutionData|map(r => r.total)|json_encode|raw }};
+    const resColors = resLabels.map(l => {
+        switch(l) {
+            case 'RESOLVED': return '#10b981';
+            case 'CANCELLED': return '#f59e0b';
+            case 'REPORTED': return '#ef4444';
+            default: return '#6366f1';
+        }
+    });
+
+    new Chart(document.getElementById('resolutionChart'), {
+        type: 'bar',
+        data: {
+            labels: resLabels.length > 0 ? resLabels : ['No data'],
+            datasets: [{
+                label: 'Count',
+                data: resValues.length > 0 ? resValues : [0],
+                backgroundColor: resLabels.length > 0 ? resColors : ['#6366f1'],
+                borderRadius: 8,
+                borderSkipped: false,
+                barThickness: 40,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}

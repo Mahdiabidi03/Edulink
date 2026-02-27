@@ -1,11 +1,7 @@
 <?php
 
 namespace App\Form;
-
 use App\Entity\Cours;
-use App\Entity\Matiere;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -13,6 +9,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\GreaterThanOrEqual;
 
 class CoursType extends AbstractType
 {
@@ -21,13 +20,19 @@ class CoursType extends AbstractType
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Course Title',
-                'required' => false,
-                'attr' => ['class' => 'form-control', 'placeholder' => 'e.g. Advanced Python']
+                'attr' => ['class' => 'form-control', 'placeholder' => 'e.g. Advanced Python'],
+                'constraints' => [
+                    new NotBlank(['message' => 'Course title is required']),
+                    new Length(['max' => 255, 'maxMessage' => 'Title cannot exceed {{ limit }} characters']),
+                ],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Short Description',
                 'required' => false,
-                'attr' => ['class' => 'form-control', 'rows' => 3]
+                'attr' => ['class' => 'form-control', 'rows' => 3],
+                'constraints' => [
+                    new Length(['max' => 5000, 'maxMessage' => 'Description cannot exceed {{ limit }} characters']),
+                ],
             ])
             ->add('level', ChoiceType::class, [
                 'choices' => [
@@ -35,13 +40,18 @@ class CoursType extends AbstractType
                     'Intermediate' => 'Intermediate',
                     'Advanced' => 'Advanced'
                 ],
-                'required' => false,
-                'attr' => ['class' => 'form-control']
+                'attr' => ['class' => 'form-control'],
+                'constraints' => [
+                    new NotBlank(['message' => 'Please select a level']),
+                ],
             ])
             ->add('xp', IntegerType::class, [
                 'label' => 'Bonus XP',
                 'required' => false,
-                'attr' => ['class' => 'form-control', 'min' => 0]
+                'attr' => ['class' => 'form-control', 'min' => 0],
+                'constraints' => [
+                    new GreaterThanOrEqual(['value' => 0, 'message' => 'XP cannot be negative']),
+                ],
             ]);
 
         if (!$options['hide_matiere']) {
@@ -50,7 +60,10 @@ class CoursType extends AbstractType
                 'label' => 'Category Name',
                 'required' => false,
                 'attr' => ['class' => 'form-control', 'placeholder' => 'e.g. Web Development'],
-                'help' => 'Enter a category name. If it exists, we will link it. If not, we will create it as Pending.'
+                'help' => 'Enter a category name. If it exists, we will link it. If not, we will create it as Pending.',
+                'constraints' => [
+                    new Length(['max' => 255]),
+                ],
             ]);
         }
     }
