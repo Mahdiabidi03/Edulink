@@ -40,15 +40,15 @@ class HelpRequest
         choices: ['OPEN', 'IN_PROGRESS', 'CLOSED'],
         message: 'Invalid status. Allowed: OPEN, IN_PROGRESS, CLOSED.'
     )]
-    private ?string $status = 'OPEN';
+    private string $status = 'OPEN';
 
     #[ORM\Column]
     #[Assert\NotNull(message: 'Bounty is required.')]
     #[Assert\PositiveOrZero(message: 'Bounty cannot be negative.')]
-    private ?int $bounty = 0;
+    private int $bounty = 0;
 
     #[ORM\Column]
-    private ?bool $isTicket = false;
+    private bool $isTicket = false;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -101,7 +101,7 @@ class HelpRequest
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -112,18 +112,18 @@ class HelpRequest
         return $this;
     }
 
-    public function getBounty(): ?int
+    public function getBounty(): int
     {
         return $this->bounty;
     }
 
-    public function setBounty(int $bounty): static
+    public function setBounty(?int $bounty): static
     {
-        $this->bounty = $bounty;
+        $this->bounty = $bounty ?? 0;
         return $this;
     }
 
-    public function isIsTicket(): ?bool
+    public function isIsTicket(): bool
     {
         return $this->isTicket;
     }

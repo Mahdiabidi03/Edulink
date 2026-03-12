@@ -81,7 +81,7 @@ class ChallengeController extends AbstractController
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        if (!$this->isCsrfTokenValid('join_challenge_' . $id, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('join_challenge_' . $id, (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Action invalide (CSRF).');
             return $this->redirectToRoute('challenge_index');
         }
@@ -144,7 +144,9 @@ class ChallengeController extends AbstractController
 
             $existingTaskIds = [];
             foreach ($p->getUserTasks() as $ut) {
-                $existingTaskIds[] = $ut->getTask()->getId();
+                if ($ut->getTask()) {
+                    $existingTaskIds[] = $ut->getTask()->getId();
+                }
             }
 
             foreach ($challenge->getTasks() as $task) {
@@ -181,7 +183,7 @@ class ChallengeController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         // CSRF
-        if (!$this->isCsrfTokenValid('update_progress_' . $userChallenge->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('update_progress_' . $userChallenge->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Action invalide (CSRF).');
             return $this->redirectToRoute('my_challenges');
         }
@@ -198,7 +200,7 @@ class ChallengeController extends AbstractController
         // Recalculate progress from actual UserTask completion (don't trust form input)
         $userChallenge->updateProgress();
         $parts = explode('/', $userChallenge->getProgress());
-        $current = (int) ($parts[0] ?? 0);
+        $current = (int) $parts[0];
         $total = (int) ($parts[1] ?? 0);
 
         if ($current >= $total) {
@@ -230,7 +232,7 @@ class ChallengeController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_USER');
 
         $uc = $userTask->getUserChallenge();
-        if ($uc->getUser() !== $this->getUser()) {
+        if (!$uc || $uc->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
 

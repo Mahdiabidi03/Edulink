@@ -6,6 +6,7 @@ use App\Entity\HelpRequest;
 use App\Entity\Message;
 use App\Entity\Review;
 use App\Entity\Session;
+use App\Entity\User;
 use App\Form\HelpRequestType;
 use App\Form\MessageType;
 use App\Form\ReviewType;
@@ -79,6 +80,7 @@ class HelpRequestController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var \App\Entity\User $user */
             $user = $this->getUser();
 
             if ($user->getWalletBalance() < $helpRequest->getBounty()) {
@@ -90,15 +92,15 @@ class HelpRequestController extends AbstractController
 
             // AI Auto-Classification — Local ML first, Gemini fallback
             $classification = $mlService->classifyRequest(
-                $helpRequest->getTitle(),
-                $helpRequest->getDescription()
+                (string) $helpRequest->getTitle(),
+                (string) $helpRequest->getDescription()
             );
 
             // If local ML failed, fall back to Gemini API
             if ($classification['source'] === 'FALLBACK') {
                 $classification = $geminiService->classifyHelpRequest(
-                    $helpRequest->getTitle(),
-                    $helpRequest->getDescription()
+                    (string) $helpRequest->getTitle(),
+                    (string) $helpRequest->getDescription()
                 );
                 $classification['source'] = 'GEMINI';
             }
@@ -113,7 +115,7 @@ class HelpRequestController extends AbstractController
             $suggestedTutors = $smartMatchingService->findBestTutors($helpRequest);
             $request->getSession()->set('suggested_tutors_' . $helpRequest->getId(), $suggestedTutors);
 
-            $source = $classification['source'] ?? 'AI';
+            $source = $classification['source'];
             $this->addFlash('success', "Help request posted! Classified as: {$classification['category']} ({$classification['difficulty']}) — via {$source}");
             return $this->redirectToRoute('app_help_request_show', ['id' => $helpRequest->getId()]);
         }
@@ -141,6 +143,7 @@ class HelpRequestController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var \App\Entity\User $user */
             $user = $this->getUser();
             if ($user->getWalletBalance() < $helpRequest->getBounty()) {
                 $this->addFlash('error', 'Insufficient wallet balance for this bounty.');
@@ -161,7 +164,7 @@ class HelpRequestController extends AbstractController
     #[Route('/delete/{id}', name: 'app_help_request_delete', methods: ['POST'])]
     public function delete(HelpRequest $helpRequest, Request $request, EntityManagerInterface $entityManager): Response
     {
-        if (!$this->isCsrfTokenValid('delete_help_' . $helpRequest->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('delete_help_' . $helpRequest->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid security token.');
             return $this->redirectToRoute('app_help_request_index');
         }
@@ -203,11 +206,12 @@ class HelpRequestController extends AbstractController
         EntityManagerInterface $entityManager,
         NotificationService $notificationService
     ): Response {
-        if (!$this->isCsrfTokenValid('invite_tutor_' . $helpRequest->getId() . '_' . $tutorId, $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('invite_tutor_' . $helpRequest->getId() . '_' . $tutorId, (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid security token.');
             return $this->redirectToRoute('app_help_request_show', ['id' => $helpRequest->getId()]);
         }
 
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
         if ($helpRequest->getStudent() !== $user) {
@@ -250,11 +254,12 @@ class HelpRequestController extends AbstractController
     #[Route('/join/{id}', name: 'app_help_request_join', methods: ['POST'])]
     public function join(HelpRequest $helpRequest, Request $request, AssistanceService $assistanceService, NotificationService $notificationService): Response
     {
-        if (!$this->isCsrfTokenValid('join_help_' . $helpRequest->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('join_help_' . $helpRequest->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid security token.');
             return $this->redirectToRoute('app_help_request_index');
         }
 
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
         if ($helpRequest->getStudent() === $user) {
@@ -296,6 +301,7 @@ class HelpRequestController extends AbstractController
         EntityManagerInterface $entityManager,
         MLService $mlService
     ): Response {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
         if ($session->getTutor() !== $user && $session->getHelpRequest()->getStudent() !== $user) {
@@ -317,7 +323,7 @@ class HelpRequestController extends AbstractController
                 return $this->redirectToRoute('app_help_request_chat', ['id' => $session->getId()]);
             }
 
-            $content = $message->getContent();
+            $content = (string) ($message->getContent() ?? '');
 
             $toxicityResult = $mlService->analyzeToxicity($content);
             if ($toxicityResult['isToxic']) {
@@ -343,6 +349,7 @@ class HelpRequestController extends AbstractController
     #[Route('/chat/{id}/messages', name: 'app_help_request_chat_messages', methods: ['GET'])]
     public function chatMessages(Session $session, Request $request, MLService $mlService): \Symfony\Component\HttpFoundation\JsonResponse
     {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         if ($session->getTutor() !== $user && $session->getHelpRequest()->getStudent() !== $user) {
             return $this->json(['error' => 'Forbidden'], 403);
@@ -352,18 +359,20 @@ class HelpRequestController extends AbstractController
         $messages = [];
         $recentTexts = [];
         foreach ($session->getMessages() as $msg) {
-            $recentTexts[] = ($msg->getSender()->getFullName() ?? $msg->getSender()->getEmail()) . ': ' . $msg->getContent();
+            /** @var \App\Entity\User $msgSender */
+            $msgSender = $msg->getSender();
+            $recentTexts[] = ($msgSender->getFullName() ?? $msgSender->getEmail()) . ': ' . $msg->getContent();
             if ($afterId > 0 && $msg->getId() <= $afterId) {
                 continue;
             }
             $msgData = [
                 'id' => $msg->getId(),
-                'content' => htmlspecialchars($msg->getContent(), ENT_QUOTES, 'UTF-8'),
-                'sender_id' => $msg->getSender()->getId(),
-                'sender_name' => $msg->getSender()->getFullName() ?? $msg->getSender()->getEmail(),
-                'timestamp' => $msg->getTimestamp()->format('H:i'),
+                'content' => htmlspecialchars((string) $msg->getContent(), ENT_QUOTES, 'UTF-8'),
+                'sender_id' => $msgSender->getId(),
+                'sender_name' => $msgSender->getFullName() ?? $msgSender->getEmail(),
+                'timestamp' => $msg->getTimestamp() ? $msg->getTimestamp()->format('H:i') : null,
                 'is_toxic' => $msg->isIsToxic(),
-                'is_mine' => $msg->getSender() === $user,
+                'is_mine' => $msgSender === $user,
                 'attachment_url' => $msg->getAttachmentName() ? '/uploads/chat/' . $msg->getAttachmentName() : null,
             ];
             $messages[] = $msgData;
@@ -390,6 +399,7 @@ class HelpRequestController extends AbstractController
         MLService $mlService,
         NotificationService $notificationService
     ): \Symfony\Component\HttpFoundation\JsonResponse {
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         if ($session->getTutor() !== $user && $session->getHelpRequest()->getStudent() !== $user) {
             return $this->json(['error' => 'Forbidden'], 403);
@@ -403,7 +413,7 @@ class HelpRequestController extends AbstractController
         $content = trim($data['content'] ?? '');
         $token = $data['_token'] ?? '';
 
-        if (!$this->isCsrfTokenValid('chat_send_' . $session->getId(), $token)) {
+        if (!$this->isCsrfTokenValid('chat_send_' . $session->getId(), (string) $token)) {
             return $this->json(['error' => 'Invalid security token'], 403);
         }
 
@@ -441,14 +451,14 @@ class HelpRequestController extends AbstractController
             'success' => true,
             'message' => [
                 'id' => $message->getId(),
-                'content' => htmlspecialchars($message->getContent(), ENT_QUOTES, 'UTF-8'),
+                'content' => htmlspecialchars((string) $message->getContent(), ENT_QUOTES, 'UTF-8'),
                 'sender_id' => $user->getId(),
                 'sender_name' => $user->getFullName() ?? $user->getEmail(),
-                'timestamp' => $message->getTimestamp()->format('H:i'),
+                'timestamp' => $message->getTimestamp() ? $message->getTimestamp()->format('H:i') : null,
                 'is_toxic' => $message->isIsToxic(),
                 'is_mine' => true,
-                'language' => $langResult['language_name'] ?? 'Unknown',
-                'sentiment' => $sentimentResult['label'] ?? 'neutral',
+                'language' => $langResult['language_name'],
+                'sentiment' => $sentimentResult['label'],
             ],
             'toxic_warning' => $message->isIsToxic(),
         ]);
@@ -480,15 +490,21 @@ class HelpRequestController extends AbstractController
     #[Route('/close/{id}', name: 'app_help_request_close', methods: ['POST'])]
     public function close(Session $session, Request $request, AssistanceService $assistanceService, GeminiService $geminiService, NotificationService $notificationService): Response
     {
-        if (!$this->isCsrfTokenValid('close_session_' . $session->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('close_session_' . $session->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid security token.');
             return $this->redirectToRoute('app_help_request_chat', ['id' => $session->getId()]);
         }
 
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
         $helpRequest = $session->getHelpRequest();
+        if (!$helpRequest) {
+            $this->addFlash('error', 'Help request not found.');
+            return $this->redirectToRoute('app_help_request_chat', ['id' => $session->getId()]);
+        }
+        $student = $helpRequest->getStudent();
 
-        if ($helpRequest->getStudent() !== $user && $session->getTutor() !== $user) {
+        if ($student !== $user && $session->getTutor() !== $user) {
             $this->addFlash('error', 'Only session participants can close.');
             return $this->redirectToRoute('app_help_request_chat', ['id' => $session->getId()]);
         }
@@ -509,7 +525,9 @@ class HelpRequestController extends AbstractController
         $summary = null;
         $messageTexts = [];
         foreach ($session->getMessages() as $msg) {
-            $senderName = $msg->getSender()->getFullName() ?? $msg->getSender()->getEmail();
+            /** @var \App\Entity\User $msgSender */
+            $msgSender = $msg->getSender();
+            $senderName = $msgSender->getFullName() ?? $msgSender->getEmail();
             $messageTexts[] = $senderName . ': ' . $msg->getContent();
         }
         if (!empty($messageTexts)) {
@@ -603,17 +621,23 @@ class HelpRequestController extends AbstractController
                 $this->addFlash('error', 'Your post contains inappropriate content and has been rejected.');
 
                 // Notify Admin
-                $notificationService->notifyAdminOfToxicContent(
-                    $this->getUser(),
-                    $fullContent,
-                    "Community Post Attempt",
-                    $toxicityResult['source']
-                );
+                /** @var \App\Entity\User $loggedUser */
+                $loggedUser = $this->getUser();
+                if ($loggedUser) {
+                    $notificationService->notifyAdminOfToxicContent(
+                        $loggedUser,
+                        (string) $fullContent,
+                        "Community Post Attempt",
+                        (string) $toxicityResult['source']
+                    );
+                }
 
                 return $this->redirectToRoute('app_community_feed');
             }
 
-            $post->setAuthor($this->getUser());
+            /** @var User|null $loggedUser */
+        $loggedUser = $this->getUser();
+        $post->setAuthor($loggedUser);
             $entityManager->persist($post);
             $entityManager->flush();
 
@@ -622,14 +646,17 @@ class HelpRequestController extends AbstractController
         }
 
         $communityPosts = $postRepo->findRecentPosts(100);
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
         // Build feed items with comments and reactions
         $feedItems = [];
         foreach ($communityPosts as $p) {
-            $reactions = $reactionRepo->getReactionCounts($p->getId());
-            $userReaction = $reactionRepo->findUserReaction($user->getId(), $p->getId());
-            $comments = $commentRepo->findByPost($p->getId());
+            $postId = (int) $p->getId();
+            $userId = (int) $user->getId();
+            $reactions = $reactionRepo->getReactionCounts($postId);
+            $userReaction = $reactionRepo->findUserReaction($userId, $postId);
+            $comments = $commentRepo->findByPost($postId);
 
             $feedItems[] = [
                 'post' => $p,
@@ -670,7 +697,7 @@ class HelpRequestController extends AbstractController
         EntityManagerInterface $entityManager,
         \App\Repository\PostReactionRepository $reactionRepo
     ): Response {
-        if (!$this->isCsrfTokenValid('react_post_' . $post->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('react_post_' . $post->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid security token.');
             return $this->redirectToRoute('app_community_feed');
         }
@@ -681,8 +708,9 @@ class HelpRequestController extends AbstractController
             return $this->redirectToRoute('app_community_feed');
         }
 
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
-        $existing = $reactionRepo->findUserReaction($user->getId(), $post->getId());
+        $existing = $reactionRepo->findUserReaction((int) $user->getId(), (int) $post->getId());
 
         if ($existing) {
             if ($existing->getType() === $type) {
@@ -708,7 +736,7 @@ class HelpRequestController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager
     ): Response {
-        if (!$this->isCsrfTokenValid('comment_post_' . $post->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('comment_post_' . $post->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid security token.');
             return $this->redirectToRoute('app_community_feed');
         }
@@ -725,7 +753,9 @@ class HelpRequestController extends AbstractController
         }
 
         $comment = new \App\Entity\PostComment();
-        $comment->setAuthor($this->getUser());
+        /** @var User|null $loggedUser */
+        $loggedUser = $this->getUser();
+        $comment->setAuthor($loggedUser);
         $comment->setPost($post);
         $comment->setContent($content);
         $entityManager->persist($comment);
@@ -741,7 +771,7 @@ class HelpRequestController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager
     ): Response {
-        if (!$this->isCsrfTokenValid('delete_comment_' . $comment->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('delete_comment_' . $comment->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid security token.');
             return $this->redirectToRoute('app_community_feed');
         }
@@ -762,7 +792,7 @@ class HelpRequestController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager
     ): Response {
-        if (!$this->isCsrfTokenValid('report_post_' . $post->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('report_post_' . $post->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid security token.');
             return $this->redirectToRoute('app_community_feed');
         }
@@ -780,9 +810,11 @@ class HelpRequestController extends AbstractController
         }
 
         $report = new \App\Entity\PostReport();
-        $report->setReporter($this->getUser());
+        /** @var User|null $loggedUser */
+        $loggedUser = $this->getUser();
+        $report->setReporter($loggedUser);
         $report->setPost($post);
-        $report->setReason($reason);
+        $report->setReason((string) $reason);
         if ($details) {
             $report->setDetails($details);
         }
@@ -799,7 +831,7 @@ class HelpRequestController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager
     ): Response {
-        if (!$this->isCsrfTokenValid('delete_post_' . $post->getId(), $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('delete_post_' . $post->getId(), (string) $request->request->get('_token'))) {
             $this->addFlash('error', 'Invalid security token.');
             return $this->redirectToRoute('app_community_feed');
         }

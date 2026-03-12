@@ -51,6 +51,12 @@
                     </div>
 
                     {% if p.status == 'IN_PROGRESS' %}
+                        <div style="margin-top: 1rem; text-align: right; margin-bottom: 1rem;">
+                            <button onclick="MotivationCoach.boostMe({{ p.id }})" class="btn" style="background: var(--brand-gradient); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                                <i data-lucide="zap" style="width: 16px; height: 16px;"></i> Boost me!
+                            </button>
+                        </div>
+                        
                         <div style="background: var(--bg-main); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); margin-top: 1rem;">
                             <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 1rem; letter-spacing: 1px;">TASKS</h4>
                             
@@ -215,4 +221,5 @@ async function toggleTask(userTaskId, element) {
     }
 }
 </script>
+<script src="{{ asset('js/motivation.js') }}"></script>
 {% endblock %}

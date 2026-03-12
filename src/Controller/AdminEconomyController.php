@@ -56,7 +56,7 @@ class AdminEconomyController extends AbstractController
         $transaction = new Transaction();
         $transaction->setUser($user);
         $transaction->setDate(new \DateTime());
-        $transaction->setType(strtoupper($type)); // GRANT or REFUND
+        $transaction->setType(strtoupper((string) $type)); // GRANT or REFUND
 
         $transaction->setAmount($amount);
 
@@ -71,7 +71,7 @@ class AdminEconomyController extends AbstractController
         // Create Notification
         $notification = new \App\Entity\Notification();
         $notification->setUser($user);
-        $emoji = strtoupper($type) === 'REFUND' ? '🔄' : '💰';
+        $emoji = strtoupper((string) $type) === 'REFUND' ? '🔄' : '💰';
         $notification->setMessage("$emoji You received $amount points from Admin ($type). Note: " . ($reason ?: 'No reason provided'));
         $notification->setLink('/student/dashboard'); // Or transaction history
         $entityManager->persist($notification);

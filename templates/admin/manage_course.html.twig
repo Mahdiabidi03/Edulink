@@ -1,45 +1,373 @@
 {% extends 'admin_base.html.twig' %}
 
 {% block content %}
-<div class="header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-    <h1 style="margin: 0;">Managing: {{ cours.title }}</h1>
-    <div style="display: flex; gap: 10px;">
-        <a href="{{ path('app_admin_category_manage', {'id': cours.matiere.id}) }}" class="btn secondary">Back to Category</a>
+<style>
+    .manage-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    /* Stats Overview Bar - Toggleable */
+    .stats-overview {
+        display: none;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        animation: fadeInDown 0.4s ease-out;
+    }
+
+    .stat-mini-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    /* Main Resource Area */
+    .resource-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .btn-small-action {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+
+    .btn-analysis { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-color: rgba(59, 130, 246, 0.2); }
+    .btn-analysis:hover { background: rgba(59, 130, 246, 0.2); transform: translateY(-1px); }
+    
+    .btn-performance { background: rgba(34, 197, 94, 0.1); color: #22c55e; border-color: rgba(34, 197, 94, 0.2); }
+    .btn-performance:hover { background: rgba(34, 197, 94, 0.2); transform: translateY(-1px); }
+
+    .resource-list-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .resource-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1.25rem;
+        align-items: center;
+        padding: 1.25rem;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .resource-row:hover {
+        border-color: var(--brand-main);
+        background: rgba(99, 102, 241, 0.05);
+        transform: scale(1.005);
+    }
+
+    .resource-icon-box {
+        width: 48px;
+        height: 48px;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--brand-main);
+        font-size: 1.4rem;
+    }
+
+    /* Forecast Overlay Section */
+    .forecast-section {
+        display: none;
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(59, 130, 246, 0.05));
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: slideInDown 0.4s ease-out;
+    }
+
+    .percentage-display {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-right: 1.5rem;
+    }
+
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+</style>
+
+<div class="manage-container">
+    <!-- Header -->
+    <div class="page-header" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1 style="margin: 0; font-size: 2rem; font-weight: 800;">Manage Course</h1>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px; color: var(--text-muted);">
+                    <span style="font-weight: 600; color: var(--brand-main);">{{ cours.title }}</span>
+                    <span>&bull;</span>
+                    <span>{{ cours.matiere.name }}</span>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button onclick="toggleAnalyses()" id="analysisToggleBtn" class="btn-small-action btn-analysis">
+                    <i class="ri-numbers-line"></i> Show Analyses
+                </button>
+                <button onclick="togglePerformance()" id="performanceToggleBtn" class="btn-small-action btn-performance">
+                    <i class="ri-pulse-line"></i> Performance
+                </button>
+                <a href="{{ path('app_admin_category_manage', {'id': cours.matiere.id}) }}" class="btn secondary" style="border-radius: 8px; padding: 8px 16px; font-size: 0.85rem;">
+                    <i class="ri-arrow-left-line"></i> Exit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggled Sections -->
+    <!-- 1. ANALYSES (Numbers) -->
+    <div id="analysesSection" class="stats-overview">
+        <div class="stat-mini-card">
+            <div class="stat-icon" style="background: rgba(96, 165, 250, 0.1); color: #60a5fa;"><i class="ri-user-follow-line"></i></div>
+            <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Students</div>
+                <div id="stat-students" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">{{ cours.enrollments|length }}</div>
+            </div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;"><i class="ri-book-open-line"></i></div>
+            <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Resources</div>
+                <div id="stat-resources" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">{{ cours.resources|length }}</div>
+            </div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;"><i class="ri-bar-chart-box-line"></i></div>
+            <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Completion</div>
+                <div id="stat-completion" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">0%</div>
+            </div>
+        </div>
+        <div class="stat-mini-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i class="ri-shield-user-line"></i></div>
+            <div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Level</div>
+                <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">{{ cours.level }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. PERFORMANCE (Success Forecast) -->
+    <div id="performanceSection" class="forecast-section">
+        <div style="display: flex; align-items: flex-start; gap: 2rem;">
+            <div class="percentage-wrapper" style="text-align: center;">
+                <div id="forecastScore" class="percentage-display" style="color: var(--success);">--%</div>
+                <div id="forecastLabel" style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); color: var(--success); display: inline-block;">Forecast</div>
+            </div>
+            <div style="flex: 1;">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+                    <i class="ri-shining-line" style="color: #fbbf24;"></i> AI Success Prediction
+                </h3>
+                <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; margin-bottom: 1rem;">
+                    <div id="forecastBar" style="height: 100%; width: 0%; background: var(--success); transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);"></div>
+                </div>
+                <p id="forecastExplanation" style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin: 0; font-style: italic;">
+                    Calculating your course success potential based on engagement metrics and content density...
+                </p>
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <button onclick="predictPerformance()" id="runAiBtn" class="btn success" style="font-size: 0.8rem; padding: 6px 14px;">
+                        <i class="ri-magic-line"></i> Run Analysis
+                    </button>
+                    <button onclick="togglePerformance()" class="btn secondary" style="font-size: 0.8rem; padding: 6px 14px;">Dismiss</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN RESOURCE LIST -->
+    <div class="resource-header">
+        <h2 style="margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 12px;">
+            <i class="ri-stack-line" style="color: var(--brand-main);"></i> Resource Matrix
+        </h2>
+        <a href="{{ path('app_admin_resource_new', {'id': cours.id}) }}" class="btn success" style="border-radius: 10px; padding: 10px 20px; font-weight: 700;">
+            <i class="ri-add-line"></i> Add New Resource
+        </a>
+    </div>
+
+    <div class="resource-list-card">
+        <div id="resource-list">
+            {% for resource in cours.resources %}
+                <div class="resource-row">
+                    <div class="resource-icon-box">
+                        {% if resource.type == 'VIDEO' %}<i class="ri-video-line"></i>
+                        {% elseif resource.type == 'PDF' %}<i class="ri-file-pdf-line"></i>
+                        {% else %}<i class="ri-link-m"></i>{% endif %}
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--text-main);">{{ resource.title ?? 'Untitled Resource' }}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">
+                             <span style="color: var(--brand-main); font-weight: 600;">{{ resource.type }}</span> 
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="{{ resource.absoluteUrl }}" target="_blank" class="btn secondary" style="padding: 8px 12px;" title="View Content">
+                            <i class="ri-eye-line"></i>
+                        </a>
+                        <a href="{{ path('app_admin_resource_edit', {'id': resource.id}) }}" class="btn secondary" style="padding: 8px 12px;" title="Edit Resource">
+                            <i class="ri-edit-line"></i>
+                        </a>
+                        <form method="post" action="{{ path('app_admin_resource_delete', {'id': resource.id}) }}" onsubmit="return confirm('Permanently delete this resource?');" style="display: inline-block;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ resource.id) }}">
+                            <button class="btn" style="padding: 8px 12px; background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);" title="Delete">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 5rem 2rem; border: 2px dashed var(--border); border-radius: 16px;">
+                    <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                        <i class="ri-folder-open-line" style="font-size: 2.5rem; color: var(--text-muted);"></i>
+                    </div>
+                    <h3 style="color: var(--text-main); margin-bottom: 0.5rem;">No Resources Yet</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Building a curriculum starts with content. Add your first resource now.</p>
+                    <a href="{{ path('app_admin_resource_new', {'id': cours.id}) }}" class="btn success" style="padding: 12px 24px;">Start Building</a>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
-<div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h2 style="margin: 0; font-size: 1.5rem; color: var(--text-main);"><i class="ri-book-open-line" style="color: var(--brand-main); margin-right: 10px;"></i>Course Resources</h2>
-        <a href="{{ path('app_admin_resource_new', {'id': cours.id}) }}" class="btn success">+ Add Resource</a>
-    </div>
-    
-    <div style="background: var(--bg-card); border-radius: 6px; overflow: hidden;">
-        <ul style="list-style: none; padding: 0; margin: 0;">
-        {% for resource in cours.resources %}
-            <li style="display: flex; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-light);">
-                <span class="badge" style="background: var(--info); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; margin-right: 15px; min-width: 60px; text-align: center; font-weight: bold;">{{ resource.type }}</span>
-                <div style="flex: 1;">
-                     <div style="font-weight: 500; font-size: 1.05rem; margin-bottom: 4px;">
-                        {{ resource.title ?? 'Untitled' }}
-                     </div>
-                     <a href="{{ resource.absoluteUrl }}" target="_blank" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;">{{ resource.url|slice(0, 60) }}...</a>
-                </div>
-                {% if resource.status == 'PENDING' %}
-                    <span class="badge" style="background: var(--warning); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 10px;">Pending Approval</span>
-                {% endif %}
-                <div style="display: flex; gap: 8px;">
-                    <a href="{{ resource.absoluteUrl }}" target="_blank" class="btn secondary" style="padding: 6px 12px;"><i class="ri-eye-line"></i></a>
-                    <a href="{{ path('app_admin_resource_edit', {'id': resource.id}) }}" class="btn secondary" style="padding: 6px 12px;"><i class="ri-edit-line"></i></a>
-                </div>
-            </li>
-        {% else %}
-            <li style="text-align: center; padding: 3rem; color: var(--text-muted);">
-                <p style="margin-bottom: 1rem; font-size: 1.1rem;">No resources added yet.</p>
-                <a href="{{ path('app_admin_resource_new', {'id': cours.id}) }}" class="btn">Add your first resource</a>
-            </li>
-        {% endfor %}
-        </ul>
-    </div>
-</div>
+<script>
+    let cachedStats = null;
+
+    function toggleAnalyses() {
+        const section = document.getElementById('analysesSection');
+        const btn = document.getElementById('analysisToggleBtn');
+        
+        if (section.style.display === 'grid') {
+            section.style.display = 'none';
+            btn.classList.remove('active');
+        } else {
+            section.style.display = 'grid';
+            btn.classList.add('active');
+            if (!cachedStats) loadAnalyses();
+        }
+    }
+
+    function togglePerformance() {
+        const section = document.getElementById('performanceSection');
+        const btn = document.getElementById('performanceToggleBtn');
+        
+        if (section.style.display === 'block') {
+            section.style.display = 'none';
+            btn.classList.remove('active');
+        } else {
+            section.style.display = 'block';
+            btn.classList.add('active');
+        }
+    }
+
+    async function loadAnalyses() {
+        try {
+            const resp = await fetch(`/admin/api/course-performance-basis/{{ cours.id }}`);
+            const json = await resp.json();
+            
+            if (json.status === 'success') {
+                cachedStats = json.data;
+                document.getElementById('stat-students').innerText = json.data.enrollment_count;
+                document.getElementById('stat-resources').innerText = json.data.resource_count;
+                document.getElementById('stat-completion').innerText = (json.data.completion_rate || 0).toFixed(1) + '%';
+            }
+        } catch (e) {
+            console.error('Failed to load metrics', e);
+        }
+    }
+
+    async function predictPerformance() {
+        const btn = document.getElementById('runAiBtn');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ri-loader-line ri-spin"></i> Analyzing...';
+
+        try {
+            const resp = await fetch(`/admin/api/analyze-course/{{ cours.id }}`, { method: 'POST' });
+            const data = await resp.json();
+
+            if (data.status === 'error') throw new Error(data.message);
+            
+            renderForecast(data);
+            btn.innerHTML = '<i class="ri-refresh-line"></i> Refresh';
+            btn.disabled = false;
+        } catch (err) {
+            Swal.fire('AI Analysis Error', err.message, 'error');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
+    }
+
+    function renderForecast(data) {
+        const score = data.predicted_quality_score;
+        const color = score < 40 ? '#ef4444' : (score < 65 ? '#f59e0b' : '#22c55e');
+
+        const scoreEl = document.getElementById('forecastScore');
+        scoreEl.innerText = Math.round(score) + '%';
+        scoreEl.style.color = color;
+
+        const labelEl = document.getElementById('forecastLabel');
+        labelEl.innerText = data.label;
+        labelEl.style.color = color;
+        labelEl.style.background = color + '20';
+        labelEl.style.borderColor = color + '40';
+
+        const barEl = document.getElementById('forecastBar');
+        barEl.style.width = score + '%';
+        barEl.style.background = color;
+
+        let explanation = score >= 80 ? "This course has exceptional potential. The resource-to-student ratio is ideal and content structure is robust." : 
+                         (score >= 50 ? "Healthy performance metrics. Consider adding more interactive resources or video content to boost engagement." : 
+                         "High engagement risk detected. We recommend reviewing resource density and adding more comprehensive materials.");
+        
+        document.getElementById('forecastExplanation').innerText = explanation;
+        document.getElementById('forecastExplanation').classList.add('animate-slide');
+    }
+</script>
 {% endblock %}

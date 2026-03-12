@@ -17,7 +17,7 @@ class CertificateController extends AbstractController
     #[Route('/{id}/certificate', name: 'app_student_course_certificate')]
     public function generate(Cours $cours, EnrollmentRepository $enrollmentRepo): Response
     {
-        /** @var \App\Entity\User $user */
+        /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('app_login');

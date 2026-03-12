@@ -112,6 +112,62 @@
         gap: 4px;
     }
     .sort-link:hover, .sort-link.active { color: var(--brand-main); }
+
+    /* --- Dropout Prediction Pro UI --- */
+    .analysis-basis-card {
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        text-align: left;
+        margin-bottom: 1rem;
+        display: none;
+        animation: slideDown 0.3s ease-out;
+    }
+    .basis-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-size: 0.85rem;
+    }
+    .basis-item:last-child { border-bottom: none; }
+    .basis-label { color: var(--text-muted); }
+    .basis-value { font-weight: 600; color: var(--text-main); }
+    
+    .prediction-result-card {
+        background: var(--bg-main);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        display: none;
+        text-align: left;
+        position: relative;
+        overflow: hidden;
+        animation: fadeIn 0.4s ease-out;
+    }
+    .result-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+    }
+    .explanation-box {
+        background: rgba(255,255,255,0.03);
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin-top: 1.2rem;
+        border-left: 3px solid var(--border);
+    }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 </style>
 
 <div class="page-header">
@@ -254,27 +310,95 @@
             </div>
         </div>
 
+        <div id="dropoutPredictionFlow">
+            <button id="indicatorBtn" class="btn" style="width: 100%; border: 1px solid #3b82f6; background: rgba(59, 130, 246, 0.1); color: #60a5fa; margin-bottom: 10px; display: none;" onclick="showAnalysisBasis()">
+                <i class="ri-bar-chart-grouped-line"></i> Step 1: Show Risk Analysis Basis
+            </button>
+            
+            <div id="analysisBasisCard" class="analysis-basis-card">
+                <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: #60a5fa; display: flex; align-items: center; gap: 8px;">
+                    <i class="ri-radar-line"></i> Indicators for Analysis
+                </h4>
+                <div id="basisContent"></div>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin: 12px 0; line-height: 1.4;">
+                    These engagement markers are analyzed by our AI to estimate dropout probability.
+                </p>
+                <button id="confirmPredictBtn" class="btn" style="width: 100%; background: var(--brand-accent); color: black; font-weight: 700;" onclick="executePrediction()">
+                    Predict Dropout Risk
+                </button>
+            </div>
+
+            <div id="predictionResultCard" class="prediction-result-card">
+                <div id="resBadge" class="result-badge"></div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Probability</span>
+                    <span id="resProbText" style="font-size: 2rem; font-weight: 800;">0%</span>
+                </div>
+                <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin: 12px 0; overflow: hidden;">
+                    <div id="resProgressBar" style="height: 100%; width: 0%; transition: width 1s ease-out;"></div>
+                </div>
+                <div id="resExplanation" class="explanation-box"></div>
+                <button class="btn" style="width: 100%; margin-top: 1.2rem; background: transparent; border: 1px solid var(--border); font-size: 0.8rem;" onclick="resetPrediction()">
+                    <i class="ri-refresh-line"></i> Re-analyze Student
+                </button>
+            </div>
+        </div>
+
+        <div id="aiSentimentFlow" style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+            <button id="sentimentBtn" class="btn" style="width: 100%; border: 1px solid #10b981; background: rgba(16, 185, 129, 0.1); color: #34d399; margin-bottom: 10px; display: none;" onclick="showSentimentLogs()">
+                <i class="ri-brain-line"></i> Step 2: Show Sentiment Logs
+            </button>
+            
+            <div id="sentimentCard" class="analysis-basis-card" style="display: none; border-color: #10b981;">
+                <h4 style="margin: 0 0 12px 0; font-size: 0.95rem; color: #34d399; display: flex; align-items: center; gap: 8px;">
+                    <i class="ri-pulse-line"></i> Live Community Sentiment
+                </h4>
+                <div id="sentimentContent" style="max-height: 250px; overflow-y: auto;"></div>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin: 12px 0; line-height: 1.4;">
+                    If the AI predicted the sentiment wrong, correct it below. The model learns instantly.
+                </p>
+            </div>
+        </div>
+
         <a id="detailEditBtn" href="#" class="btn" style="width: 100%; border: 1px solid var(--border); background: transparent; margin-bottom: 10px; pointer-events: none; opacity: 0.5;">Edit Profile</a>
         
         <form id="detailDeleteForm" method="post" action="#" onsubmit="return confirm('Are you sure you want to delete this user?');" style="display: block;">
             <input type="hidden" name="_token" value=""> 
-            <!-- Note: CSRF token handling in JS for delete is tricky, strictly we should use generated forms or fetch. 
-                 For simplicity in this panel, we might disable delete or use the table button. 
-                 Let's keep the Delete button in the table for functionality, and make this a 'Suspend' placeholder or link to delete route if possible.
-            -->
             <button type="button" class="btn" style="width: 100%; border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; background: rgba(239, 68, 68, 0.1); cursor: not-allowed;" disabled>Suspend User</button>
         </form>
     </div>
 </div>
 
 <script>
+    let selectedUserId = null;
+    let cachedMetrics = null;
+
+    function resetPrediction() {
+        document.getElementById('analysisBasisCard').style.display = 'none';
+        document.getElementById('predictionResultCard').style.display = 'none';
+        document.getElementById('indicatorBtn').style.display = (selectedUserId && lastRole === 'student') ? 'block' : 'none';
+        
+        document.getElementById('sentimentCard').style.display = 'none';
+        document.getElementById('sentimentBtn').style.display = (selectedUserId && lastRole === 'student') ? 'block' : 'none';
+        
+        cachedMetrics = null;
+    }
+
+    let lastRole = '';
+
     function selectUser(row, name, email, role, wallet, id) {
+        selectedUserId = id;
+        lastRole = role;
+
         // Highlight Row
         document.querySelectorAll('.pro-table tr').forEach(tr => tr.classList.remove('active'));
         row.classList.add('active');
 
+        // Reset flow
+        resetPrediction();
+
         // Update Panel
-        document.getElementById('detailName').innerText = name.split('@')[0]; // Use part of email as name for now
+        document.getElementById('detailName').innerText = name.split('@')[0];
         document.getElementById('detailEmail').innerText = email;
         document.getElementById('detailRole').innerText = role.toUpperCase();
         document.getElementById('detailWallet').innerText = wallet + ' XP';
@@ -282,15 +406,219 @@
         const avatar = document.getElementById('detailAvatar');
         avatar.innerText = email.substring(0, 2).toUpperCase();
         
-        // Dynamic Avatar Color
         const hue = (id * 50) % 360;
         avatar.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 60%), hsl(${hue+40}, 70%, 50%))`;
 
-        // Update Buttons
         const editBtn = document.getElementById('detailEditBtn');
         editBtn.href = "/admin/users/" + id + "/edit";
         editBtn.style.pointerEvents = 'auto';
         editBtn.style.opacity = '1';
+
+        // Toggle Entry Button
+        document.getElementById('indicatorBtn').style.display = (role === 'student') ? 'block' : 'none';
+        document.getElementById('sentimentBtn').style.display = (role === 'student') ? 'block' : 'none';
+    }
+
+    async function showAnalysisBasis() {
+        if (!selectedUserId) return;
+        
+        Swal.fire({
+            title: 'Gathering Indicators...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); },
+            background: 'var(--bg-card)',
+            color: 'var(--text-main)',
+        });
+
+        try {
+            const resp = await fetch(`/admin/api/student-indicators/${selectedUserId}`);
+            const json = await resp.json();
+            Swal.close();
+
+            if (json.status === 'success') {
+                cachedMetrics = json.data;
+                renderBasis(json.data);
+                document.getElementById('analysisBasisCard').style.display = 'block';
+                document.getElementById('indicatorBtn').style.display = 'none';
+            } else {
+                throw new Error(json.message);
+            }
+        } catch (err) {
+            Swal.fire('Error', err.message || 'System failed to fetch metrics.', 'error');
+        }
+    }
+
+    function renderBasis(data) {
+        const container = document.getElementById('basisContent');
+        const map = {
+            'course_progress_percent': 'Course Progress',
+            'quiz_average_score': 'Avg Quiz Score',
+            'forum_interactions': 'Forum Interactions',
+            'help_requests': 'Help Requests',
+            'assignments_completed': 'Completed Challenges',
+            'video_watch_percent': 'Video Watch %',
+            'login_frequency_per_week': 'Login Frequency / Week',
+            'avg_session_minutes': 'Avg Session (Mins)'
+        };
+        
+        let html = '';
+        for (const [key, label] of Object.entries(map)) {
+            let val = data[key] || 0;
+            let displayVal = val;
+            if (key.includes('percent') || key.includes('score')) displayVal = val.toFixed(1) + '%';
+            html += `<div class="basis-item"><span class="basis-label">${label}</span><span class="basis-value">${displayVal}</span></div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    async function executePrediction() {
+        if (!selectedUserId) return;
+        
+        const btn = document.getElementById('confirmPredictBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ri-loader-line ri-spin"></i> Running Prediction...';
+
+        try {
+            const resp = await fetch(`/admin/api/predict-dropout/${selectedUserId}`, { method: 'POST' });
+            const data = await resp.json();
+            
+            if (data.status === 'error') throw new Error(data.message);
+
+            displayPredictionResult(data);
+        } catch (err) {
+            Swal.fire('Prediction Error', err.message || 'Microservice unreachable.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Predict Dropout Risk';
+        }
+    }
+
+    function displayPredictionResult(data) {
+        const prob = data.dropout_probability;
+        const pct = (prob * 100).toFixed(1);
+        
+        let color, label;
+        if (prob > 0.6) { color = '#ef4444'; label = 'High Risk'; }
+        else if (prob > 0.3) { color = '#f59e0b'; label = 'Medium Risk'; }
+        else { color = '#10b981'; label = 'Low Risk'; }
+
+        document.getElementById('analysisBasisCard').style.display = 'none';
+        const card = document.getElementById('predictionResultCard');
+        card.style.display = 'block';
+        card.style.borderColor = color;
+
+        const badge = document.getElementById('resBadge');
+        badge.innerText = label;
+        badge.style.background = color + '20';
+        badge.style.color = color;
+
+        document.getElementById('resProbText').innerText = pct + '%';
+        document.getElementById('resProbText').style.color = color;
+        
+        const bar = document.getElementById('resProgressBar');
+        bar.style.width = pct + '%';
+        bar.style.background = color;
+
+        document.getElementById('resExplanation').innerText = generateDeterministicExplanation(prob, cachedMetrics);
+        document.getElementById('resExplanation').style.borderLeftColor = color;
+    }
+
+    function generateDeterministicExplanation(prob, metrics) {
+        let reasons = [];
+        if (prob > 0.6) {
+            if (metrics.quiz_average_score < 50) reasons.push("Extremely low quiz scores indicate high learning struggle.");
+            if (metrics.course_progress_percent < 30) reasons.push("Lack of course progression is the primary risk driver.");
+            if (metrics.forum_interactions === 0) reasons.push("Social isolation (0 interactions) correlates with disengagement.");
+            if (reasons.length === 0) reasons.push("Engagement pattern shows critical disinterest in current module.");
+        } else if (prob > 0.3) {
+            reasons.push("Moderate risk due to inconsistent participation logs.");
+            if (metrics.quiz_average_score < 70) reasons.push("Assistance with current assignments could improve persistence.");
+        } else {
+            reasons.push("Strong engagement indicators. The student is thriving in the current environment.");
+            if (metrics.course_progress_percent > 80) reasons.push("High completion progress significantly reduces dropout risk.");
+        }
+        return reasons.join(" ");
+    }
+
+    // --- TAKI AI SENTIMENT ---
+
+    async function showSentimentLogs() {
+        if (!selectedUserId) return;
+        
+        Swal.fire({
+            title: 'Fetching AI Sentiment...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); },
+            background: 'var(--bg-card)',
+            color: 'var(--text-main)',
+        });
+
+        try {
+            const resp = await fetch(`/admin/users/api/${selectedUserId}/sentiment-logs`);
+            const json = await resp.json();
+            Swal.close();
+
+            if (json.status === 'success') {
+                renderSentimentLogs(json.logs);
+                document.getElementById('sentimentCard').style.display = 'block';
+                document.getElementById('sentimentBtn').style.display = 'none';
+            } else {
+                throw new Error(json.message);
+            }
+        } catch (err) {
+            Swal.fire('Error', err.message || 'System failed to fetch sentiment logs.', 'error');
+        }
+    }
+
+    function renderSentimentLogs(logs) {
+        const container = document.getElementById('sentimentContent');
+        if (!logs || logs.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-muted);font-size:0.8rem;">No recent activities logged by AI.</p>';
+            return;
+        }
+
+        let html = '';
+        logs.forEach(log => {
+            let color = '';
+            if (log.sentiment === 'Positive') color = 'var(--success)';
+            else if (log.sentiment === 'Negative') color = 'var(--error)';
+            else color = '#fbbf24';
+
+            html += `
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 10px; border-radius: 8px; margin-bottom: 8px; text-align: left;">
+                <p style="font-size:0.85rem; margin-top:0;">"${log.text}"</p>
+                <div style="display: flex; justify-content: space-between; align-items:center;">
+                    <span style="font-size: 0.75rem; font-weight: bold; color: ${color};">
+                        ${log.sentiment} AI (${Math.round(log.confidence * 100)}%)
+                    </span>
+                    <button class="icon-btn" style="transform: scale(0.8);" title="Correct AI: Force Positive" onclick="teachAi('${log.text.replace(/'/g, "\\'")}', 'Positive')"><i class="ri-emotion-happy-line" style="color: var(--success)"></i></button>
+                    <button class="icon-btn" style="transform: scale(0.8);" title="Correct AI: Force Neutral" onclick="teachAi('${log.text.replace(/'/g, "\\'")}', 'Neutral')"><i class="ri-emotion-normal-line" style="color: #fbbf24"></i></button>
+                    <button class="icon-btn" style="transform: scale(0.8);" title="Correct AI: Force Negative" onclick="teachAi('${log.text.replace(/'/g, "\\'")}', 'Negative')"><i class="ri-emotion-unhappy-line" style="color: var(--error)"></i></button>
+                </div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    async function teachAi(text, correctLabel) {
+        try {
+            Swal.fire({ title: 'Teaching AI Model...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }, background: 'var(--bg-card)' });
+            const resp = await fetch('/admin/users/api/sentiment/teach', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text: text, correct_label: correctLabel})
+            });
+            const data = await resp.json();
+            
+            if (data.status === 'success') {
+                Swal.fire({ icon: 'success', title: 'AI Learned!', text: data.message, background: 'var(--bg-card)', color: 'var(--text-main)', timer: 2500, showConfirmButton: false });
+                showSentimentLogs(); // Refresh
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (err) {
+            Swal.fire('Error', err.message, 'error');
+        }
     }
 </script>
 {% endblock %}

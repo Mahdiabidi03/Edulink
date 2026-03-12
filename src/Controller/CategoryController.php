@@ -17,6 +17,7 @@ class CategoryController extends AbstractController
     #[Route('', name: 'index')]
     public function index(CategoryRepository $categoryRepository): Response
     {
+        /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
         $categories = $categoryRepository->findAllOrderedByName($user);
 
@@ -33,7 +34,9 @@ class CategoryController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $category->setOwner($this->getUser());
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $category->setOwner($user);
             $entityManager->persist($category);
             $entityManager->flush();
 
@@ -74,7 +77,7 @@ class CategoryController extends AbstractController
         if ($category->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException('You can only delete your own categories.');
         }
-        if ($this->isCsrfTokenValid('delete' . $category->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $category->getId(), (string) $request->request->get('_token'))) {
             $entityManager->remove($category);
             $entityManager->flush();
 

@@ -94,8 +94,8 @@ class AssistanceController extends AbstractController
                 $req->getId(),
                 $this->csvEscape($req->getStudent()?->getFullName() ?? 'N/A'),
                 $this->csvEscape($req->getStudent()?->getEmail() ?? 'N/A'),
-                $this->csvEscape($req->getTitle()),
-                $this->csvEscape(mb_substr($req->getDescription(), 0, 200)),
+                $this->csvEscape((string) $req->getTitle()),
+                $this->csvEscape(mb_substr((string) $req->getDescription(), 0, 200)),
                 $req->getStatus(),
                 $req->getBounty(),
                 $req->isIsTicket() ? 'Yes' : 'No',
@@ -209,7 +209,7 @@ class AssistanceController extends AbstractController
                 $msg->getId(),
                 $this->csvEscape($msg->getSender()?->getFullName() ?? 'N/A'),
                 $this->csvEscape($msg->getSender()?->getEmail() ?? 'N/A'),
-                $this->csvEscape(mb_substr($msg->getContent(), 0, 300)),
+                $this->csvEscape(mb_substr((string) $msg->getContent(), 0, 300)),
                 $msg->getSession()?->getId() ?? 'N/A',
                 $msg->getTimestamp()?->format('Y-m-d H:i:s') ?? 'N/A'
             );

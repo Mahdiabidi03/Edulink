@@ -15,13 +15,16 @@ class ChatbotController extends AbstractController
 {
     private GroqService $aiService;
     private \App\Service\ContextService $contextService;
+    private \App\Service\AiMicroservice $aiMicroservice;
 
     public function __construct(
         GroqService $aiService,
-        \App\Service\ContextService $contextService
+        \App\Service\ContextService $contextService,
+        \App\Service\AiMicroservice $aiMicroservice
     ) {
         $this->aiService = $aiService;
         $this->contextService = $contextService;
+        $this->aiMicroservice = $aiMicroservice;
     }
 
     #[Route('/api/chat', name: 'api_chat', methods: ['POST'])]
@@ -35,14 +38,29 @@ class ChatbotController extends AbstractController
             return new JsonResponse(['error' => 'Empty message'], 400);
         }
 
-        try {
-            /** @var \App\Entity\User $user */
-            $user = $this->getUser();
+        /** @var \App\Entity\User|null $user */
+        $user = $this->getUser();
 
-            // 1. Get User-specific context (Notes, Enrollments, Help Requests)
+        // 1. TRY AGENT (LangChain Agent via Microservice)
+        if ($user) {
+            try {
+                $agentResult = $this->aiMicroservice->chat((string) $userMessage, (int) $user->getId());
+                // We consider it a success if we get a response that doesn't look like our custom error
+                if (isset($agentResult['response']) && !str_contains($agentResult['response'], "trouble connecting to my brain")) {
+                    return new JsonResponse(['reply' => $agentResult['response']]);
+                }
+            } catch (\Throwable $e) {
+                // Ignore agent errors, fall back to Groq
+                error_log('[Agent Fallback Triggered] ' . $e->getMessage());
+            }
+        }
+
+        // 2. FALLBACK TO GROQ (Original logic)
+        try {
+            // Get User-specific context (Notes, Enrollments, Help Requests)
             $userInfo = $user ? $this->contextService->getUserContext($user) : "No user authenticated.";
 
-            // 2. Get Platform-wide context (Courses, Events, Categories)
+            // Get Platform-wide context (Courses, Events, Categories)
             $platformContext = $this->contextService->getPlatformContext();
 
             $navigation = "HOW TO USE EDULINK (NAVIGATION GUIDE):\n";
@@ -87,14 +105,13 @@ class ChatbotController extends AbstractController
 
             return new JsonResponse(['reply' => $reply]);
         } catch (\Throwable $e) {
-            // Log the actual error for debugging
             error_log('[Chatbot Error] ' . get_class($e) . ': ' . $e->getMessage());
 
             $errorMsg = match (true) {
-                str_contains($e->getMessage(), '401') => "AI service authentication failed. Please check the API key configuration.",
-                str_contains($e->getMessage(), '429') => "AI service is temporarily overloaded. Please try again in a moment.",
-                str_contains($e->getMessage(), 'timed out') || str_contains($e->getMessage(), 'timeout') => "AI service took too long to respond. Please try again.",
-                default => "Technical Error: " . $e->getMessage(),
+                str_contains($e->getMessage(), '401') => "AI service authentication failed.",
+                str_contains($e->getMessage(), '429') => "AI service is temporarily overloaded.",
+                str_contains($e->getMessage(), 'timed out') || str_contains($e->getMessage(), 'timeout') => "AI service took too long to respond.",
+                default => "Technical Error: I'm currently unavailable.",
             };
 
             return new JsonResponse(['reply' => $errorMsg], 500);

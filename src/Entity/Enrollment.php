@@ -32,6 +32,25 @@ class Enrollment
     #[ORM\Column(type: 'json', options: ['default' => '[]'])]
     private array $completedResources = [];
 
+    #[ORM\Column(type: 'float', options: ['default' => 0.0])]
+    private float $loginFrequencyPerWeek = 0.0;
+
+    #[ORM\Column(type: 'float', options: ['default' => 0.0])]
+    private float $avgSessionMinutes = 0.0;
+
+    #[ORM\Column(type: 'float', options: ['default' => 0.0])]
+    private float $assignmentsCompleted = 0.0;
+
+    #[ORM\Column(type: 'float', options: ['default' => 0.0])]
+    private float $quizAverageScore = 0.0;
+
+    #[ORM\Column(type: 'float', options: ['default' => 0.0])]
+    private float $forumInteractions = 0.0;
+
+    #[ORM\Column(type: 'float', options: ['default' => 0.0])]
+    private float $videoWatchPercent = 0.0;
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -117,4 +136,22 @@ class Enrollment
 
         return $this;
     }
+
+    public function getLoginFrequencyPerWeek(): float { return $this->loginFrequencyPerWeek; }
+    public function setLoginFrequencyPerWeek(float $val): static { $this->loginFrequencyPerWeek = $val; return $this; }
+
+    public function getAvgSessionMinutes(): float { return $this->avgSessionMinutes; }
+    public function setAvgSessionMinutes(float $val): static { $this->avgSessionMinutes = $val; return $this; }
+
+    public function getAssignmentsCompleted(): float { return $this->assignmentsCompleted; }
+    public function setAssignmentsCompleted(float $val): static { $this->assignmentsCompleted = $val; return $this; }
+
+    public function getQuizAverageScore(): float { return $this->quizAverageScore; }
+    public function setQuizAverageScore(float $val): static { $this->quizAverageScore = $val; return $this; }
+
+    public function getForumInteractions(): float { return $this->forumInteractions; }
+    public function setForumInteractions(float $val): static { $this->forumInteractions = $val; return $this; }
+
+    public function getVideoWatchPercent(): float { return $this->videoWatchPercent; }
+    public function setVideoWatchPercent(float $val): static { $this->videoWatchPercent = $val; return $this; }
 }

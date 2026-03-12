@@ -543,7 +543,7 @@
     {# ======================== MESSAGES ======================== #}
     <div class="chat-body" id="chat-messages">
         {% for message in session.messages %}
-            <div class="msg-row {{ message.sender == app.user ? 'sent' : 'received' }}">
+            <div class="msg-row {{ message.sender == app.user ? 'sent' : 'received' }}" data-msg-id="{{ message.id }}">
                 <div class="msg-bubble">
                     {% if message.isToxic %}
                         <div class="toxic-warn"><i class="ri-alert-line"></i> Toxicity Detected</div>
@@ -666,11 +666,10 @@
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 
 <script>
-    // Auto-scroll chat
+    // ===== CORE REFS =====
     const chatContainer = document.getElementById('chat-messages');
     if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    // File upload display
     function showFileName(input) {
         const display = document.getElementById('fileNameDisplay');
         if (display && input.files.length > 0) {
@@ -679,6 +678,165 @@
         }
     }
 
+    // ===== AJAX MESSAGING =====
+    {% if session.isActive %}
+    const CHAT_SEND_URL   = '{{ path("app_help_request_chat_send", {id: session.id}) }}';
+    const CHAT_POLL_URL   = '{{ path("app_help_request_chat_messages", {id: session.id}) }}';
+    const CSRF_TOKEN      = '{{ csrf_token("chat_send_" ~ session.id) }}';
+    const CURRENT_USER_ID = {{ app.user.id }};
+    let lastMessageId     = 0;
+    let isPolling          = true;
+
+    // Track existing message IDs to avoid duplicates
+    document.querySelectorAll('.msg-row[data-msg-id]').forEach(el => {
+        const id = parseInt(el.dataset.msgId);
+        if (id > lastMessageId) lastMessageId = id;
+    });
+
+    // Intercept form submission — send via AJAX
+    (function() {
+        const form = document.querySelector('.chat-input-bar form');
+        if (!form) return;
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const input = document.querySelector('#chat-message-input, textarea[name*="content"]');
+            const content = (input ? input.value : '').trim();
+            if (!content) return;
+
+            const sendBtn = form.querySelector('.send-btn');
+            if (sendBtn) { sendBtn.disabled = true; sendBtn.style.opacity = '0.5'; }
+
+            try {
+                const res = await fetch(CHAT_SEND_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: content, _token: CSRF_TOKEN })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok || data.error) {
+                    showToast(data.error || 'Failed to send message', 'error');
+                    return;
+                }
+
+                // Append sent message to DOM
+                if (data.message) {
+                    appendMessage(data.message);
+                    lastMessageId = Math.max(lastMessageId, data.message.id);
+                }
+
+                // Clear input
+                if (input) { input.value = ''; input.style.height = 'auto'; }
+
+                // Show toxicity warning
+                if (data.toxic_warning) {
+                    showToast('⚠️ Your message triggered the toxicity filter but was sent.', 'warning');
+                }
+
+                // Refresh AI suggestions
+                loadSuggestions();
+
+            } catch (err) {
+                console.error('[Chat] Send error:', err);
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                if (sendBtn) { sendBtn.disabled = false; sendBtn.style.opacity = '1'; }
+            }
+        });
+    })();
+
+    // Append a message to the chat DOM
+    function appendMessage(msg) {
+        // Remove the "Start the conversation!" empty state
+        const empty = chatContainer.querySelector('.chat-empty');
+        if (empty) empty.remove();
+
+        const row = document.createElement('div');
+        row.className = 'msg-row ' + (msg.is_mine ? 'sent' : 'received');
+        row.dataset.msgId = msg.id;
+
+        let toxicHtml = '';
+        if (msg.is_toxic) {
+            toxicHtml = '<div class="toxic-warn"><i class="ri-alert-line"></i> Toxicity Detected</div>';
+        }
+
+        let attachHtml = '';
+        if (msg.attachment_url) {
+            const ext = msg.attachment_url.split('.').pop().toLowerCase();
+            if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                attachHtml = `<div class="msg-attachment"><a href="${msg.attachment_url}" target="_blank"><img src="${msg.attachment_url}" alt="Attachment"></a></div>`;
+            } else {
+                attachHtml = `<div class="msg-attachment"><a href="${msg.attachment_url}" target="_blank" class="msg-attachment-file"><i class="ri-file-download-line"></i> File</a></div>`;
+            }
+        }
+
+        row.innerHTML = `
+            <div class="msg-bubble">
+                ${toxicHtml}
+                <div>${msg.content}</div>
+                ${attachHtml}
+                <div class="msg-footer">
+                    <span>${msg.timestamp}</span>
+                    ${!msg.is_mine ? '<span style="font-size:0.7rem;opacity:0.6;">' + (msg.sender_name || '') + '</span>' : ''}
+                </div>
+            </div>
+        `;
+
+        chatContainer.appendChild(row);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Poll for new messages every 3 seconds
+    async function pollMessages() {
+        if (!isPolling) return;
+        try {
+            const res = await fetch(CHAT_POLL_URL + '?after=' + lastMessageId);
+            if (!res.ok) return;
+            const data = await res.json();
+
+            if (data.messages && data.messages.length > 0) {
+                data.messages.forEach(msg => {
+                    // Only append messages we don't already have
+                    if (!chatContainer.querySelector(`[data-msg-id="${msg.id}"]`)) {
+                        appendMessage(msg);
+                        lastMessageId = Math.max(lastMessageId, msg.id);
+                    }
+                });
+            }
+
+            // Refresh AI suggestions
+            if (data.suggestions && data.suggestions.length > 0) {
+                renderSuggestions(data.suggestions);
+            }
+
+            // Detect session closed by the other user
+            if (data.session_active === false) {
+                isPolling = false;
+                showToast('Session has been closed.', 'info');
+                setTimeout(() => location.reload(), 2000);
+            }
+
+        } catch (err) {
+            console.warn('[Chat] Poll error:', err);
+        }
+    }
+
+    setInterval(pollMessages, 3000);
+
+    // Toast helper
+    function showToast(text, type) {
+        const toast = document.createElement('div');
+        toast.className = 'flash-toast flash-' + (type || 'warning');
+        toast.innerHTML = '<i class="ri-alert-line"></i> ' + text;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    {% endif %}
+
     // ===== PEERJS VIDEO CALL =====
     {% if session.isActive %}
     const SESSION_ID = {{ session.id }};
@@ -686,7 +844,6 @@
     const MY_PEER_ID = 'edulink_session_' + SESSION_ID + '_user_' + MY_USER_ID;
     const MY_NAME = '{{ app.user.fullName|default(app.user.email)|e('js') }}';
 
-    // Figure out the other user's peer ID
     const studentId = {{ session.helpRequest.student.id }};
     const tutorId = {{ session.tutor.id }};
     const otherUserId = (MY_USER_ID === studentId) ? tutorId : studentId;
@@ -699,49 +856,55 @@
     let isMuted = false;
     let isCamOff = false;
 
-    // Initialize PeerJS
     function initPeer() {
-        peer = new Peer(MY_PEER_ID);
+        if (peer) { try { peer.destroy(); } catch(e) {} }
+
+        peer = new Peer(MY_PEER_ID, {
+            debug: 1,
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            }
+        });
 
         peer.on('open', (id) => {
             console.log('[PeerJS] Connected with ID:', id);
         });
 
-        // Listen for incoming calls
         peer.on('call', (call) => {
             pendingCall = call;
             document.getElementById('incomingCall').classList.add('show');
-            // Play ring sound (optional)
         });
 
         peer.on('error', (err) => {
             console.warn('[PeerJS] Error:', err.type, err.message);
             if (err.type === 'unavailable-id') {
-                // ID already taken — reconnect with suffix
-                peer = new Peer(MY_PEER_ID + '_' + Date.now());
+                // Retry with same ID after a delay (previous session tab may have closed)
+                setTimeout(() => {
+                    console.log('[PeerJS] Retrying with same ID...');
+                    initPeer();
+                }, 2000);
+            }
+        });
+
+        peer.on('disconnected', () => {
+            console.log('[PeerJS] Disconnected, attempting reconnect...');
+            if (peer && !peer.destroyed) {
+                peer.reconnect();
             }
         });
     }
 
-    // Start a video call
     async function startVideoCall() {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             document.getElementById('localVideo').srcObject = localStream;
             document.getElementById('videoOverlay').classList.add('active');
 
-            // Call the other peer
-            const call = peer.call(REMOTE_PEER_ID, localStream);
-            if (!call) {
-                document.getElementById('remoteLabel').textContent = 'Waiting for them to join...';
-                // Add a system message in chat
-                addSystemMessage('📹 ' + MY_NAME + ' started a video call');
-                return;
-            }
-            handleCall(call);
-            addSystemMessage('📹 ' + MY_NAME + ' started a video call');
+            attemptCall(0);
 
-            // Update button to hangup
             const btn = document.getElementById('videoCallBtn');
             btn.classList.add('hangup');
             btn.innerHTML = '<i class="ri-phone-off-line"></i> End Call';
@@ -752,7 +915,31 @@
         }
     }
 
-    // Answer incoming call
+    // Retry calling up to 5 times if the other peer isn't connected yet
+    function attemptCall(attempt) {
+        if (attempt >= 5) {
+            document.getElementById('remoteLabel').textContent = 'User not available';
+            addSystemMessage('📹 ' + MY_NAME + ' started a video call (waiting for answer...)');
+            return;
+        }
+
+        if (!peer || peer.destroyed) {
+            console.warn('[PeerJS] Peer not ready, retrying...');
+            setTimeout(() => attemptCall(attempt + 1), 3000);
+            return;
+        }
+
+        const call = peer.call(REMOTE_PEER_ID, localStream);
+        if (!call) {
+            document.getElementById('remoteLabel').textContent = 'Connecting... (attempt ' + (attempt + 1) + '/5)';
+            setTimeout(() => attemptCall(attempt + 1), 3000);
+            return;
+        }
+
+        handleCall(call);
+        addSystemMessage('📹 ' + MY_NAME + ' started a video call');
+    }
+
     async function answerCall() {
         if (!pendingCall) return;
         try {
@@ -764,7 +951,6 @@
             pendingCall.answer(localStream);
             handleCall(pendingCall);
 
-            // Update button
             const btn = document.getElementById('videoCallBtn');
             btn.classList.add('hangup');
             btn.innerHTML = '<i class="ri-phone-off-line"></i> End Call';
@@ -787,9 +973,7 @@
             document.getElementById('remoteVideo').srcObject = remoteStream;
             document.getElementById('remoteLabel').textContent = (MY_USER_ID === studentId) ? '{{ session.tutor.fullName|e('js') }}' : '{{ session.helpRequest.student.fullName|e('js') }}';
         });
-        call.on('close', () => {
-            hangUp();
-        });
+        call.on('close', () => hangUp());
         call.on('error', (err) => {
             console.warn('[PeerJS] Call error:', err);
             hangUp();
@@ -808,9 +992,11 @@
         document.getElementById('remoteVideo').srcObject = null;
 
         const btn = document.getElementById('videoCallBtn');
-        btn.classList.remove('hangup');
-        btn.innerHTML = '<i class="ri-vidicon-line"></i> Video Call';
-        btn.onclick = startVideoCall;
+        if (btn) {
+            btn.classList.remove('hangup');
+            btn.innerHTML = '<i class="ri-vidicon-line"></i> Video Call';
+            btn.onclick = startVideoCall;
+        }
     }
 
     function toggleMute() {
@@ -831,7 +1017,6 @@
         btn.innerHTML = isCamOff ? '<i class="ri-camera-off-line"></i>' : '<i class="ri-camera-line"></i>';
     }
 
-    // Add a system message to the chat (visual only, not persisted)
     function addSystemMessage(text) {
         const row = document.createElement('div');
         row.className = 'msg-row system';
@@ -840,50 +1025,48 @@
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Initialize PeerJS on page load
     initPeer();
     {% endif %}
 
     // ===== AI SUGGESTION CHIPS =====
     {% if session.isActive %}
-    (function() {
-        const suggestionsContainer = document.getElementById('ai-suggestions');
-        const suggestionsWrapper = document.getElementById('ai-suggestions-wrapper');
-        const messageInput = document.querySelector('#chat-message-input, textarea[name*="content"]');
+    const suggestionsContainer = document.getElementById('ai-suggestions');
+    const suggestionsWrapper = document.getElementById('ai-suggestions-wrapper');
+    const messageInput = document.querySelector('#chat-message-input, textarea[name*="content"]');
 
-        async function loadSuggestions() {
-            try {
-                const res = await fetch('{{ path("app_help_request_chat_messages", {id: session.id}) }}?after=0');
-                if (!res.ok) throw new Error('Failed to load');
-                const data = await res.json();
-                
-                if (data.suggestions && data.suggestions.length > 0) {
-                    suggestionsContainer.innerHTML = '';
-                    data.suggestions.forEach(text => {
-                        const chip = document.createElement('button');
-                        chip.type = 'button';
-                        chip.className = 'ai-suggestion-chip';
-                        chip.innerHTML = '<i class="ri-sparkling-line"></i> ' + text;
-                        chip.addEventListener('click', () => {
-                            if (messageInput) {
-                                messageInput.value = text;
-                                messageInput.focus();
-                            }
-                        });
-                        suggestionsContainer.appendChild(chip);
-                    });
-                    suggestionsWrapper.style.display = 'block';
-                } else {
-                    suggestionsWrapper.style.display = 'none';
-                }
-            } catch (e) {
-                console.warn('AI suggestions unavailable:', e);
-                suggestionsWrapper.style.display = 'none';
-            }
+    function renderSuggestions(suggestions) {
+        if (!suggestionsContainer || !suggestionsWrapper) return;
+        if (!suggestions || suggestions.length === 0) {
+            suggestionsWrapper.style.display = 'none';
+            return;
         }
+        suggestionsContainer.innerHTML = '';
+        suggestions.forEach(text => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'ai-suggestion-chip';
+            chip.innerHTML = '<i class="ri-sparkling-line"></i> ' + text;
+            chip.addEventListener('click', () => {
+                if (messageInput) { messageInput.value = text; messageInput.focus(); }
+            });
+            suggestionsContainer.appendChild(chip);
+        });
+        suggestionsWrapper.style.display = 'block';
+    }
 
-        loadSuggestions();
-    })();
+    async function loadSuggestions() {
+        try {
+            const res = await fetch('{{ path("app_help_request_chat_messages", {id: session.id}) }}?after=0');
+            if (!res.ok) throw new Error('Failed to load');
+            const data = await res.json();
+            renderSuggestions(data.suggestions || []);
+        } catch (e) {
+            console.warn('AI suggestions unavailable:', e);
+            if (suggestionsWrapper) suggestionsWrapper.style.display = 'none';
+        }
+    }
+
+    loadSuggestions();
     {% endif %}
 </script>
 {% endblock %}

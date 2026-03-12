@@ -67,7 +67,7 @@ class AuthController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Validate reCAPTCHA
-            $recaptchaResponse = $request->request->get('g-recaptcha-response');
+            $recaptchaResponse = (string) $request->request->get('g-recaptcha-response');
             if (!$this->recaptchaService->verify($recaptchaResponse)) {
                 $recaptchaError = 'Please complete the reCAPTCHA verification.';
             } else {
@@ -101,7 +101,7 @@ class AuthController extends AbstractController
                     try {
                         $emailMessage = (new Email())
                             ->from($this->mailerFrom)
-                            ->to($user->getEmail())
+                            ->to((string) $user->getEmail())
                             ->subject('EduLink - Verify Your Email')
                             ->html("
                                 <div style='font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 2rem; text-align: center;'>
@@ -148,7 +148,7 @@ class AuthController extends AbstractController
         $error = null;
 
         if ($request->isMethod('POST')) {
-            $otp = trim($request->request->get('otp', ''));
+            $otp = trim((string) $request->request->get('otp', ''));
             $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
 
             if (!$user) {
@@ -198,7 +198,7 @@ class AuthController extends AbstractController
         try {
             $emailMessage = (new Email())
                 ->from($this->mailerFrom)
-                ->to($user->getEmail())
+                ->to((string) $user->getEmail())
                 ->subject('EduLink - New Verification Code')
                 ->html("
                     <div style='font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 2rem; text-align: center;'>

@@ -1,0 +1,15 @@
+INFO:     Started server process [6008]
+INFO:     Waiting for application startup.
+INFO: \U0001f680 Loading model artifacts from C:\Users\Makhlouf Eya\Downloads\edulink keml\edulink keml\mahdi\models …
+INFO: \u2705  Loaded RandomForestClassifier from C:\Users\Makhlouf Eya\Downloads\edulink keml\edulink keml\mahdi\models\dropout_model.pkl
+INFO: \u2705  Loaded StandardScaler from C:\Users\Makhlouf Eya\Downloads\edulink keml\edulink keml\mahdi\models\scaler.pkl
+INFO: \u2705  Loaded LabelEncoder from C:\Users\Makhlouf Eya\Downloads\edulink keml\edulink keml\mahdi\models\encoder.pkl
+INFO: \u2705  Dropout model loaded — /predict/dropout is active.
+INFO: \u2705  Loaded TfidfVectorizer from C:\Users\Makhlouf Eya\Downloads\edulink keml\edulink keml\mahdi\models\tfidf_vectorizer.pkl
+INFO: \u2705  Loaded CourseFeatureMatrix from C:\Users\Makhlouf Eya\Downloads\edulink keml\edulink keml\mahdi\models\course_features.pkl
+INFO: \u2705  Loaded CourseIndex from C:\Users\Makhlouf Eya\Downloads\edulink keml\edulink keml\mahdi\models\course_index.pkl
+INFO: \u2705  Recommendation engine loaded — /recommend/courses is active.
+INFO: \u2705  Loaded CoursePerformanceModel from C:\Users\Makhlouf Eya\Downloads\edulink keml\edulink keml\mahdi\models\course_performance_model.pkl
+INFO: \u2705  Performance engine loaded — /analyze/course is active.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)

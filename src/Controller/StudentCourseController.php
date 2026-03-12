@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Cours;
 use App\Entity\Enrollment;
+use App\Entity\User;
 use App\Repository\CoursRepository;
 use App\Repository\EnrollmentRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -177,7 +178,9 @@ class StudentCourseController extends AbstractController
 
         if (!$existing) {
             $enrollment = new Enrollment();
-            $enrollment->setStudent($user);
+            /** @var User $loggedUser */
+            $loggedUser = $this->getUser();
+            $enrollment->setStudent($loggedUser);
             $enrollment->setCours($cours);
             $enrollment->setEnrolledAt(new \DateTimeImmutable());
             $enrollment->setProgress(0);
@@ -195,6 +198,7 @@ class StudentCourseController extends AbstractController
     #[Route('/{id}', name: 'app_student_course_detail')]
     public function show(Cours $cours, EnrollmentRepository $enrollRepo): Response
     {
+        /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
         $enrollment = $user ? $enrollRepo->findOneBy(['student' => $user, 'cours' => $cours]) : null;
 
@@ -208,7 +212,7 @@ class StudentCourseController extends AbstractController
     #[Route('/complete/{id}', name: 'app_student_complete_course', methods: ['POST'])]
     public function complete(Cours $cours, EntityManagerInterface $em, EnrollmentRepository $enrollRepo, \App\Service\BadgeService $badgeService): Response
     {
-        /** @var User $user */
+        /** @var \App\Entity\User|null $user */
         $user = $this->getUser();
         if (!$user)
             return $this->redirectToRoute('app_login');
@@ -236,7 +240,7 @@ class StudentCourseController extends AbstractController
             if ($reward > 0) {
                 // Add to Wallet/XP (unified)
                 $user->setWalletBalance($user->getWalletBalance() + $reward);
-
+    
                 // Create Transaction
                 $transaction = new \App\Entity\Transaction();
                 $transaction->setUser($user);
@@ -277,18 +281,21 @@ class StudentCourseController extends AbstractController
         }
 
         // Add to completed
-        $enrollment->addCompletedResource($resource->getId());
+        $enrollment->addCompletedResource((int) $resource->getId());
 
         // Update progress percentage
-        $resources = $cours->getResources()->filter(fn($r) => $r->getStatus() === 'APPROVED');
+        $resources = [];
+        if ($cours) {
+            $resources = $cours->getResources()->filter(fn($r) => $r->getStatus() === 'APPROVED');
+        }
         $total = count($resources);
         $done = count($enrollment->getCompletedResources());
 
         $percentage = $total > 0 ? floor(($done / $total) * 100) : 100;
-        $enrollment->setProgress($percentage);
+        $enrollment->setProgress((int) $percentage);
 
         $em->flush();
 
-        return $this->redirectToRoute('app_student_course_detail', ['id' => $cours->getId()]);
+        return $this->redirectToRoute('app_student_course_detail', ['id' => $cours ? $cours->getId() : null]);
     }
 }

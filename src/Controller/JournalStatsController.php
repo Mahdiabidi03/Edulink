@@ -84,7 +84,7 @@ class JournalStatsController extends AbstractController
         $leaderboardCategories = array_slice($statsByUser, 0, 10);
 
         return $this->render('admin/journal_statistics.html.twig', [
-            'journalStats' => array_values($statsByUser),
+            'journalStats' => $statsByUser,
             'searchQuery' => $searchQuery,
             'summary' => [
                 'totalStudents' => $totalStudents,

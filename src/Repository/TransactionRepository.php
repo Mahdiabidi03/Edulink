@@ -23,7 +23,7 @@ class TransactionRepository extends ServiceEntityRepository
             ->where('t.amount > 0') // Assuming positive transactions are "earned"
             ->groupBy('t.id') // This group by might be wrong for a single sum, removed below
             ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+            ->getSingleScalarResult();
     }
 
     public function getTotalPointsEarned(): int

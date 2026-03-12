@@ -53,6 +53,9 @@ class Event
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $predictedScore = null;
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
@@ -209,6 +212,18 @@ class Event
     public function setImage(?string $image): static
     {
         $this->image = $image;
+
+        return $this;
+    }
+
+    public function getPredictedScore(): ?int
+    {
+        return $this->predictedScore;
+    }
+
+    public function setPredictedScore(?int $predictedScore): static
+    {
+        $this->predictedScore = $predictedScore;
 
         return $this;
     }

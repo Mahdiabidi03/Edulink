@@ -31,8 +31,10 @@ class AdminResourceController extends AbstractController
                 $newFilename = uniqid().'.'.$file->getClientOriginalExtension();
                 
                 try {
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    $dir = is_string($projectDir) ? $projectDir : '';
                     $file->move(
-                        $this->getParameter('kernel.project_dir').'/public/uploads/resources',
+                        $dir . '/public/uploads/resources',
                         $newFilename
                     );
                     $resource->setUrl('/uploads/resources/'.$newFilename);
@@ -42,7 +44,9 @@ class AdminResourceController extends AbstractController
             }
 
             // Admin creates = auto-approved
-            $resource->setAuthor($this->getUser());
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $resource->setAuthor($user);
             $resource->setStatus('APPROVED');
             
             $entityManager->persist($resource);
@@ -71,7 +75,9 @@ class AdminResourceController extends AbstractController
             if ($file) {
                 // Remove old file if it exists
                 if ($resource->getUrl() && str_starts_with($resource->getUrl(), '/uploads/resources/')) {
-                    $oldPath = $this->getParameter('kernel.project_dir') . '/public' . $resource->getUrl();
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    $dir = is_string($projectDir) ? $projectDir : '';
+                    $oldPath = $dir . '/public' . $resource->getUrl();
                     if (file_exists($oldPath)) {
                         @unlink($oldPath);
                     }
@@ -79,8 +85,10 @@ class AdminResourceController extends AbstractController
 
                 $newFilename = uniqid().'.'.$file->getClientOriginalExtension();
                 try {
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    $dir = is_string($projectDir) ? $projectDir : '';
                     $file->move(
-                        $this->getParameter('kernel.project_dir').'/public/uploads/resources',
+                        $dir . '/public/uploads/resources',
                         $newFilename
                     );
                     $resource->setUrl('/uploads/resources/'.$newFilename);
@@ -92,7 +100,8 @@ class AdminResourceController extends AbstractController
             $entityManager->flush();
             $this->addFlash('success', 'Resource updated successfully!');
 
-            return $this->redirectToRoute('app_admin_course_manage', ['id' => $resource->getCours()->getId()], Response::HTTP_SEE_OTHER);
+            $courseId = $resource->getCours() ? $resource->getCours()->getId() : null;
+            return $this->redirectToRoute('app_admin_course_manage', ['id' => $courseId], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('admin/resource/edit.html.twig', [
@@ -104,9 +113,9 @@ class AdminResourceController extends AbstractController
     #[Route('/{id}', name: 'app_admin_resource_delete', methods: ['POST'])]
     public function delete(Request $request, Resource $resource, EntityManagerInterface $entityManager): Response
     {
-        $courseId = $resource->getCours()->getId();
+        $courseId = $resource->getCours() ? $resource->getCours()->getId() : null;
         
-        if ($this->isCsrfTokenValid('delete'.$resource->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$resource->getId(), (string) $request->request->get('_token'))) {
             $entityManager->remove($resource);
             $entityManager->flush();
         }

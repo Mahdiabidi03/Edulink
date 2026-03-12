@@ -26,6 +26,8 @@
             <!-- Quick Input -->
             <div class="card" style="padding: 1.5rem;" id="noteFormContainer">
                 {{ form_start(noteForm, {'attr': {'style': 'display: contents;', 'novalidate': 'novalidate', 'enctype': 'multipart/form-data'}}) }}
+                    <input type="hidden" name="note_ai_tags" id="note_ai_tags_input" value="" />
+                    <input type="hidden" name="note_ai_category" id="note_ai_category_input" value="" />
                     {{ form_widget(noteForm.title, {'attr': {'class': 'form-input', 'style': 'margin-bottom: 10px; box-sizing: border-box;', 'placeholder': 'Note Title'}}) }}
                     
                     {% if noteForm.title.vars.errors %}
@@ -73,10 +75,40 @@
                     </div>
                     {{ form_widget(noteForm.category, {'attr': {'class': 'form-input', 'style': 'margin-bottom: 1rem; box-sizing: border-box;'}}) }}
                     
-                    <div style="display: flex; justify-content: flex-end;">
+                    <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                        <button type="button" id="aiPredictBtn" class="btn secondary" style="padding: 10px 24px; border-radius: 8px; font-weight: 600; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); transition: all 0.2s;"><i class="ri-sparkling-2-line" style="color: #4285F4;"></i> Test AI Prediction</button>
                         <button type="submit" class="btn" style="padding: 10px 24px; background: var(--brand-gradient); color: white; border: none; border-radius: 8px; font-weight: 600; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); transition: transform 0.2s;"><i class="ri-save-3-line"></i> Save Note</button>
                     </div>
                 {{ form_end(noteForm) }}
+            </div>
+
+            <!-- AI Prediction Results Container -->
+            <div id="aiPredictionResultsContainer" style="display: none; margin-bottom: 1.5rem;">
+                <div class="card card-pro" style="padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--brand-accent); border-radius: 12px;">
+                    <h3 style="margin-top: 0; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+                        <i class="ri-robot-2-fill" style="color: #4285F4;"></i> AI Models Analysis
+                    </h3>
+                    <div id="aiPredictionLoading" style="display: none; padding: 1rem; text-align: center;">
+                        <div style="width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: #4285F4; border-radius: 50%; animation: advisorSpin 0.8s linear infinite; margin: 0 auto 0.5rem;"></div>
+                        <span style="font-size: 0.9rem; color: var(--text-secondary);">Analyzing with Python Models...</span>
+                    </div>
+                    <div id="aiPredictionContent" style="display: none;">
+                        <div style="margin-bottom: 1rem;">
+                            <strong style="color: var(--text-main);">📂 Predicted Category:</strong> 
+                            <span id="aiPredictedCategory" style="margin-left: 8px; padding: 4px 10px; border-radius: 20px; background: rgba(66, 133, 244, 0.1); color: #4285F4; font-weight: 600; font-size: 0.85rem;"></span>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <strong style="color: var(--text-main);">🏷️ Generated Tags (Multi-Label):</strong> 
+                            <div id="aiGeneratedTags" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;"></div>
+                        </div>
+                        <div>
+                            <strong style="color: var(--text-main);">🔍 Top Semantic Matches (Word2Vec):</strong>
+                            <ul id="aiSemanticMatches" style="list-style: none; padding: 0; margin: 8px 0 0 0; display: flex; flex-direction: column; gap: 8px;"></ul>
+                        </div>
+                    </div>
+                    <div id="aiPredictionError" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 8px; background: rgba(234,67,53,0.1); border: 1px solid rgba(234,67,53,0.2); color: var(--error); font-size: 0.9rem;">
+                    </div>
+                </div>
             </div>
 
             <!-- Saved Notes List -->
@@ -142,6 +174,11 @@
                                 {% if note.category %}
                                     <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(99, 102, 241, 0.1); color: var(--brand-main); font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;">
                                         <i class="ri-bookmark-2-line"></i> {{ note.category.name }}
+                                    </span>
+                                {% endif %}
+                                {% if note.tag %}
+                                    <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background: rgba(52, 168, 83, 0.1); color: #34A853; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem; margin-left: 4px;">
+                                        <i class="ri-price-tag-3-line"></i> {{ note.tag }}
                                     </span>
                                 {% endif %}
                                 <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
@@ -582,6 +619,135 @@
 
 
 <script>
+    // AI Prediction feature
+    document.addEventListener('DOMContentLoaded', function() {
+        const aiPredictBtn = document.getElementById('aiPredictBtn');
+        if (aiPredictBtn) {
+            aiPredictBtn.addEventListener('click', async function() {
+                let textContent = '';
+                const quillEditor = document.querySelector('#inline-quill-editor .ql-editor');
+                if (quillEditor) {
+                    textContent = quillEditor.innerText.trim();
+                } else {
+                    const hiddenContent = document.getElementById('inline-note-content-hidden');
+                    if (hiddenContent) {
+                        const div = document.createElement("div");
+                        div.innerHTML = hiddenContent.value;
+                        textContent = div.textContent || div.innerText || "";
+                    }
+                }
+                
+                if (!textContent || textContent.trim() === '') {
+                    alert('Please write some content in the note before testing AI prediction.');
+                    return;
+                }
+
+                const container = document.getElementById('aiPredictionResultsContainer');
+                const loading = document.getElementById('aiPredictionLoading');
+                const content = document.getElementById('aiPredictionContent');
+                const errorHtml = document.getElementById('aiPredictionError');
+                
+                container.style.display = 'block';
+                loading.style.display = 'block';
+                content.style.display = 'none';
+                errorHtml.style.display = 'none';
+
+                try {
+                    const response = await fetch('/student/note/ai-predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({text: textContent})
+                    });
+
+                    const data = await response.json();
+                    console.log('[AI Predict] Full response:', data);
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.error || 'Failed to fetch AI predictions.');
+                    }
+
+                    document.getElementById('aiPredictedCategory').textContent = data.data.category;
+                    
+                    // Auto-select the predicted category in the dropdown if it exists
+                    const categorySelect = document.getElementById('note_category');
+                    if (categorySelect) {
+                        for (let i = 0; i < categorySelect.options.length; i++) {
+                            const option = categorySelect.options[i];
+                            // Match text case-insensitively since categories are user-defined
+                            if (option.text.toLowerCase().trim() === data.data.category.toLowerCase().trim()) {
+                                categorySelect.selectedIndex = i;
+                                // Highlight the input briefly to show the user it was changed
+                                categorySelect.style.transition = 'box-shadow 0.3s';
+                                categorySelect.style.boxShadow = '0 0 0 2px #4285F4';
+                                setTimeout(() => categorySelect.style.boxShadow = '', 1500);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    const tagsContainer = document.getElementById('aiGeneratedTags');
+                    tagsContainer.innerHTML = '';
+                    let tagsStringList = [];
+                    
+                    if (data.data.tags && data.data.tags.length > 0) {
+                        data.data.tags.forEach(tag => {
+                            const tagSpan = document.createElement('span');
+                            tagSpan.style.cssText = 'padding: 4px 10px; border-radius: 20px; background: var(--bg-main); border: 1px solid var(--border); color: var(--text-secondary); font-size: 0.8rem; margin-right: 4px; display: inline-block; white-space: nowrap;';
+                            tagSpan.innerHTML = `<i class="ri-price-tag-3-line"></i> ${tag}`;
+                            tagsContainer.appendChild(tagSpan);
+                            tagsStringList.push(tag);
+                        });
+                    } else {
+                        // Fallback if the sentence is too short and model predicts NO tags
+                        const fallbackTag = data.data.category.toLowerCase() + '-related';
+                        const tagSpan = document.createElement('span');
+                        tagSpan.style.cssText = 'padding: 4px 10px; border-radius: 20px; background: var(--bg-main); border: 1px solid var(--border); color: var(--text-secondary); font-size: 0.8rem; margin-right: 4px; display: inline-block; white-space: nowrap;';
+                        tagSpan.innerHTML = `<i class="ri-price-tag-3-line"></i> ${fallbackTag}`;
+                        tagsContainer.appendChild(tagSpan);
+                        tagsStringList.push(fallbackTag);
+                    }
+                    
+                    // Populate hidden input so it gets POSTed on form submission
+                    const aiTagsInput = document.getElementById('note_ai_tags_input');
+                    if(aiTagsInput) {
+                        aiTagsInput.value = tagsStringList.join(', ');
+                    }
+                    
+                    // Populate hidden category input so backend can create it if the user doesn't have it
+                    const aiCategoryInput = document.getElementById('note_ai_category_input');
+                    if(aiCategoryInput) {
+                        aiCategoryInput.value = data.data.category;
+                    }
+
+                    const matchContainer = document.getElementById('aiSemanticMatches');
+                    matchContainer.innerHTML = '';
+                    const entries = data.data.similar_entries || [];
+                    if (entries.length === 0) {
+                        matchContainer.innerHTML = '<li style="color: var(--text-muted); font-size:0.85rem; font-style: italic;">No close matches found in the training corpus.</li>';
+                    } else {
+                        entries.forEach(match => {
+                            const li = document.createElement('li');
+                            li.style.cssText = 'padding: 8px 12px; background: var(--bg-main); border-radius: 6px; font-size: 0.9rem; color: var(--text-main); border-left: 3px solid #34A853; margin-bottom: 6px; line-height: 1.4;';
+                            li.innerHTML = `<div style="color: var(--text-muted); font-size: 0.75rem; margin-bottom: 4px;">Similarity Score: ${(parseFloat(match.score)*100).toFixed(1)}%</div> ${match.text}`;
+                            matchContainer.appendChild(li);
+                        });
+                    }
+
+                    loading.style.display = 'none';
+                    content.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('AI Predict Error:', error);
+                    loading.style.display = 'none';
+                    errorHtml.innerHTML = `<i class="ri-error-warning-line"></i> ${error.message}`;
+                    errorHtml.style.display = 'block';
+                }
+            });
+        }
+    });
     // Task checkbox toggle (optimistic UI + label click handling)
     function handleTaskToggleCheckbox(checkbox) {
         return async function(e) {

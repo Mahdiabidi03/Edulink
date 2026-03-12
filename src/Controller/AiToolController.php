@@ -32,7 +32,7 @@ class AiToolController extends AbstractController
     #[Route('/api/ai/process-pdf', name: 'api_ai_process_pdf', methods: ['POST'])]
     public function processPdf(Request $request): JsonResponse
     {
-        /** @var UploadedFile $file */
+        /** @var UploadedFile|null $file */
         $file = $request->files->get('pdf_file');
         $type = $request->request->get('type'); // 'quiz', 'summary', 'video_script'
 
@@ -60,9 +60,9 @@ class AiToolController extends AbstractController
                 case 'quiz':
                     $result = $this->aiService->generateQuiz($text);
                     // Clean up: remove markdown code fences, trim whitespace
-                    $result = preg_replace('/^```(?:json)?\s*/m', '', $result);
-                    $result = preg_replace('/\s*```\s*$/m', '', $result);
-                    $result = trim($result);
+                    $result = preg_replace('/^```(?:json)?\s*/m', '', (string) $result);
+                    $result = preg_replace('/\s*```\s*$/m', '', (string) $result);
+                    $result = trim((string) $result);
                     // If there's text before the JSON array, extract just the array
                     if (preg_match('/(\[[\s\S]*\])/', $result, $matches)) {
                         $result = $matches[1];
@@ -122,4 +122,41 @@ class AiToolController extends AbstractController
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
+
+    #[Route('/api/ai/save-quiz-score', name: 'api_ai_save_quiz_score', methods: ['POST'])]
+    public function saveQuizScore(
+        Request $request,
+        \Doctrine\ORM\EntityManagerInterface $em
+    ): JsonResponse {
+        /** @var \App\Entity\User|null $student */
+        $student = $this->getUser();
+        if (!$student) {
+            return new JsonResponse(['error' => 'Not authenticated'], 401);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $newScore = (float) ($data['score'] ?? 0); // e.g. 75 for 75%
+
+        if ($newScore < 0 || $newScore > 100) {
+            return new JsonResponse(['error' => 'Score must be between 0 and 100'], 400);
+        }
+
+        $enrollments = $student->getEnrollments();
+        if ($enrollments->isEmpty()) {
+            return new JsonResponse(['error' => 'No enrollments found'], 404);
+        }
+
+        // Update all enrollments with a running average
+        foreach ($enrollments as $enrollment) {
+            $current = $enrollment->getQuizAverageScore();
+            // Running average: if 0, just set. Otherwise average with new score.
+            $updated = $current > 0 ? round(($current + $newScore) / 2, 1) : $newScore;
+            $enrollment->setQuizAverageScore($updated);
+            $em->persist($enrollment);
+        }
+        $em->flush();
+
+        return new JsonResponse(['success' => true, 'quiz_average_score' => $updated ?? $newScore]);
+    }
 }
+

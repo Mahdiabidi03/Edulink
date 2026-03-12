@@ -35,7 +35,7 @@ class BadgeService
     public function checkBadges(User $user): array
     {
         $newlyAwarded = [];
-        $xp = $user->getWalletBalance() ?? 0;
+        $xp = $user->getWalletBalance();
         
         // 1. Get all available badges
         $allBadges = $this->badgeRepository->findAll();

@@ -53,7 +53,7 @@ class AuthResetController extends AbstractController
         try {
             $email = (new Email())
                 ->from('no-reply@edulink.com')
-                ->to($user->getEmail())
+                ->to((string) $user->getEmail())
                 ->subject('Your Password Reset OTP Code')
                 ->html("<p>Your OTP code is: <strong>$otp</strong>. It expires in 15 minutes.</p>");
 

@@ -24,9 +24,9 @@ class Matiere
     private ?string $name = null;
 
     #[ORM\Column(length: 20, options: ['default' => 'APPROVED'])]
-    private ?string $status = 'APPROVED';
+    private string $status = 'APPROVED';
 
-    #[ORM\ManyToOne(targetEntity: 'User', inversedBy: 'createdMatieres')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'createdMatieres')]
     #[ORM\JoinColumn(name: "creator_id", referencedColumnName: "id", nullable: true)]
     private ?User $creator = null;
 
@@ -65,7 +65,7 @@ class Matiere
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }

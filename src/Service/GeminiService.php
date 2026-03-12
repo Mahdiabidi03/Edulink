@@ -94,7 +94,7 @@ Difficulty: [level]";
         try {
             $response = $this->callGemini($prompt);
             $lines = array_filter(array_map('trim', explode("\n", $response)));
-            $suggestions = array_values(array_slice($lines, 0, 3));
+            $suggestions = array_slice($lines, 0, 3);
             return count($suggestions) >= 3 ? $suggestions : $fallback;
         } catch (\Exception $e) {
             $this->log('Suggest replies failed: ' . $e->getMessage());

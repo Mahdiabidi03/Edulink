@@ -21,10 +21,6 @@ class CoursType extends AbstractType
             ->add('title', TextType::class, [
                 'label' => 'Course Title',
                 'attr' => ['class' => 'form-control', 'placeholder' => 'e.g. Advanced Python'],
-                'constraints' => [
-                    new NotBlank(['message' => 'Course title is required']),
-                    new Length(['max' => 255, 'maxMessage' => 'Title cannot exceed {{ limit }} characters']),
-                ],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Short Description',

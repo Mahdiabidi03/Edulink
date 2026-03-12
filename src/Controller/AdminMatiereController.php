@@ -126,7 +126,9 @@ class AdminMatiereController extends AbstractController
         $cours = new Cours();
         $cours->setMatiere($matiere);
         $cours->setStatus('APPROVED'); // Admin-created = auto-approved
-        $cours->setAuthor($this->getUser());
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $cours->setAuthor($user);
         $cours->setCreatedAt(new \DateTimeImmutable());
 
         $form = $this->createForm(\App\Form\CoursType::class, $cours, [
@@ -157,7 +159,9 @@ class AdminMatiereController extends AbstractController
     {
         $matiere = new Matiere();
         $matiere->setStatus('APPROVED'); // Admin-created = auto-approved
-        $matiere->setCreator($this->getUser());
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $matiere->setCreator($user);
 
         $form = $this->createForm(MatiereType::class, $matiere);
         $form->handleRequest($request);
@@ -167,8 +171,10 @@ class AdminMatiereController extends AbstractController
             if ($imageFile) {
                 $newFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
                 try {
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    $dir = is_string($projectDir) ? $projectDir : '';
                     $imageFile->move(
-                        $this->getParameter('kernel.project_dir') . '/public/uploads/categories',
+                        $dir . '/public/uploads/categories',
                         $newFilename
                     );
                     $matiere->setImageUrl('/uploads/categories/' . $newFilename);
@@ -178,10 +184,10 @@ class AdminMatiereController extends AbstractController
             } else {
                 // Auto-generate AI image if none uploaded
                 try {
-                    $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+                    $aiUrl = $this->imageService->generateAiImageUrl((string) $matiere->getName());
                     $matiere->setImageUrl($aiUrl);
                 } catch (\Exception $e) {
-                    $matiere->setImageUrl($this->imageService->getPlaceholderUrl($matiere->getName()));
+                    $matiere->setImageUrl($this->imageService->getPlaceholderUrl((string) $matiere->getName()));
                 }
             }
             $em->persist($matiere);
@@ -211,8 +217,10 @@ class AdminMatiereController extends AbstractController
             if ($imageFile) {
                 $newFilename = uniqid() . '.' . $imageFile->getClientOriginalExtension();
                 try {
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    $dir = is_string($projectDir) ? $projectDir : '';
                     $imageFile->move(
-                        $this->getParameter('kernel.project_dir') . '/public/uploads/categories',
+                        $dir . '/public/uploads/categories',
                         $newFilename
                     );
                     $matiere->setImageUrl('/uploads/categories/' . $newFilename);
@@ -222,10 +230,10 @@ class AdminMatiereController extends AbstractController
             } elseif (!$matiere->getImageUrl()) {
                 // Auto-generate AI image if none exists and no file uploaded
                 try {
-                    $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+                    $aiUrl = $this->imageService->generateAiImageUrl((string) $matiere->getName());
                     $matiere->setImageUrl($aiUrl);
                 } catch (\Exception $e) {
-                    $matiere->setImageUrl($this->imageService->getPlaceholderUrl($matiere->getName()));
+                    $matiere->setImageUrl($this->imageService->getPlaceholderUrl((string) $matiere->getName()));
                 }
             }
             $em->flush();
@@ -243,7 +251,7 @@ class AdminMatiereController extends AbstractController
     #[Route('/{id}/delete', name: 'app_admin_category_delete', methods: ['POST'])]
     public function delete(Matiere $matiere, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $matiere->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $matiere->getId(), (string) $request->request->get('_token'))) {
             $em->remove($matiere);
             $em->flush();
 
@@ -257,7 +265,7 @@ class AdminMatiereController extends AbstractController
     public function refreshImage(Matiere $matiere, EntityManagerInterface $em): Response
     {
         try {
-            $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+            $aiUrl = $this->imageService->generateAiImageUrl((string) $matiere->getName());
             $matiere->setImageUrl($aiUrl);
             $em->flush();
             $this->addFlash('success', 'Category visual refreshed!');

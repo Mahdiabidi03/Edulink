@@ -76,17 +76,21 @@ PROMPT;
 
             // Handle different possible JSON structures
             $missions = [];
-            if (isset($content['missions'])) {
+            if (isset($content['missions']) && is_array($content['missions'])) {
                 $missions = $content['missions'];
-            } elseif (is_array($content) && count($content) > 0 && !isset($content[0])) {
-                foreach ($content as $val) {
-                    if (is_array($val)) {
-                        $missions = $val;
-                        break;
+            } elseif (is_array($content)) {
+                // If it's a sequential array [...]
+                if (isset($content[0])) {
+                    $missions = $content;
+                } else {
+                    // If it's an associative array without 'missions' key, look for any nested array
+                    foreach ($content as $val) {
+                        if (is_array($val)) {
+                            $missions = $val;
+                            break;
+                        }
                     }
                 }
-            } elseif (is_array($content) && isset($content[0])) {
-                $missions = $content;
             }
 
             if (empty($missions)) {

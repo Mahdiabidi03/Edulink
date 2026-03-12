@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+pandas
+numpy
+scikit-learn
+mysql-connector-python
+sqlalchemy
+python-dotenv
+langchain
+langchain-groq
+langchain-community
+sentence-transformers
+faiss-cpu
+scipy

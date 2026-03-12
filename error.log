@@ -1,0 +1,17 @@
+﻿System.Management.Automation.RemoteException
+Mapping
+-------
+System.Management.Automation.RemoteException
+System.Management.Automation.RemoteException
+In MappingException.php line 634:
+                           
+  Duplicate definition of  
+   column 'text' on entit  
+  y 'App\Entity\AiSentime  
+  ntLog' in a field or di  
+  scriminator column mapp  
+  ing.                     
+                           
+System.Management.Automation.RemoteException
+doctrine:schema:validate [--em EM] [--skip-mapping] [--skip-sync] [--skip-property-types]
+System.Management.Automation.RemoteException

@@ -63,6 +63,18 @@
                 <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
                     <h3 style="margin: 0 0 0.5rem; font-size: 1.25rem; font-weight: 700; color: var(--text-main); line-height: 1.3;">{{ event.title }}</h3>
                     
+                    {% if event.predictedScore is not null %}
+                        <div style="margin-bottom: 0.75rem;">
+                            {% if event.predictedScore == 0 %}
+                                <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(239, 68, 68, 0.2);"><i class="ri-bar-chart-2-line"></i> Predict: Low</span>
+                            {% elseif event.predictedScore == 1 %}
+                                <span style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(245, 158, 11, 0.2);"><i class="ri-bar-chart-2-line"></i> Predict: Medium</span>
+                            {% elseif event.predictedScore == 2 %}
+                                <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(16, 185, 129, 0.2);"><i class="ri-bar-chart-2-line"></i> Predict: High</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
                     <div style="display: flex; gap: 10px; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
                         <span><i class="ri-time-line"></i> {{ event.dateStart|date('H:i') }}</span>
                         <span>•</span>
@@ -120,10 +132,22 @@
                             </div>
                         {% endif %}
                         <h2 style="font-size: 1.75rem; margin-bottom: 0.5rem;">{{ event.title }}</h2>
-                        <div style="display: flex; justify-content: center; gap: 15px; color: var(--text-secondary); font-size: 0.9rem;">
+                        <div style="display: flex; justify-content: center; gap: 15px; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
                             <span><i class="ri-calendar-line"></i> {{ event.dateStart|date('d M Y') }}</span>
                             <span><i class="ri-time-line"></i> {{ event.dateStart|date('H:i') }} - {{ event.dateEnd|date('H:i') }}</span>
                         </div>
+
+                        {% if event.predictedScore is not null %}
+                            <div>
+                                {% if event.predictedScore == 0 %}
+                                    <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(239, 68, 68, 0.2);"><i class="ri-magic-line"></i> AI Predict: Low Success</span>
+                                {% elseif event.predictedScore == 1 %}
+                                    <span style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(245, 158, 11, 0.2);"><i class="ri-magic-line"></i> AI Predict: Medium Success</span>
+                                {% elseif event.predictedScore == 2 %}
+                                    <span style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; border: 1px solid rgba(16, 185, 129, 0.2);"><i class="ri-magic-line"></i> AI Predict: High Success</span>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div style="margin-bottom: 2rem;">

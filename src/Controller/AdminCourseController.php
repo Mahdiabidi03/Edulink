@@ -19,6 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class AdminCourseController extends AbstractController
 {
     private PaginatorInterface $paginator;
+    private CategoryImageService $imageService;
 
     public function __construct(CategoryImageService $imageService, PaginatorInterface $paginator)
     {
@@ -29,8 +30,8 @@ class AdminCourseController extends AbstractController
     #[Route('/', name: 'app_admin_courses')]
     public function index(Request $request, CoursRepository $courseRepo): Response
     {
-        $sort = $request->query->get('sort', 'c.createdAt');
-        $direction = $request->query->get('direction', 'desc');
+        $sort = (string) $request->query->get('sort', 'c.createdAt');
+        $direction = (string) $request->query->get('direction', 'desc');
 
         $query = $courseRepo->createQueryBuilder('c')
             ->orderBy($sort, $direction)
@@ -69,10 +70,10 @@ class AdminCourseController extends AbstractController
                     
                     // Auto-generate AI image
                     try {
-                        $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+                        $aiUrl = $this->imageService->generateAiImageUrl((string) $matiere->getName());
                         $matiere->setImageUrl($aiUrl);
                     } catch (\Exception $e) {
-                        $matiere->setImageUrl($this->imageService->getPlaceholderUrl($matiere->getName()));
+                        $matiere->setImageUrl($this->imageService->getPlaceholderUrl((string) $matiere->getName()));
                     }
                     
                     $em->persist($matiere);
@@ -80,7 +81,9 @@ class AdminCourseController extends AbstractController
                 $cours->setMatiere($matiere);
             }
 
-            $cours->setAuthor($this->getUser());
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $cours->setAuthor($user);
             $cours->setStatus('APPROVED'); // Auto-approved
             $cours->setCreatedAt(new \DateTimeImmutable());
 
@@ -124,7 +127,8 @@ class AdminCourseController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Course updated successfully!');
-            return $this->redirectToRoute('app_admin_category_manage', ['id' => $cours->getMatiere()->getId()]);
+            $matiereId = $cours->getMatiere() ? $cours->getMatiere()->getId() : null;
+            return $this->redirectToRoute('app_admin_category_manage', ['id' => $matiereId]);
         }
 
         return $this->render('admin/edit_course.html.twig', [
@@ -137,9 +141,9 @@ class AdminCourseController extends AbstractController
     #[Route('/{id}/delete', name: 'app_admin_course_delete', methods: ['POST'])]
     public function delete(Cours $cours, Request $request, EntityManagerInterface $em): Response
     {
-        $matiereId = $cours->getMatiere()->getId();
+        $matiereId = $cours->getMatiere() ? $cours->getMatiere()->getId() : null;
         
-        if ($this->isCsrfTokenValid('delete'.$cours->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$cours->getId(), (string) $request->request->get('_token'))) {
             $em->remove($cours);
             $em->flush();
 

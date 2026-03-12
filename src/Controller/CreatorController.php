@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Cours;
 use App\Entity\Resource;
+use App\Entity\User;
 use App\Form\CoursType;
 use App\Form\ResourceType;
 use App\Repository\CoursRepository;
@@ -66,15 +67,17 @@ class CreatorController extends AbstractController
                         $newMatiere = new \App\Entity\Matiere();
                         $newMatiere->setName($matiereName);
                         $newMatiere->setStatus('PENDING');
-                        $newMatiere->setCreator($this->getUser());
+                        /** @var User $loggedUser */
+                        $loggedUser = $this->getUser();
+                        $newMatiere->setCreator($loggedUser);
                         $newMatiere->setCreatedAt(new \DateTimeImmutable());
                         
                         // Auto-generate AI image
                         try {
-                            $aiUrl = $this->imageService->generateAiImageUrl($newMatiere->getName());
+                            $aiUrl = $this->imageService->generateAiImageUrl((string) $matiereName);
                             $newMatiere->setImageUrl($aiUrl);
                         } catch (\Exception $e) {
-                            $newMatiere->setImageUrl($this->imageService->getPlaceholderUrl($newMatiere->getName()));
+                            $newMatiere->setImageUrl($this->imageService->getPlaceholderUrl((string) $matiereName));
                         }
                         
                         $em->persist($newMatiere);
@@ -83,7 +86,9 @@ class CreatorController extends AbstractController
                 }
             }
 
-            $cours->setAuthor($this->getUser());
+            /** @var User $loggedUser */
+            $loggedUser = $this->getUser();
+            $cours->setAuthor($loggedUser);
             $cours->setStatus('PENDING');
             $cours->setCreatedAt(new \DateTimeImmutable());
             
@@ -137,8 +142,10 @@ class CreatorController extends AbstractController
             if ($file) {
                 $newFilename = uniqid().'.'.$file->getClientOriginalExtension();
                 try {
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    $dir = is_string($projectDir) ? $projectDir : '';
                     $file->move(
-                        $this->getParameter('kernel.project_dir').'/public/uploads/resources',
+                        $dir . '/public/uploads/resources',
                         $newFilename
                     );
                     $resource->setUrl('/uploads/resources/'.$newFilename);
@@ -147,7 +154,9 @@ class CreatorController extends AbstractController
                 }
             }
 
-            $resource->setAuthor($this->getUser());
+            /** @var User $loggedUser */
+            $loggedUser = $this->getUser();
+            $resource->setAuthor($loggedUser);
             $resource->setStatus('PENDING'); // Student proposals are pending
             
             $em->persist($resource);
@@ -185,8 +194,10 @@ class CreatorController extends AbstractController
             if ($imageFile) {
                 $newFilename = uniqid().'.'.$imageFile->getClientOriginalExtension();
                 try {
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    $dir = is_string($projectDir) ? $projectDir : '';
                     $imageFile->move(
-                        $this->getParameter('kernel.project_dir').'/public/uploads/categories',
+                        $dir . '/public/uploads/categories',
                         $newFilename
                     );
                     $matiere->setImageUrl('/uploads/categories/'.$newFilename);
@@ -196,13 +207,15 @@ class CreatorController extends AbstractController
             } else {
                 // Auto-generate AI image if none uploaded
                 try {
-                    $aiUrl = $this->imageService->generateAiImageUrl($matiere->getName());
+                    $aiUrl = $this->imageService->generateAiImageUrl((string) $matiere->getName());
                     $matiere->setImageUrl($aiUrl);
                 } catch (\Exception $e) {
-                    $matiere->setImageUrl($this->imageService->getPlaceholderUrl($matiere->getName()));
+                    $matiere->setImageUrl($this->imageService->getPlaceholderUrl((string) $matiere->getName()));
                 }
             }
-            $matiere->setCreator($this->getUser());
+            /** @var User $loggedUser */
+            $loggedUser = $this->getUser();
+            $matiere->setCreator($loggedUser);
             
             $em->persist($matiere);
             $em->flush();

@@ -4,8 +4,6 @@ namespace App\Service;
 
 use App\Entity\HelpRequest;
 use App\Entity\User;
-use App\Repository\SessionRepository;
-use App\Repository\ReviewRepository;
 use App\Repository\HelpRequestRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\MLService;
@@ -20,9 +18,6 @@ class SmartMatchingService
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private SessionRepository $sessionRepository,
-        private ReviewRepository $reviewRepository,
-        private HelpRequestRepository $helpRequestRepository,
         private MLService $mlService
     ) {
     }

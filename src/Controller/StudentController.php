@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Controller;
+ 
+use Smalot\PdfParser\Parser;
 
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
@@ -35,9 +37,17 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use App\Service\AiMicroservice;
 
 class StudentController extends AbstractController
 {
+    private AiMicroservice $aiMicroservice;
+
+    public function __construct(AiMicroservice $aiMicroservice)
+    {
+        $this->aiMicroservice = $aiMicroservice;
+    }
+
     #[Route('/student/dashboard', name: 'student_dashboard')]
     public function dashboard(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -75,7 +85,7 @@ class StudentController extends AbstractController
         EntityManagerInterface $entityManager,
         ReminderRepository $reminderRepository
     ): JsonResponse {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
         if (!$user) {
@@ -126,7 +136,7 @@ class StudentController extends AbstractController
         ReminderRepository $reminderRepository,
         SluggerInterface $slugger
     ): Response {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
         if (!$user) {
@@ -152,9 +162,32 @@ class StudentController extends AbstractController
             $note = $noteForm->getData();
             $note->setUser($user);
 
+            // Fetch AI generated tags and category if present in the POST request
+            $aiTags = $request->request->get('note_ai_tags');
+            if (!empty($aiTags)) {
+                // Ensure tags fit in the 255 char DB column limit
+                $note->setTag(substr((string) $aiTags, 0, 250));
+            }
+
+            $aiCategory = $request->request->get('note_ai_category');
+            if (!empty($aiCategory) && !$note->getCategory()) {
+                // The AI predicted a category, but the user didn't select one (likely because it didn't exist in their dropdown)
+                // Let's create it for them automatically
+                $catRepo = $entityManager->getRepository(\App\Entity\Category::class);
+                $existingCat = $catRepo->findOneBy(['name' => $aiCategory, 'owner' => $user]);
+                
+                if (!$existingCat) {
+                    $existingCat = new \App\Entity\Category();
+                    $existingCat->setName((string) $aiCategory);
+                    $existingCat->setOwner($user);
+                    $entityManager->persist($existingCat);
+                }
+                $note->setCategory($existingCat);
+            }
+
             // Sanitize HTML content from Quill editor (XSS prevention)
             $allowedTags = '<p><br><strong><em><u><s><ol><ul><li><h1><h2><h3><a><blockquote><pre><code><span>';
-            $note->setContent(strip_tags($note->getContent(), $allowedTags));
+            $note->setContent(strip_tags((string) $note->getContent(), $allowedTags));
             $attachmentFile = $noteForm->get('attachment')->getData();
 
             if ($attachmentFile) {
@@ -164,8 +197,10 @@ class StudentController extends AbstractController
                 $newFilename = $safeFilename . '-' . uniqid() . '.' . $attachmentFile->getClientOriginalExtension();
 
                 try {
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    $dir = is_string($projectDir) ? $projectDir : '';
                     $attachmentFile->move(
-                        $this->getParameter('kernel.project_dir') . '/public/uploads/notes',
+                        $dir . '/public/uploads/notes',
                         $newFilename
                     );
                     $note->setAttachment($newFilename);
@@ -204,13 +239,16 @@ class StudentController extends AbstractController
         }
 
         // Get filters from request
-        $query = $request->query->get('q');
+        $queryParam = $request->query->get('q');
+        $query = is_string($queryParam) ? $queryParam : null;
         $categoryId = $request->query->get('category');
 
         $notes = $noteRepository->findByUserWithFilters($user, $query, $categoryId ? (int) $categoryId : null);
         $tasks = $taskRepository->findByUserOrderedByDate($user);
         $reminders = $reminderRepository->findByUserOrderedByDate($user);
-        $userCategories = $entityManager->getRepository(\App\Entity\Category::class)->findAllOrderedByName($user);
+        /** @var \App\Repository\CategoryRepository $categoryRepo */
+        $categoryRepo = $entityManager->getRepository(\App\Entity\Category::class);
+        $userCategories = $categoryRepo->findAllOrderedByName($user);
 
         return $this->render('student/journal.html.twig', [
             'noteForm' => $noteForm->createView(),
@@ -242,7 +280,7 @@ class StudentController extends AbstractController
     #[Route('/student/wallet', name: 'student_wallet')]
     public function wallet(Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
         if (!$user) {
@@ -276,7 +314,7 @@ class StudentController extends AbstractController
                     // 1. Sender Transaction
                     $tSender = new Transaction();
                     $tSender->setUser($user);
-                    $tSender->setAmount(-$amount);
+                    $tSender->setAmount((int) (-$amount));
                     $tSender->setType('TRANSFER_SENT');
                     $tSender->setDate(new \DateTime());
 
@@ -289,7 +327,7 @@ class StudentController extends AbstractController
 
                     // 3. Update Balances
                     $user->setWalletBalance($user->getWalletBalance() - $amount);
-                    $recipient->setWalletBalance(($recipient->getWalletBalance() ?? 0) + $amount);
+                    $recipient->setWalletBalance($recipient->getWalletBalance() + $amount);
 
                     $entityManager->persist($tSender);
                     $entityManager->persist($tRecipient);
@@ -347,7 +385,7 @@ class StudentController extends AbstractController
     #[Route('/student/help-history', name: 'student_help_history')]
     public function helpHistory(): Response
     {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $this->getUser();
         if (!$user) {
             return $this->redirectToRoute('login');
@@ -367,9 +405,10 @@ class StudentController extends AbstractController
         $items = [];
         foreach ($sessions as $s) {
             $req = $s->getHelpRequest();
-            $status = $req->getStatus();
-            $reason = $req->getCloseReason();
-            $bounty = (int) ($req->getBounty() ?? 0);
+            if (!$req) continue;
+            $status = (string) $req->getStatus();
+            $reason = (string) $req->getCloseReason();
+            $bounty = (int) $req->getBounty();
 
             $isResolved = ($status === 'CLOSED' && $reason === 'RESOLVED');
             $isCancelled = ($status === 'CLOSED' && $reason === 'CANCELLED');
@@ -398,6 +437,8 @@ class StudentController extends AbstractController
             ];
         }
 
+        /** @var User $user */
+        $user = $this->getUser();
         return $this->render('student/help_history.html.twig', [
             'items' => $items,
             'stats' => $stats,
@@ -425,7 +466,7 @@ class StudentController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // Sanitize HTML content from Quill editor (XSS prevention)
             $allowedTags = '<p><br><strong><em><u><s><ol><ul><li><h1><h2><h3><a><blockquote><pre><code><span>';
-            $note->setContent(strip_tags($note->getContent(), $allowedTags));
+            $note->setContent(strip_tags((string) $note->getContent(), $allowedTags));
             $note->setUpdatedAt(new \DateTime());
             $entityManager->flush();
             $this->addFlash('success', 'Note updated successfully!');
@@ -454,6 +495,31 @@ class StudentController extends AbstractController
         $entityManager->flush();
         $this->addFlash('success', 'Note deleted successfully!');
         return $this->redirectToRoute('student_journal');
+    }
+
+    #[Route('/student/note/ai-predict', name: 'student_note_ai_predict', methods: ['POST'])]
+    public function aiPredict(Request $request): JsonResponse 
+    {
+        /** @var User|null $user */
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['success' => false, 'error' => 'Unauthorized'], 401);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $text = trim($data['text'] ?? '');
+
+        if (empty($text)) {
+            return new JsonResponse(['success' => false, 'error' => 'Text is empty'], 400);
+        }
+
+        $result = $this->aiMicroservice->predictJournal($text);
+
+        if (!$result['success']) {
+            return new JsonResponse(['success' => false, 'error' => $result['error']], 500);
+        }
+
+        return new JsonResponse($result);
     }
 
     #[Route('/student/note/{id}/export-pdf', name: 'student_note_export_pdf', methods: ['GET'])]
@@ -626,6 +692,10 @@ class StudentController extends AbstractController
 
         // Update reminder time by adding defer minutes
         $originalTime = $reminder->getReminderTime();
+        if (!$originalTime) {
+            $this->addFlash('error', 'Reminder time not set.');
+            return $this->redirectToRoute('student_journal');
+        }
         $newTime = \DateTime::createFromInterface($originalTime)
             ->modify("+{$deferMinutes} minutes");
 
@@ -724,9 +794,9 @@ class StudentController extends AbstractController
                 'message' => 'Reminder updated successfully',
                 'reminder' => [
                     'id' => $reminder->getId(),
-                    'title' => $reminder->getTitle(),
-                    'description' => $reminder->getDescription(),
-                    'reminderTime' => $reminder->getReminderTime()->format('Y-m-d H:i'),
+                    'title' => (string) $reminder->getTitle(),
+                    'description' => (string) $reminder->getDescription(),
+                    'reminderTime' => $reminder->getReminderTime() ? $reminder->getReminderTime()->format('Y-m-d H:i') : null,
                 ]
             ]);
         } catch (\ValueError $e) {
@@ -752,7 +822,7 @@ class StudentController extends AbstractController
     #[Route('/student/note/analyze-sentiment', name: 'student_note_analyze_sentiment', methods: ['POST'])]
     public function analyzeSentiment(Request $request, \App\Service\SentimentService $sentimentService): JsonResponse
     {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
         if (!$user) {
@@ -775,7 +845,7 @@ class StudentController extends AbstractController
     #[Route('/student/study-advice', name: 'student_study_advice', methods: ['GET'])]
     public function getStudyAdvice(\App\Service\StudyAdvisorService $studyAdvisorService): JsonResponse
     {
-        /** @var User $user */
+        /** @var User|null $user */
         $user = $this->getUser();
 
         if (!$user) {
@@ -784,6 +854,93 @@ class StudentController extends AbstractController
 
         $result = $studyAdvisorService->getWeeklyAdvice($user);
 
+        return new JsonResponse($result);
+    }
+
+    // ===== AI RECOMMENDATIONS & CHAT (AI Microservice) =====
+
+    #[Route('/student/api/recommendations', name: 'student_api_recommendations', methods: ['POST'])]
+    public function recommendCoursesAction(Request $request, CoursRepository $coursRepository): JsonResponse
+    {
+        $userText = $request->request->get('query') ?: $request->request->get('career_description', 'I want to learn something new');
+        
+        // Handle CV upload if present
+        /** @var UploadedFile|null $cvFile */
+        $cvFile = $request->files->get('cv_file');
+        
+        if ($cvFile) {
+            try {
+                $parser = new Parser();
+                $pdf = $parser->parseFile($cvFile->getPathname());
+                $cvText = $pdf->getText();
+                
+                if (!empty(trim($cvText))) {
+                   // Append CV text to query
+                   $userText .= "\n\nUser CV/Background:\n" . substr($cvText, 0, 5000);
+                }
+            } catch (\Exception $e) {
+                // Ignore parsing errors, proceed with description only
+            }
+        }
+        
+        // Use JSON body as fallback if not multipart
+        if (empty($userText) || $userText === 'I want to learn something new') {
+            $data = json_decode($request->getContent(), true);
+            if ($data && isset($data['query'])) {
+                $userText = $data['query'];
+            }
+        }
+
+        $result = $this->aiMicroservice->recommendCourses($userText, 10);
+        $ids = $result['recommended_course_ids'] ?? [];
+
+        if (empty($ids)) {
+            error_log("[AI DEBUG] No IDs returned from AI Microservice for query: " . $userText);
+        } else {
+            error_log("[AI DEBUG] IDs returned: " . implode(',', $ids));
+        }
+        
+        $courses = [];
+        if (!empty($ids)) {
+            $courseEntities = $coursRepository->findBy(['id' => $ids]);
+            error_log("[AI DEBUG] Entities found in DB: " . count($courseEntities));
+            // Sort them to match AI's ranking
+            usort($courseEntities, function($a, $b) use ($ids) {
+                return (int)array_search($a->getId(), $ids) <=> (int)array_search($b->getId(), $ids);
+            });
+
+            foreach ($courseEntities as $c) {
+                $matiere = $c->getMatiere();
+                $courses[] = [
+                    'id' => $c->getId(),
+                    'title' => (string) $c->getTitle(),
+                    'description' => substr((string) $c->getDescription(), 0, 80) . '...',
+                    'xp' => (int) $c->getXp(),
+                    'level' => (string) $c->getLevel(),
+                    'category' => $matiere ? (string) $matiere->getName() : 'Uncategorized',
+                    'image' => ($matiere && $matiere->getImageUrl()) ? $matiere->getImageUrl() : 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=400',
+                    'url' => $this->generateUrl('app_student_course_detail', ['id' => $c->getId()])
+                ];
+            }
+        }
+        
+        return new JsonResponse(['courses' => $courses]);
+    }
+
+    #[Route('/student/api/chat', name: 'student_api_chat', methods: ['POST'])]
+    public function chatAction(Request $request): JsonResponse
+    {
+        /** @var User|null $user */
+        $user = $this->getUser();
+        $data = json_decode($request->getContent(), true);
+        $message = $data['message'] ?? '';
+        
+        if (!$user) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $result = $this->aiMicroservice->chat((string) $message, (int) $user->getId());
+        
         return new JsonResponse($result);
     }
 }

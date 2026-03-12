@@ -64,7 +64,7 @@ class ContextService
         $context .= "\n";
 
         // 4. Challenges
-        $userChallenges = method_exists($user, 'getUserChallenges') ? $user->getUserChallenges() : [];
+        $userChallenges = $user->getUserChallenges();
         $context .= "- Challenges (" . count($userChallenges) . " total): " . (count($userChallenges) === 0 ? "No challenges joined yet." : "");
         foreach ($userChallenges as $uc) {
             $challenge = $uc->getChallenge();
@@ -94,7 +94,7 @@ class ContextService
         $tasks = $user->getTasks();
         $context .= "- Personal Tasks (" . count($tasks) . " total): " . (count($tasks) === 0 ? "No personal tasks." : "");
         foreach ($tasks as $task) {
-            $status = method_exists($task, 'isCompleted') && $task->isCompleted() ? 'Done' : 'Pending';
+            $status = $task->isCompleted() ? 'Done' : 'Pending';
             $context .= "\n  * [$status] " . $task->getTitle();
         }
         $context .= "\n";

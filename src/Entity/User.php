@@ -85,6 +85,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: UserMatiereStat::class, mappedBy: 'user')]
     private Collection $userMatiereStats;
 
+    /**
+     * @var Collection<int, AiSentimentLog>
+     */
+    #[ORM\OneToMany(targetEntity: AiSentimentLog::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $aiSentimentLogs;
+
     public function __construct()
     {
         $this->userBadges = new ArrayCollection();
@@ -103,6 +109,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->reservations = new ArrayCollection();
         $this->userChallenges = new ArrayCollection();
         $this->userMatiereStats = new ArrayCollection();
+        $this->aiSentimentLogs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -312,7 +319,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Matiere>
      */
-    #[ORM\OneToMany(targetEntity: 'Matiere', mappedBy: 'creator')]
+    #[ORM\OneToMany(targetEntity: Matiere::class, mappedBy: 'creator')]
     private Collection $createdMatieres;
 
     /**
@@ -540,7 +547,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Task>
+     * @return Collection<int, PersonalTask>
      */
     public function getTasks(): Collection
     {
@@ -623,5 +630,51 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->isVerified = $isVerified;
         return $this;
+    }
+
+    /**
+     * @return Collection<int, AiSentimentLog>
+     */
+    public function getAiSentimentLogs(): Collection
+    {
+        return $this->aiSentimentLogs;
+    }
+
+    public function addAiSentimentLog(AiSentimentLog $aiSentimentLog): static
+    {
+        if (!$this->aiSentimentLogs->contains($aiSentimentLog)) {
+            $this->aiSentimentLogs->add($aiSentimentLog);
+            $aiSentimentLog->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAiSentimentLog(AiSentimentLog $aiSentimentLog): static
+    {
+        if ($this->aiSentimentLogs->removeElement($aiSentimentLog)) {
+            // set the owning side to null (unless already changed)
+            if ($aiSentimentLog->getUser() === $this) {
+                $aiSentimentLog->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UserChallenge>
+     */
+    public function getUserChallenges(): Collection
+    {
+        return $this->userChallenges;
+    }
+
+    /**
+     * @return Collection<int, UserMatiereStat>
+     */
+    public function getUserMatiereStats(): Collection
+    {
+        return $this->userMatiereStats;
     }
 }

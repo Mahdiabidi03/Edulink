@@ -90,7 +90,7 @@ final class EventController extends AbstractController
     }
 
     #[Route('/events/new', name: 'app_event_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, \App\Service\PredictionService $predictionService): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
@@ -114,8 +114,8 @@ final class EventController extends AbstractController
             return $this->redirectToRoute('app_event_index');
         }
 
-        $dateStart = new \DateTime($dateStartRaw);
-        $dateEnd = new \DateTime($dateEndRaw);
+        $dateStart = new \DateTime((string) $dateStartRaw);
+        $dateEnd = new \DateTime((string) $dateEndRaw);
 
         if ($dateEnd <= $dateStart) {
             $this->addFlash('error', 'End date must be after start date.');
@@ -127,7 +127,9 @@ final class EventController extends AbstractController
         }
 
         $event = new Event();
-        $event->setOrganizer($this->getUser());
+        /** @var \App\Entity\User $loggedUser */
+        $loggedUser = $this->getUser();
+        $event->setOrganizer($loggedUser);
         $event->setTitle($title);
         $event->setDescription($description);
         $event->setDateStart($dateStart);
@@ -142,7 +144,8 @@ final class EventController extends AbstractController
             $event->setMeetLink($meetLink);
             $event->setLocation(null);
         } else {
-            $event->setLocation($request->request->get('location'));
+            $locationValue = $request->request->get('location');
+            $event->setLocation(is_scalar($locationValue) ? (string) $locationValue : null);
         }
 
         // --- Image upload with validation ---
@@ -162,7 +165,21 @@ final class EventController extends AbstractController
         $entityManager->persist($event);
         $entityManager->flush();
 
-        $this->addFlash('success', 'Event created successfully!');
+        // --- Call Python ML API ---
+        $predictedScore = $predictionService->predictSuccess($event);
+        $event->setPredictedScore($predictedScore);
+        $entityManager->flush();
+        
+        if ($predictedScore === 0) {
+            $this->addFlash('error', 'Événement créé. Succès prédit : Faible');
+        } elseif ($predictedScore === 1) {
+            $this->addFlash('warning', 'Événement créé. Succès prédit : Moyen');
+        } elseif ($predictedScore === 2) {
+            $this->addFlash('success', 'Événement créé. Succès prédit : Fort');
+        } else {
+            $this->addFlash('success', 'Event created successfully!'); // Fallback
+        }
+
         return $this->redirectToRoute('app_event_index');
     }
 
@@ -203,10 +220,10 @@ final class EventController extends AbstractController
         $dateStartRaw = $request->request->get('dateStart');
         $dateEndRaw = $request->request->get('dateEnd');
         if ($dateStartRaw) {
-            $event->setDateStart(new \DateTime($dateStartRaw));
+            $event->setDateStart(new \DateTime((string) $dateStartRaw));
         }
         if ($dateEndRaw) {
-            $event->setDateEnd(new \DateTime($dateEndRaw));
+            $event->setDateEnd(new \DateTime((string) $dateEndRaw));
         }
 
         $isOnline = $request->request->get('isOnline') === 'on';
@@ -217,7 +234,8 @@ final class EventController extends AbstractController
             }
             $event->setLocation(null);
         } else {
-            $event->setLocation($request->request->get('location'));
+            $locationValue = $request->request->get('location');
+            $event->setLocation(is_scalar($locationValue) ? (string) $locationValue : null);
         }
 
         $imageFile = $request->files->get('image');
@@ -228,7 +246,7 @@ final class EventController extends AbstractController
                 return $this->redirectToRoute('app_event_edit', ['id' => $event->getId()]);
             }
             if ($event->getImage()) {
-                $oldPath = $this->getParameter('events_images_directory') . '/' . $event->getImage();
+                $oldPath = (string) $this->getParameter('events_images_directory') . '/' . $event->getImage();
                 if (file_exists($oldPath)) {
                     @unlink($oldPath);
                 }
@@ -253,10 +271,10 @@ final class EventController extends AbstractController
             return $this->redirectToRoute('app_event_index');
         }
 
-        if ($this->isCsrfTokenValid('delete' . $event->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $event->getId(), (string) $request->request->get('_token'))) {
             // Remove image file
             if ($event->getImage()) {
-                $path = $this->getParameter('events_images_directory') . '/' . $event->getImage();
+                $path = (string) $this->getParameter('events_images_directory') . '/' . $event->getImage();
                 if (file_exists($path)) {
                     @unlink($path);
                 }
@@ -296,7 +314,9 @@ final class EventController extends AbstractController
         }
 
         $reservation = new Reservation();
-        $reservation->setUser($user);
+        /** @var \App\Entity\User $loggedUser */
+        $loggedUser = $this->getUser();
+        $reservation->setUser($loggedUser);
         $reservation->setEvent($event);
         $reservation->setReservedAt(new \DateTime());
 
@@ -309,7 +329,7 @@ final class EventController extends AbstractController
 
     // --- Private Helpers ---
 
-    private function validateImage($file): ?string
+    private function validateImage(\Symfony\Component\HttpFoundation\File\UploadedFile $file): ?string
     {
         if (!$file->isValid()) {
             return 'Image upload failed: ' . $file->getErrorMessage();
@@ -327,14 +347,14 @@ final class EventController extends AbstractController
         return null;
     }
 
-    private function uploadImage($file): ?string
+    private function uploadImage(\Symfony\Component\HttpFoundation\File\UploadedFile $file): ?string
     {
         $ext = strtolower($file->getClientOriginalExtension());
         $newFilename = uniqid('event_', true) . '.' . $ext;
 
         try {
             $file->move(
-                $this->getParameter('events_images_directory'),
+                (string) $this->getParameter('events_images_directory'),
                 $newFilename
             );
             return $newFilename;

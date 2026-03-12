@@ -24,9 +24,9 @@
                     <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0;">Test your knowledge with custom-generated questions.</p>
                 </div>
 
-                <div class="tool-option" onclick="selectTool('video_script', this)" style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                <div class="tool-option" onclick="selectTool('video_script', this)" style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;">
                     <div style="font-weight: 600; display: flex; align-items: center; gap: 10px;">
-                        <i data-lucide="clapperboard" style="color: var(--success); width: 20px; height: 20px;"></i> Video Script Gen
+                        <i data-lucide="video" style="color: var(--warning); width: 20px; height: 20px;"></i> Video Script
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0.5rem 0 0;">Generate a professional production script with scenes and narration.</p>
                 </div>
@@ -72,12 +72,14 @@
                     </p>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
 <script>
 let currentTool = 'summary';
+let quizState = { total: 0, answered: 0, correct: 0 };
 
 function selectTool(tool, element) {
     currentTool = tool;
@@ -103,6 +105,9 @@ function selectTool(tool, element) {
     element.classList.add('active');
     
     document.getElementById('toolTitle').innerText = element.querySelector('div').innerText;
+
+    // All tools now use the upload section
+    document.getElementById('uploadSection').style.display = 'block';
 }
 
 function handleFileSelect(input) {
@@ -186,7 +191,6 @@ async function processPdf() {
         document.getElementById('uploadSection').style.display = 'block';
     }
 }
-
 function renderScript(text) {
     let formatted = marked.parse(text);
     // Custom highlights for script components
@@ -230,6 +234,7 @@ function renderQuiz(questions) {
     
     document.getElementById('resultContent').innerHTML = html;
     if (window.lucide) lucide.createIcons();
+    quizState = { total: qArray.length, answered: 0, correct: 0 };
 }
 
 function checkAnswer(element, qIndex, selectedIdx, correctIdx) {
@@ -238,8 +243,10 @@ function checkAnswer(element, qIndex, selectedIdx, correctIdx) {
     
     parent.classList.add('answered');
     const options = parent.querySelectorAll('.quiz-option');
+    quizState.answered++;
     
     if (selectedIdx === correctIdx) {
+        quizState.correct++;
         element.style.borderColor = '#10b981';
         element.style.background = 'rgba(16, 185, 129, 0.1)';
         element.querySelector('.status-icon').innerHTML = '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'; 
@@ -268,6 +275,27 @@ function checkAnswer(element, qIndex, selectedIdx, correctIdx) {
         const correctOpt = options[correctIdx];
         correctOpt.style.borderColor = '#10b981';
         correctOpt.style.boxShadow = '0 0 15px rgba(16, 185, 129, 0.2)';
+    }
+
+    // When all questions answered, save score to server
+    if (quizState.answered === quizState.total && quizState.total > 0) {
+        const pct = Math.round((quizState.correct / quizState.total) * 100);
+        fetch('/api/ai/save-quiz-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ score: pct })
+        }).then(r => r.json()).then(data => {
+            if (data.success && window.Swal) {
+                Swal.fire({
+                    title: `Quiz Complete! Score: ${pct}%`,
+                    text: `You answered ${quizState.correct}/${quizState.total} correctly.`,
+                    icon: pct >= 60 ? 'success' : 'info',
+                    background: '#0f172a',
+                    color: '#fff',
+                    confirmButtonText: 'Great!'
+                });
+            }
+        }).catch(() => {});
     }
 }
 

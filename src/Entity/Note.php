@@ -56,8 +56,7 @@ class Note
     #[ORM\JoinColumn(nullable: true)]
     private ?Category $category = null;
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
-    #[Assert\Choice(choices: Note::ALLOWED_TAGS, message: 'Choose a valid journal category.')]
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $tag = null;
 
     public function __construct()

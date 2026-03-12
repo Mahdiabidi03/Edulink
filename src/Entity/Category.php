@@ -28,7 +28,7 @@ class Category
     private ?string $name = null;
 
     #[ORM\Column(type: 'string', length: 20)]
-    private ?string $color = '#000000';
+    private string $color = '#000000';
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]

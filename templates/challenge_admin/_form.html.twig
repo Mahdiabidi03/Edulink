@@ -84,7 +84,7 @@
       <i data-lucide="save"></i> {{ button_label|default('Save') }}
     </button>
   </div>
-</div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -247,4 +247,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+{% do form.tasks.setRendered %}
 {{ form_end(form) }}

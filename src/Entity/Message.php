@@ -40,7 +40,7 @@ class Message
     private ?User $sender = null;
 
     #[ORM\Column]
-    private ?bool $isToxic = false;
+    private bool $isToxic = false;
 
     #[Vich\UploadableField(mapping: 'chat_attachments', fileNameProperty: 'attachmentName', size: 'attachmentSize')]
     #[Assert\File(
@@ -141,7 +141,7 @@ class Message
         return $this;
     }
 
-    public function isIsToxic(): ?bool
+    public function isIsToxic(): bool
     {
         return $this->isToxic;
     }

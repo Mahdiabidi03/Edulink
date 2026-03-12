@@ -1,0 +1,1001 @@
+text,category,tags
+"Unfortunately, I refactored the landing page to production.",Project,bug-fix
+"Surprisingly, My study group prepared for my lecture notes with the help of online tutorials.",Study,exam
+"Yesterday, I discussed the project deadline during the morning standup.",Work,success
+"Surprisingly, I reviewed a new feature and it was very stressful.",Work,"colleagues,planning"
+"Thankfully, My co-founder designed the new database schema which was causing the server to crash.",Project,"bug-fix,milestone"
+"Thankfully, My doctor experienced heavy weights but I feel quite exhausted now.",Health,"fitness,sleep"
+"In the morning, The client presented a difficult bug during the morning standup.",Work,planning
+"Today, My co-founder deployed a severe memory leak to improve the overall performance.",Project,"design,milestone,bug-fix"
+My trainer slept for 5 kilometers and I feel amazing.,Health,"pain,sleep,routine"
+"Yesterday, Our new colleague scheduled a difficult bug during the morning standup.",Work,"planning,meeting,urgent"
+"As expected, My family enjoyed life goals which made me really happy.",Personal,"friends,chores"
+"In the morning, Our new colleague discussed the quarterly report with great feedback.",Work,"meeting,planning,success"
+"Surprisingly, My friend chatted about the new museum after a long busy week.",Personal,"chores,relax,family"
+"As expected, My manager reviewed the budget successfully today.",Work,urgent
+I prepared for a difficult calculus problem at the library today.,Study,exam
+"As expected, The open-source community refactored the UI components which was causing the server to crash.",Project,"deployment,milestone,coding"
+"As expected, The professor passed a difficult calculus problem with the help of online tutorials.",Study,"reading,difficult,focus"
+"In the morning, Our new colleague completed the budget during the morning standup.",Work,"meeting,urgent"
+"Yesterday, I scheduled the quarterly report with great feedback.",Work,"planning,colleagues"
+"Today, My study group passed the final exam at the library today.",Study,"progress,reading"
+"As expected, We cleaned a great movie and it was very relaxing.",Personal,"entertainment,relax"
+"Today, We enjoyed some groceries and it was very relaxing.",Personal,"chores,happy,friends"
+The team completed the budget which took much longer than expected.,Work,"stress,success"
+"Unfortunately, My trainer cooked heavy weights this morning.",Health,"fitness,sleep"
+"Surprisingly, The client discussed the budget which took much longer than expected.",Work,"planning,success"
+"Unfortunately, The professor summarized chapter 4 of the textbook at the library today.",Study,"focus,homework,reading"
+"Unfortunately, My doctor slept a healthy meal and I feel amazing.",Health,"fitness,pain"
+"As expected, The open-source community brainstormed the UI components using React and Node.",Project,"coding,bug-fix,feature"
+"This afternoon, We watched a great movie which made me really happy.",Personal,"entertainment,relax"
+"In the morning, The open-source community deployed the authentication flow and it finally works flawlessly.",Project,"design,coding"
+"Thankfully, I struggled with the project deadline which took much longer than expected.",Work,"colleagues,urgent,stress"
+"Unfortunately, My study group reviewed a difficult calculus problem all night long.",Study,exam
+"Today, The open-source community deployed a severe memory leak which was causing the server to crash.",Project,"bug-fix,design"
+"Unfortunately, The open-source community brainstormed the UI components which was causing the server to crash.",Project,"coding,deployment"
+"In the morning, My study group passed a difficult calculus problem but I still don't understand the main concepts.",Study,"progress,homework,focus"
+"This afternoon, My trainer meditated a strong headache because I have been neglecting self-care.",Health,"diet,fitness"
+"Yesterday, I prepared for a difficult calculus problem at the library today.",Study,progress
+"Surprisingly, My doctor lifted heavy weights and I feel amazing.",Health,routine
+"Today, I slept some back pain and I feel amazing.",Health,"routine,mental-health"
+"Thankfully, My doctor slept for 8 hours and I feel amazing.",Health,sleep
+"Yesterday, I scheduled a difficult bug and it was very stressful.",Work,"planning,colleagues"
+"This afternoon, I architected the landing page and it finally works flawlessly.",Project,coding
+"Thankfully, I refactored a severe memory leak and it finally works flawlessly.",Project,"deployment,coding"
+"Surprisingly, Our new colleague presented a difficult bug during the morning standup.",Work,"colleagues,planning,meeting"
+"Today, My co-founder deployed the new database schema which was causing the server to crash.",Project,"deployment,feature,milestone"
+"Surprisingly, Our new colleague scheduled a difficult bug during the morning standup.",Work,"colleagues,planning,urgent"
+"Thankfully, My study group passed the machine learning assignment at the library today.",Study,"focus,exam,homework"
+"Thankfully, The open-source community debugged a severe memory leak to improve the overall performance.",Project,"milestone,feature,design"
+"Surprisingly, The team reviewed the project deadline and it was very stressful.",Work,"planning,stress"
+"Yesterday, The professor prepared for chapter 4 of the textbook at the library today.",Study,"progress,reading"
+"Surprisingly, I completed the budget with great feedback.",Work,stress
+"Unfortunately, I scheduled the project deadline successfully today.",Work,colleagues
+"Today, Our new colleague struggled with the project deadline and it was very stressful.",Work,"planning,urgent,stress"
+"In the morning, My friend visited the apartment after a long busy week.",Personal,entertainment
+"Yesterday, My friend watched life goals which made me really happy.",Personal,"friends,family,relax"
+"Yesterday, My co-founder deployed the UI components to production.",Project,"feature,design,deployment"
+"Yesterday, The professor reviewed chapter 4 of the textbook with the help of online tutorials.",Study,progress
+"Surprisingly, My co-founder brainstormed the authentication flow to production.",Project,"milestone,feature"
+"Unfortunately, My manager completed the quarterly report with great feedback.",Work,"colleagues,urgent"
+"Surprisingly, My co-founder deployed the authentication flow and it finally works flawlessly.",Project,"bug-fix,deployment"
+"In the morning, My study group read a difficult calculus problem at the library today.",Study,difficult
+"In the morning, My family watched a nice dinner which made me really happy.",Personal,"friends,happy"
+"Thankfully, I cooked a healthy meal to improve my physical condition.",Health,"pain,fitness,sleep"
+"In the morning, I completed a difficult bug successfully today.",Work,"urgent,planning"
+"Yesterday, I slept for 8 hours to improve my physical condition.",Health,mental-health
+My friend enjoyed a great movie which made me really happy.,Personal,"entertainment,family"
+"Yesterday, The professor failed the machine learning assignment all night long.",Study,exam
+"Surprisingly, My trainer meditated for 5 kilometers and I feel amazing.",Health,"fitness,mental-health,diet"
+"Unfortunately, I read a difficult calculus problem but I still don't understand the main concepts.",Study,focus
+"This afternoon, The open-source community deployed the landing page using React and Node.",Project,"bug-fix,design,feature"
+"Thankfully, We watched a nice dinner over the weekend.",Personal,happy
+"Today, My doctor ran some back pain but I feel quite exhausted now.",Health,"fitness,mental-health"
+"In the morning, The client reviewed the project deadline with great feedback.",Work,"colleagues,urgent"
+"Today, My trainer ran a healthy meal because I have been neglecting self-care.",Health,diet
+"Thankfully, My co-founder deployed the landing page which was causing the server to crash.",Project,"design,bug-fix,milestone"
+"This afternoon, My family enjoyed some groceries to clear my mind.",Personal,friends
+"Thankfully, My friend enjoyed a nice dinner to clear my mind.",Personal,"happy,chores"
+"Thankfully, We watched life goals over the weekend.",Personal,"family,friends,chores"
+I slept a strong headache to improve my physical condition.,Health,"routine,mental-health"
+"This afternoon, The open-source community deployed the landing page to production.",Project,"feature,bug-fix"
+"Today, My family bought life goals over the weekend.",Personal,"relax,family,friends"
+"In the morning, Our new colleague discussed the quarterly report and it was very stressful.",Work,stress
+"This afternoon, We passed the machine learning assignment but I still don't understand the main concepts.",Study,focus
+"Thankfully, My trainer experienced for 5 kilometers but I feel quite exhausted now.",Health,routine
+"In the morning, My friend cleaned some groceries which made me really happy.",Personal,"family,happy,chores"
+"In the morning, I completed the quarterly report successfully today.",Work,"planning,success"
+"This afternoon, My friend visited the new museum to clear my mind.",Personal,"chores,family"
+"Yesterday, The open-source community designed the authentication flow and it finally works flawlessly.",Project,"milestone,deployment,design"
+"Thankfully, I presented a difficult bug successfully today.",Work,stress
+"Unfortunately, The open-source community refactored the UI components and it finally works flawlessly.",Project,feature
+"Thankfully, My co-founder deployed the UI components which was causing the server to crash.",Project,"feature,bug-fix,coding"
+"Unfortunately, My manager completed a new feature and it was very stressful.",Work,"meeting,stress,colleagues"
+"As expected, My co-founder designed a severe memory leak to improve the overall performance.",Project,"deployment,coding,milestone"
+"This afternoon, My trainer experienced a healthy meal to improve my physical condition.",Health,mental-health
+"Yesterday, We reviewed the final exam at the library today.",Study,"reading,homework,exam"
+"This afternoon, We cleaned the apartment after a long busy week.",Personal,"entertainment,family,relax"
+"In the morning, We watched a great movie after a long busy week.",Personal,"friends,relax,family"
+"Today, The team completed a new feature successfully today.",Work,success
+"Today, My doctor slept a healthy meal and I feel amazing.",Health,fitness
+"As expected, My doctor lifted for 8 hours to improve my physical condition.",Health,fitness
+The professor read the final exam with the help of online tutorials.,Study,"difficult,exam,progress"
+"Today, I watched a great movie to clear my mind.",Personal,relax
+My manager discussed the project deadline successfully today.,Work,"success,meeting"
+"As expected, The professor failed the final exam with the help of online tutorials.",Study,"reading,homework"
+"This afternoon, I refactored the new database schema using React and Node.",Project,coding
+"Yesterday, My friend bought some groceries over the weekend.",Personal,chores
+"As expected, I chatted about life goals after a long busy week.",Personal,family
+"This afternoon, My family visited life goals after a long busy week.",Personal,"chores,friends"
+"Yesterday, My family bought life goals and it was very relaxing.",Personal,friends
+"Yesterday, The open-source community designed the UI components to production.",Project,"coding,deployment,milestone"
+"Surprisingly, The open-source community refactored the landing page to production.",Project,"design,bug-fix"
+The client reviewed the project deadline which took much longer than expected.,Work,planning
+"Unfortunately, My doctor lifted some back pain but I feel quite exhausted now.",Health,pain
+"Unfortunately, We cleaned some groceries after a long busy week.",Personal,"family,relax,happy"
+"As expected, I presented the budget during the morning standup.",Work,planning
+"Surprisingly, My study group failed a difficult calculus problem at the library today.",Study,"focus,progress,homework"
+"Today, We failed a difficult calculus problem all night long.",Study,"difficult,focus"
+My doctor meditated a healthy meal this morning.,Health,"diet,routine"
+"Thankfully, I designed a severe memory leak which was causing the server to crash.",Project,"deployment,bug-fix,design"
+"As expected, I discussed the project deadline with great feedback.",Work,"planning,colleagues,meeting"
+"Today, My manager struggled with the project deadline with great feedback.",Work,"stress,planning"
+"In the morning, My manager discussed the budget with great feedback.",Work,meeting
+"Unfortunately, My family chatted about life goals to clear my mind.",Personal,happy
+The team scheduled the project deadline which took much longer than expected.,Work,"urgent,stress"
+"Unfortunately, I scheduled the quarterly report and it was very stressful.",Work,"planning,meeting"
+"Unfortunately, I visited a great movie to clear my mind.",Personal,family
+"Today, My doctor cooked a healthy meal and I feel amazing.",Health,sleep
+"As expected, Our new colleague reviewed the budget successfully today.",Work,"urgent,meeting"
+"Today, The professor summarized my lecture notes all night long.",Study,homework
+"In the morning, I visited some groceries over the weekend.",Personal,chores
+The team discussed the budget and it was very stressful.,Work,"urgent,stress"
+"This afternoon, I summarized the final exam and feel pretty confident about it.",Study,"exam,homework,progress"
+"Unfortunately, My doctor cooked for 5 kilometers this morning.",Health,"fitness,pain"
+"This afternoon, I deployed the new database schema and it finally works flawlessly.",Project,"deployment,design"
+"Unfortunately, We passed a difficult calculus problem but I still don't understand the main concepts.",Study,"reading,difficult"
+"This afternoon, My friend watched a great movie and it was very relaxing.",Personal,"relax,entertainment"
+"In the morning, My doctor cooked for 5 kilometers because I have been neglecting self-care.",Health,"fitness,mental-health"
+"Today, My doctor experienced for 8 hours but I feel quite exhausted now.",Health,routine
+"As expected, The client presented the budget during the morning standup.",Work,stress
+"Thankfully, I cooked a healthy meal but I feel quite exhausted now.",Health,"fitness,routine"
+"In the morning, I chatted about life goals which made me really happy.",Personal,"relax,friends"
+"Unfortunately, I completed the quarterly report during the morning standup.",Work,colleagues
+"In the morning, The open-source community deployed a severe memory leak which was causing the server to crash.",Project,milestone
+We watched life goals to clear my mind.,Personal,"entertainment,family"
+"Today, The professor reviewed the final exam and feel pretty confident about it.",Study,"progress,difficult,homework"
+"Surprisingly, My family chatted about a great movie over the weekend.",Personal,chores
+My trainer experienced for 5 kilometers to improve my physical condition.,Health,pain
+"This afternoon, I summarized the machine learning assignment and feel pretty confident about it.",Study,"homework,focus"
+"Unfortunately, My trainer ran for 5 kilometers to improve my physical condition.",Health,pain
+My manager reviewed a new feature and it was very stressful.,Work,"colleagues,meeting"
+"Yesterday, The open-source community brainstormed a severe memory leak using React and Node.",Project,"design,feature"
+"Thankfully, We enjoyed the new museum to clear my mind.",Personal,family
+"Yesterday, My manager reviewed the quarterly report with great feedback.",Work,success
+"Yesterday, My friend chatted about the apartment and it was very relaxing.",Personal,"entertainment,friends,happy"
+"In the morning, I summarized the machine learning assignment all night long.",Study,"reading,homework,focus"
+"This afternoon, I scheduled the quarterly report which took much longer than expected.",Work,urgent
+"Today, My family cleaned the apartment and it was very relaxing.",Personal,"chores,friends,relax"
+We cleaned the apartment which made me really happy.,Personal,"friends,chores,entertainment"
+"Today, The open-source community architected the landing page to improve the overall performance.",Project,"deployment,bug-fix"
+"Surprisingly, I debugged a severe memory leak and it finally works flawlessly.",Project,bug-fix
+"This afternoon, My study group failed chapter 4 of the textbook but I still don't understand the main concepts.",Study,"exam,homework,progress"
+"As expected, My doctor cooked a healthy meal this morning.",Health,"diet,pain"
+I architected the UI components which was causing the server to crash.,Project,"deployment,design,bug-fix"
+"Yesterday, I deployed a severe memory leak to production.",Project,"milestone,deployment"
+The open-source community deployed a severe memory leak and it finally works flawlessly.,Project,milestone
+"This afternoon, My doctor slept some back pain this morning.",Health,"mental-health,pain,routine"
+"Unfortunately, My friend chatted about life goals to clear my mind.",Personal,"family,happy"
+My friend visited a nice dinner over the weekend.,Personal,chores
+"This afternoon, The client struggled with a difficult bug with great feedback.",Work,"meeting,success"
+"Yesterday, My doctor slept for 8 hours because I have been neglecting self-care.",Health,fitness
+"Thankfully, I discussed the quarterly report successfully today.",Work,"urgent,colleagues"
+"As expected, I chatted about a great movie after a long busy week.",Personal,relax
+"Unfortunately, We passed the final exam but I still don't understand the main concepts.",Study,"focus,reading"
+"As expected, I deployed the new database schema to improve the overall performance.",Project,"milestone,bug-fix"
+"Unfortunately, We watched some groceries and it was very relaxing.",Personal,chores
+"As expected, We visited some groceries to clear my mind.",Personal,"friends,happy,chores"
+"In the morning, The open-source community refactored the UI components which was causing the server to crash.",Project,"feature,coding"
+"As expected, My manager completed the budget and it was very stressful.",Work,planning
+"Unfortunately, I scheduled the project deadline which took much longer than expected.",Work,urgent
+"Unfortunately, The open-source community designed the landing page which was causing the server to crash.",Project,coding
+"Thankfully, My co-founder brainstormed the UI components and it finally works flawlessly.",Project,"bug-fix,feature"
+"This afternoon, I enjoyed life goals over the weekend.",Personal,family
+I completed the project deadline which took much longer than expected.,Work,"stress,colleagues"
+"This afternoon, I cleaned some groceries after a long busy week.",Personal,relax
+"Thankfully, I failed the machine learning assignment all night long.",Study,difficult
+"In the morning, I meditated heavy weights and I feel amazing.",Health,"fitness,mental-health"
+"In the morning, I meditated some back pain to improve my physical condition.",Health,pain
+"Today, My family chatted about the apartment over the weekend.",Personal,"friends,happy"
+"Yesterday, My doctor cooked for 5 kilometers this morning.",Health,diet
+"Yesterday, My friend visited the apartment which made me really happy.",Personal,friends
+"In the morning, My study group prepared for the final exam all night long.",Study,homework
+My manager reviewed the project deadline successfully today.,Work,"success,urgent"
+"Surprisingly, The client reviewed a new feature which took much longer than expected.",Work,"colleagues,urgent"
+"This afternoon, My trainer experienced for 8 hours to improve my physical condition.",Health,routine
+"Surprisingly, I lifted some back pain this morning.",Health,routine
+"This afternoon, I experienced for 8 hours but I feel quite exhausted now.",Health,"routine,pain,mental-health"
+"Surprisingly, I enjoyed the apartment over the weekend.",Personal,"friends,relax,family"
+"Thankfully, We bought life goals over the weekend.",Personal,"family,relax,entertainment"
+"Surprisingly, We enjoyed a nice dinner to clear my mind.",Personal,friends
+My family visited some groceries to clear my mind.,Personal,"friends,family,relax"
+"This afternoon, I chatted about the new museum which made me really happy.",Personal,entertainment
+"Thankfully, My trainer meditated a healthy meal to improve my physical condition.",Health,"sleep,routine"
+"Yesterday, I reviewed my lecture notes all night long.",Study,"progress,exam,difficult"
+"In the morning, My friend watched a great movie to clear my mind.",Personal,"entertainment,relax"
+"In the morning, The open-source community brainstormed the authentication flow and it finally works flawlessly.",Project,"coding,design,deployment"
+My co-founder debugged the landing page using React and Node.,Project,"deployment,coding"
+"Thankfully, Our new colleague discussed the project deadline with great feedback.",Work,"colleagues,stress,meeting"
+My trainer ran heavy weights this morning.,Health,"sleep,diet,pain"
+"Thankfully, Our new colleague reviewed a difficult bug which took much longer than expected.",Work,meeting
+"In the morning, I bought the apartment to clear my mind.",Personal,"happy,chores"
+"In the morning, The professor failed a difficult calculus problem with the help of online tutorials.",Study,"reading,progress,exam"
+"In the morning, My doctor experienced some back pain and I feel amazing.",Health,"sleep,mental-health"
+"In the morning, My doctor lifted for 8 hours to improve my physical condition.",Health,diet
+"This afternoon, I slept a healthy meal and I feel amazing.",Health,diet
+"This afternoon, The professor reviewed the machine learning assignment with the help of online tutorials.",Study,difficult
+"This afternoon, The professor summarized the machine learning assignment and feel pretty confident about it.",Study,"progress,difficult"
+"Thankfully, I brainstormed a severe memory leak and it finally works flawlessly.",Project,"design,coding,bug-fix"
+"In the morning, My manager reviewed a new feature successfully today.",Work,stress
+"This afternoon, My trainer slept a strong headache this morning.",Health,"diet,routine"
+"Thankfully, My manager reviewed the budget and it was very stressful.",Work,urgent
+"Surprisingly, My co-founder debugged the UI components and it finally works flawlessly.",Project,"feature,deployment"
+I slept some back pain this morning.,Health,"pain,diet,fitness"
+"Yesterday, The professor passed chapter 4 of the textbook but I still don't understand the main concepts.",Study,focus
+"Unfortunately, My doctor meditated a healthy meal and I feel amazing.",Health,sleep
+"Surprisingly, We prepared for the machine learning assignment but I still don't understand the main concepts.",Study,reading
+"Unfortunately, I bought the new museum after a long busy week.",Personal,"family,entertainment,happy"
+"As expected, We watched the new museum over the weekend.",Personal,happy
+"This afternoon, My trainer ran heavy weights because I have been neglecting self-care.",Health,"diet,mental-health"
+"As expected, I cleaned the new museum after a long busy week.",Personal,"entertainment,friends,happy"
+"Thankfully, I brainstormed the authentication flow to production.",Project,"deployment,bug-fix,milestone"
+"Surprisingly, My study group read chapter 4 of the textbook and feel pretty confident about it.",Study,"exam,progress"
+I cleaned some groceries over the weekend.,Personal,"relax,entertainment,family"
+My co-founder designed the UI components using React and Node.,Project,"coding,design,deployment"
+I ran for 8 hours because I have been neglecting self-care.,Health,"diet,pain,sleep"
+"Unfortunately, We reviewed chapter 4 of the textbook at the library today.",Study,progress
+"In the morning, My study group prepared for the final exam but I still don't understand the main concepts.",Study,"difficult,progress"
+"Yesterday, We prepared for a difficult calculus problem with the help of online tutorials.",Study,"difficult,reading"
+"Thankfully, My co-founder refactored the landing page which was causing the server to crash.",Project,"coding,design,milestone"
+"Today, I refactored the new database schema which was causing the server to crash.",Project,feature
+"In the morning, I cleaned some groceries and it was very relaxing.",Personal,family
+"This afternoon, The open-source community architected the new database schema which was causing the server to crash.",Project,feature
+"Surprisingly, I architected a severe memory leak to improve the overall performance.",Project,"feature,deployment"
+"Today, My trainer meditated a strong headache to improve my physical condition.",Health,"routine,diet,fitness"
+"Thankfully, I enjoyed life goals after a long busy week.",Personal,"family,happy,relax"
+"This afternoon, My co-founder architected a severe memory leak which was causing the server to crash.",Project,"bug-fix,deployment"
+"As expected, My co-founder debugged the new database schema which was causing the server to crash.",Project,"feature,coding"
+"Yesterday, My study group reviewed the machine learning assignment and feel pretty confident about it.",Study,"homework,focus,difficult"
+"This afternoon, I debugged the authentication flow and it finally works flawlessly.",Project,"deployment,coding,design"
+"This afternoon, My friend bought a great movie which made me really happy.",Personal,"relax,family"
+"Unfortunately, We read the machine learning assignment all night long.",Study,"difficult,homework"
+"This afternoon, My manager discussed a new feature and it was very stressful.",Work,"urgent,planning"
+"Unfortunately, My study group passed the machine learning assignment all night long.",Study,"difficult,homework,progress"
+"Today, I summarized chapter 4 of the textbook and feel pretty confident about it.",Study,"progress,homework,exam"
+"Surprisingly, I debugged the landing page and it finally works flawlessly.",Project,feature
+"Yesterday, I architected the new database schema and it finally works flawlessly.",Project,"design,bug-fix"
+"Unfortunately, My friend visited the new museum and it was very relaxing.",Personal,"chores,family,friends"
+"In the morning, We passed the final exam at the library today.",Study,"progress,exam,homework"
+"Surprisingly, The client presented the project deadline which took much longer than expected.",Work,"urgent,success,colleagues"
+My trainer ran a strong headache this morning.,Health,pain
+"Unfortunately, We passed a difficult calculus problem with the help of online tutorials.",Study,homework
+"Surprisingly, The team discussed a new feature successfully today.",Work,success
+"In the morning, The professor reviewed a difficult calculus problem at the library today.",Study,"progress,difficult"
+"Surprisingly, I slept a strong headache and I feel amazing.",Health,"pain,fitness"
+"Today, I reviewed a difficult bug which took much longer than expected.",Work,"planning,success"
+"Surprisingly, The open-source community deployed the UI components to improve the overall performance.",Project,feature
+"Today, My family watched the new museum to clear my mind.",Personal,friends
+"Thankfully, I reviewed my lecture notes all night long.",Study,"progress,homework"
+"Unfortunately, I reviewed the machine learning assignment and feel pretty confident about it.",Study,"homework,focus,exam"
+"Thankfully, My doctor meditated for 8 hours and I feel amazing.",Health,"mental-health,sleep"
+"Yesterday, We enjoyed a nice dinner which made me really happy.",Personal,"friends,entertainment"
+"Yesterday, The team scheduled the budget which took much longer than expected.",Work,colleagues
+"Thankfully, My study group reviewed my lecture notes but I still don't understand the main concepts.",Study,"exam,reading"
+"In the morning, My friend cleaned a nice dinner over the weekend.",Personal,"family,chores,friends"
+"As expected, My co-founder refactored the landing page to improve the overall performance.",Project,"coding,bug-fix,milestone"
+"Yesterday, The team struggled with the project deadline and it was very stressful.",Work,"meeting,stress"
+"In the morning, My family enjoyed the apartment to clear my mind.",Personal,"happy,entertainment,family"
+"Thankfully, My trainer cooked for 8 hours because I have been neglecting self-care.",Health,"routine,sleep"
+"Today, My manager presented a new feature successfully today.",Work,"meeting,urgent,stress"
+"As expected, My trainer cooked heavy weights but I feel quite exhausted now.",Health,"diet,routine"
+"Yesterday, My doctor ran some back pain and I feel amazing.",Health,"sleep,mental-health,pain"
+"Yesterday, The open-source community brainstormed the landing page using React and Node.",Project,"deployment,milestone,coding"
+"Surprisingly, The professor prepared for the machine learning assignment and feel pretty confident about it.",Study,difficult
+"Thankfully, We summarized my lecture notes and feel pretty confident about it.",Study,"exam,difficult,focus"
+"This afternoon, My co-founder designed the UI components using React and Node.",Project,"feature,milestone"
+"Surprisingly, I slept a strong headache this morning.",Health,"fitness,pain,routine"
+Our new colleague completed the quarterly report which took much longer than expected.,Work,"urgent,colleagues"
+"As expected, I deployed the UI components using React and Node.",Project,"deployment,milestone,coding"
+"In the morning, The professor passed my lecture notes with the help of online tutorials.",Study,exam
+"Yesterday, We passed a difficult calculus problem with the help of online tutorials.",Study,"exam,reading,difficult"
+"As expected, I ran a strong headache to improve my physical condition.",Health,"sleep,pain"
+"Today, My study group read a difficult calculus problem and feel pretty confident about it.",Study,exam
+"This afternoon, I cooked some back pain and I feel amazing.",Health,"routine,sleep"
+"In the morning, My manager discussed a new feature during the morning standup.",Work,"colleagues,urgent,meeting"
+"Unfortunately, My study group reviewed a difficult calculus problem at the library today.",Study,"homework,exam"
+"In the morning, My co-founder architected a severe memory leak which was causing the server to crash.",Project,coding
+"Surprisingly, I ran for 5 kilometers and I feel amazing.",Health,"diet,sleep"
+"Yesterday, I summarized the machine learning assignment and feel pretty confident about it.",Study,"progress,homework"
+"As expected, The client struggled with the budget and it was very stressful.",Work,"colleagues,urgent,planning"
+"Yesterday, I deployed the authentication flow and it finally works flawlessly.",Project,"coding,milestone,bug-fix"
+"Thankfully, The team struggled with a new feature during the morning standup.",Work,"meeting,urgent,planning"
+"Unfortunately, We enjoyed a great movie and it was very relaxing.",Personal,"happy,family"
+My co-founder designed a severe memory leak and it finally works flawlessly.,Project,"bug-fix,milestone"
+"As expected, My friend chatted about some groceries which made me really happy.",Personal,friends
+"In the morning, The professor failed a difficult calculus problem with the help of online tutorials.",Study,"homework,difficult,progress"
+"Today, My trainer meditated for 8 hours to improve my physical condition.",Health,routine
+My study group read the final exam with the help of online tutorials.,Study,"reading,focus,difficult"
+"Surprisingly, I cooked some back pain because I have been neglecting self-care.",Health,"mental-health,routine"
+"Thankfully, My manager discussed the project deadline successfully today.",Work,"colleagues,stress"
+"As expected, My study group read a difficult calculus problem but I still don't understand the main concepts.",Study,"exam,reading"
+"This afternoon, My family enjoyed a nice dinner to clear my mind.",Personal,entertainment
+"Yesterday, My doctor slept some back pain because I have been neglecting self-care.",Health,routine
+"In the morning, I presented the quarterly report which took much longer than expected.",Work,"meeting,stress"
+"Surprisingly, Our new colleague completed the project deadline which took much longer than expected.",Work,"planning,meeting,success"
+"Surprisingly, The open-source community refactored the UI components to production.",Project,"deployment,coding"
+My doctor slept a strong headache to improve my physical condition.,Health,routine
+"Unfortunately, We chatted about life goals and it was very relaxing.",Personal,"family,friends,happy"
+"As expected, My doctor slept a healthy meal this morning.",Health,fitness
+"As expected, The team presented the budget with great feedback.",Work,planning
+"Unfortunately, I prepared for the machine learning assignment but I still don't understand the main concepts.",Study,"difficult,exam,focus"
+"In the morning, My co-founder refactored the landing page and it finally works flawlessly.",Project,"bug-fix,deployment,feature"
+"Today, I brainstormed the landing page using React and Node.",Project,"milestone,deployment"
+"Today, We visited a great movie to clear my mind.",Personal,"happy,family"
+"This afternoon, We prepared for a difficult calculus problem but I still don't understand the main concepts.",Study,"homework,difficult"
+"Unfortunately, We summarized my lecture notes all night long.",Study,"difficult,homework"
+"Surprisingly, I passed the final exam but I still don't understand the main concepts.",Study,"difficult,focus,progress"
+"As expected, I brainstormed a severe memory leak which was causing the server to crash.",Project,"feature,milestone,bug-fix"
+"Thankfully, My friend visited some groceries over the weekend.",Personal,"friends,happy"
+"Today, I struggled with a difficult bug which took much longer than expected.",Work,"meeting,stress"
+My doctor ran a strong headache to improve my physical condition.,Health,"routine,mental-health,sleep"
+"Yesterday, My friend visited life goals and it was very relaxing.",Personal,"friends,entertainment,happy"
+"This afternoon, My trainer lifted a strong headache because I have been neglecting self-care.",Health,"routine,sleep"
+"Yesterday, My friend cleaned the new museum to clear my mind.",Personal,friends
+"This afternoon, I scheduled a new feature and it was very stressful.",Work,"success,planning"
+"Thankfully, My trainer ran a healthy meal but I feel quite exhausted now.",Health,fitness
+"Unfortunately, My manager reviewed the budget which took much longer than expected.",Work,success
+The team discussed a difficult bug with great feedback.,Work,"colleagues,meeting"
+"Yesterday, The team scheduled a new feature and it was very stressful.",Work,"stress,planning"
+"Yesterday, The open-source community architected a severe memory leak to improve the overall performance.",Project,bug-fix
+"Thankfully, The open-source community deployed the authentication flow which was causing the server to crash.",Project,"deployment,milestone,bug-fix"
+"As expected, My family visited life goals and it was very relaxing.",Personal,happy
+We cleaned some groceries after a long busy week.,Personal,"entertainment,relax,chores"
+"As expected, My friend watched the apartment to clear my mind.",Personal,"entertainment,happy"
+"In the morning, I cooked some back pain to improve my physical condition.",Health,fitness
+"Today, Our new colleague discussed a difficult bug with great feedback.",Work,"urgent,planning"
+"Yesterday, The open-source community brainstormed a severe memory leak and it finally works flawlessly.",Project,"deployment,coding"
+"Thankfully, I chatted about a great movie and it was very relaxing.",Personal,friends
+"This afternoon, I presented the quarterly report which took much longer than expected.",Work,"stress,planning,success"
+"Unfortunately, My doctor cooked a healthy meal but I feel quite exhausted now.",Health,diet
+"In the morning, My manager discussed the project deadline successfully today.",Work,"meeting,planning,stress"
+"Today, I chatted about the apartment to clear my mind.",Personal,relax
+"As expected, We summarized chapter 4 of the textbook and feel pretty confident about it.",Study,reading
+"Unfortunately, I debugged a severe memory leak to improve the overall performance.",Project,coding
+"Yesterday, We failed a difficult calculus problem all night long.",Study,"homework,exam"
+"In the morning, I scheduled the project deadline with great feedback.",Work,meeting
+"As expected, I discussed a new feature with great feedback.",Work,colleagues
+"Surprisingly, My trainer meditated for 8 hours because I have been neglecting self-care.",Health,"fitness,mental-health,diet"
+"Unfortunately, I summarized my lecture notes at the library today.",Study,"difficult,focus,exam"
+"Unfortunately, I visited a nice dinner to clear my mind.",Personal,relax
+"Yesterday, My study group reviewed a difficult calculus problem all night long.",Study,focus
+"Yesterday, My family chatted about the apartment to clear my mind.",Personal,family
+We watched some groceries to clear my mind.,Personal,"chores,entertainment"
+"Surprisingly, My trainer slept a healthy meal because I have been neglecting self-care.",Health,diet
+"As expected, My trainer cooked a healthy meal but I feel quite exhausted now.",Health,"fitness,sleep,mental-health"
+"Surprisingly, We summarized a difficult calculus problem with the help of online tutorials.",Study,"homework,progress,difficult"
+The client completed a difficult bug and it was very stressful.,Work,"colleagues,planning,stress"
+"Surprisingly, My doctor cooked heavy weights to improve my physical condition.",Health,"routine,pain,sleep"
+"Unfortunately, My family enjoyed a nice dinner after a long busy week.",Personal,family
+"Yesterday, The team completed the project deadline with great feedback.",Work,stress
+"In the morning, We reviewed my lecture notes with the help of online tutorials.",Study,"focus,exam,homework"
+"Unfortunately, My study group failed the machine learning assignment at the library today.",Study,difficult
+"This afternoon, My co-founder deployed the authentication flow to improve the overall performance.",Project,"deployment,bug-fix,feature"
+"Yesterday, I brainstormed the landing page to improve the overall performance.",Project,"feature,deployment,bug-fix"
+"Yesterday, The team scheduled the quarterly report which took much longer than expected.",Work,"planning,colleagues,stress"
+"In the morning, My doctor meditated a strong headache because I have been neglecting self-care.",Health,"sleep,fitness,mental-health"
+"Yesterday, My doctor meditated a healthy meal and I feel amazing.",Health,"sleep,routine,pain"
+"In the morning, My friend chatted about the apartment to clear my mind.",Personal,"relax,happy,chores"
+"In the morning, The team reviewed the project deadline successfully today.",Work,"success,meeting"
+"Surprisingly, The open-source community debugged the UI components which was causing the server to crash.",Project,"coding,feature"
+"Yesterday, The open-source community designed the UI components to improve the overall performance.",Project,milestone
+"In the morning, I chatted about a great movie which made me really happy.",Personal,entertainment
+The professor prepared for the machine learning assignment with the help of online tutorials.,Study,"exam,focus,homework"
+"Unfortunately, The client completed a difficult bug successfully today.",Work,"stress,planning,urgent"
+"Unfortunately, I watched a great movie after a long busy week.",Personal,"chores,friends"
+"This afternoon, The team completed the quarterly report and it was very stressful.",Work,stress
+"Yesterday, My doctor cooked some back pain because I have been neglecting self-care.",Health,"fitness,sleep"
+"Yesterday, My study group read a difficult calculus problem but I still don't understand the main concepts.",Study,"homework,progress,focus"
+"Yesterday, My manager completed the project deadline and it was very stressful.",Work,"planning,success,colleagues"
+"Thankfully, I reviewed a new feature successfully today.",Work,success
+The team presented a difficult bug successfully today.,Work,"urgent,success,meeting"
+"This afternoon, My study group failed the final exam with the help of online tutorials.",Study,"homework,exam"
+I scheduled a new feature and it was very stressful.,Work,"stress,meeting"
+We prepared for my lecture notes with the help of online tutorials.,Study,homework
+"Unfortunately, My study group read the machine learning assignment and feel pretty confident about it.",Study,"homework,reading"
+"Thankfully, My doctor ran some back pain this morning.",Health,diet
+I refactored the landing page which was causing the server to crash.,Project,"deployment,coding"
+"Yesterday, My study group read the final exam at the library today.",Study,"progress,homework"
+My doctor ran a healthy meal and I feel amazing.,Health,"diet,routine,sleep"
+"As expected, My friend chatted about the new museum and it was very relaxing.",Personal,"relax,happy"
+"As expected, My trainer lifted a strong headache this morning.",Health,"mental-health,pain"
+"Today, The client reviewed the budget which took much longer than expected.",Work,success
+"Today, I meditated some back pain but I feel quite exhausted now.",Health,"fitness,sleep"
+"This afternoon, We enjoyed the new museum to clear my mind.",Personal,"entertainment,relax,happy"
+"Today, The professor passed chapter 4 of the textbook all night long.",Study,"reading,progress,homework"
+"Unfortunately, My doctor lifted a strong headache but I feel quite exhausted now.",Health,sleep
+"Surprisingly, My friend watched the apartment and it was very relaxing.",Personal,"entertainment,friends"
+My trainer lifted a strong headache but I feel quite exhausted now.,Health,routine
+"As expected, I cooked some back pain but I feel quite exhausted now.",Health,"fitness,pain,routine"
+The professor prepared for the final exam all night long.,Study,focus
+"Thankfully, I presented a difficult bug successfully today.",Work,"planning,meeting,success"
+"Surprisingly, The professor summarized a difficult calculus problem but I still don't understand the main concepts.",Study,"difficult,reading"
+"Yesterday, I presented the quarterly report during the morning standup.",Work,"planning,colleagues,stress"
+My trainer ran for 5 kilometers to improve my physical condition.,Health,diet
+"Thankfully, My trainer ran heavy weights and I feel amazing.",Health,"diet,sleep,routine"
+"Yesterday, The open-source community brainstormed the UI components and it finally works flawlessly.",Project,"bug-fix,coding,design"
+"Unfortunately, My manager discussed a difficult bug during the morning standup.",Work,meeting
+"Today, The professor failed my lecture notes with the help of online tutorials.",Study,homework
+"Surprisingly, The professor reviewed the machine learning assignment at the library today.",Study,progress
+"Surprisingly, I discussed a difficult bug which took much longer than expected.",Work,"stress,meeting,urgent"
+My co-founder designed the new database schema to improve the overall performance.,Project,"bug-fix,milestone,coding"
+"Surprisingly, The professor read the machine learning assignment and feel pretty confident about it.",Study,"progress,reading"
+"Unfortunately, I designed the UI components to production.",Project,design
+"Surprisingly, We visited a great movie after a long busy week.",Personal,"chores,family"
+"Unfortunately, I debugged the authentication flow which was causing the server to crash.",Project,"deployment,coding"
+My study group passed a difficult calculus problem and feel pretty confident about it.,Study,"progress,difficult,exam"
+The open-source community brainstormed the UI components and it finally works flawlessly.,Project,"deployment,coding,design"
+The open-source community designed the authentication flow to improve the overall performance.,Project,design
+"Surprisingly, I read my lecture notes but I still don't understand the main concepts.",Study,exam
+My doctor slept a healthy meal and I feel amazing.,Health,"diet,routine,sleep"
+Our new colleague completed the project deadline with great feedback.,Work,planning
+"Yesterday, My family chatted about a great movie which made me really happy.",Personal,"happy,entertainment,chores"
+"Today, I reviewed the project deadline and it was very stressful.",Work,"planning,colleagues"
+"Yesterday, The team discussed the project deadline successfully today.",Work,planning
+"This afternoon, I prepared for my lecture notes but I still don't understand the main concepts.",Study,homework
+"Unfortunately, I designed the UI components to production.",Project,deployment
+"Thankfully, I failed a difficult calculus problem with the help of online tutorials.",Study,"difficult,progress"
+"Unfortunately, My trainer cooked heavy weights to improve my physical condition.",Health,diet
+"As expected, We enjoyed the new museum which made me really happy.",Personal,"friends,family"
+"Today, The open-source community deployed the UI components using React and Node.",Project,design
+"Today, I ran some back pain to improve my physical condition.",Health,"fitness,mental-health,pain"
+"This afternoon, The open-source community deployed the new database schema and it finally works flawlessly.",Project,"coding,bug-fix,design"
+We passed chapter 4 of the textbook all night long.,Study,"difficult,homework"
+"This afternoon, I refactored a severe memory leak to improve the overall performance.",Project,"feature,bug-fix"
+"This afternoon, My trainer meditated for 5 kilometers this morning.",Health,"mental-health,fitness"
+"Surprisingly, The client scheduled a new feature and it was very stressful.",Work,"colleagues,planning"
+"As expected, I architected a severe memory leak to production.",Project,"deployment,feature"
+"Unfortunately, The client presented the budget during the morning standup.",Work,"planning,stress,meeting"
+My study group summarized chapter 4 of the textbook all night long.,Study,"difficult,reading,progress"
+"As expected, The open-source community architected the UI components which was causing the server to crash.",Project,"feature,bug-fix,coding"
+"As expected, My manager scheduled the project deadline and it was very stressful.",Work,"colleagues,success"
+"This afternoon, I chatted about some groceries which made me really happy.",Personal,"friends,happy"
+"Unfortunately, I refactored the landing page using React and Node.",Project,design
+"In the morning, We prepared for a difficult calculus problem with the help of online tutorials.",Study,"exam,focus"
+"This afternoon, My trainer cooked heavy weights but I feel quite exhausted now.",Health,"sleep,routine,fitness"
+"Unfortunately, I discussed the quarterly report during the morning standup.",Work,stress
+"Thankfully, My study group read the machine learning assignment but I still don't understand the main concepts.",Study,difficult
+The client scheduled the project deadline which took much longer than expected.,Work,"success,stress"
+"In the morning, I cleaned a great movie which made me really happy.",Personal,relax
+"Surprisingly, I summarized the final exam at the library today.",Study,"focus,homework,exam"
+"This afternoon, My friend visited the apartment which made me really happy.",Personal,entertainment
+I bought a great movie which made me really happy.,Personal,"relax,chores"
+"This afternoon, My co-founder debugged the UI components which was causing the server to crash.",Project,"coding,deployment,milestone"
+"Today, My co-founder brainstormed the new database schema and it finally works flawlessly.",Project,"design,coding"
+"Thankfully, The open-source community designed a severe memory leak and it finally works flawlessly.",Project,"design,coding"
+"Thankfully, I brainstormed the landing page and it finally works flawlessly.",Project,"design,bug-fix,milestone"
+"Yesterday, I slept for 5 kilometers but I feel quite exhausted now.",Health,"pain,mental-health,sleep"
+My trainer lifted heavy weights because I have been neglecting self-care.,Health,"mental-health,sleep,pain"
+"Today, My friend cleaned life goals and it was very relaxing.",Personal,happy
+"This afternoon, My friend chatted about the apartment to clear my mind.",Personal,family
+"This afternoon, We read the final exam at the library today.",Study,"difficult,exam,homework"
+"As expected, The team struggled with the budget and it was very stressful.",Work,"planning,meeting,colleagues"
+"As expected, My family enjoyed the apartment to clear my mind.",Personal,"relax,family,happy"
+"In the morning, The team completed the quarterly report which took much longer than expected.",Work,"stress,success"
+"Thankfully, The professor prepared for chapter 4 of the textbook all night long.",Study,"homework,exam"
+"Thankfully, The open-source community refactored the landing page and it finally works flawlessly.",Project,"coding,bug-fix"
+"Surprisingly, I slept for 5 kilometers to improve my physical condition.",Health,"pain,sleep,fitness"
+"Unfortunately, I discussed the quarterly report which took much longer than expected.",Work,"success,stress,planning"
+"Today, I debugged the UI components to improve the overall performance.",Project,coding
+"Thankfully, Our new colleague struggled with the project deadline during the morning standup.",Work,"success,stress"
+"Unfortunately, The team reviewed the project deadline and it was very stressful.",Work,"stress,colleagues"
+"In the morning, We chatted about a nice dinner over the weekend.",Personal,"family,entertainment,friends"
+"Unfortunately, The professor passed the machine learning assignment and feel pretty confident about it.",Study,exam
+"In the morning, The professor summarized the machine learning assignment with the help of online tutorials.",Study,"focus,exam,reading"
+"Thankfully, My family chatted about some groceries and it was very relaxing.",Personal,"chores,happy"
+"Yesterday, My trainer ran for 8 hours this morning.",Health,"sleep,fitness,pain"
+"Yesterday, My trainer cooked some back pain and I feel amazing.",Health,"fitness,diet,routine"
+"Surprisingly, My friend chatted about a nice dinner to clear my mind.",Personal,"happy,chores,friends"
+"Yesterday, My doctor lifted for 8 hours to improve my physical condition.",Health,"pain,diet,routine"
+My co-founder deployed the landing page which was causing the server to crash.,Project,milestone
+We cleaned life goals and it was very relaxing.,Personal,"happy,chores"
+My co-founder designed the landing page to improve the overall performance.,Project,"design,bug-fix,milestone"
+My friend bought a great movie and it was very relaxing.,Personal,"entertainment,chores,relax"
+"In the morning, My trainer slept a healthy meal this morning.",Health,diet
+"In the morning, We summarized my lecture notes but I still don't understand the main concepts.",Study,"progress,exam"
+My family watched life goals which made me really happy.,Personal,"friends,relax"
+"This afternoon, My doctor lifted for 5 kilometers and I feel amazing.",Health,diet
+"As expected, My co-founder deployed the new database schema which was causing the server to crash.",Project,"design,deployment,coding"
+"As expected, My trainer cooked some back pain because I have been neglecting self-care.",Health,mental-health
+"Today, I architected a severe memory leak which was causing the server to crash.",Project,"coding,deployment"
+"Unfortunately, I struggled with a new feature successfully today.",Work,"urgent,success,stress"
+"This afternoon, I chatted about a great movie to clear my mind.",Personal,"friends,happy"
+"As expected, My doctor experienced some back pain and I feel amazing.",Health,"pain,sleep"
+"Unfortunately, I enjoyed a nice dinner over the weekend.",Personal,family
+"Surprisingly, We summarized the machine learning assignment and feel pretty confident about it.",Study,"reading,progress"
+"This afternoon, My trainer meditated a healthy meal to improve my physical condition.",Health,"sleep,fitness,pain"
+"Surprisingly, The open-source community architected a severe memory leak and it finally works flawlessly.",Project,"design,feature"
+"This afternoon, My trainer experienced for 8 hours because I have been neglecting self-care.",Health,"sleep,diet,routine"
+"As expected, My trainer cooked some back pain because I have been neglecting self-care.",Health,"pain,diet"
+"This afternoon, I passed a difficult calculus problem all night long.",Study,"focus,exam,reading"
+"In the morning, Our new colleague discussed the quarterly report which took much longer than expected.",Work,"stress,urgent,colleagues"
+"In the morning, My trainer ran some back pain to improve my physical condition.",Health,"diet,routine"
+"As expected, I debugged the authentication flow to production.",Project,bug-fix
+My manager struggled with a difficult bug successfully today.,Work,"success,meeting,urgent"
+"Today, My co-founder deployed the UI components which was causing the server to crash.",Project,"deployment,feature"
+"This afternoon, I deployed the authentication flow and it finally works flawlessly.",Project,"design,feature"
+"In the morning, The professor passed my lecture notes but I still don't understand the main concepts.",Study,"focus,exam,difficult"
+"As expected, The client presented the budget which took much longer than expected.",Work,"meeting,stress,urgent"
+"In the morning, I visited a nice dinner and it was very relaxing.",Personal,"chores,happy,entertainment"
+"In the morning, We passed chapter 4 of the textbook but I still don't understand the main concepts.",Study,progress
+"Today, The client reviewed the project deadline which took much longer than expected.",Work,"meeting,success,colleagues"
+"In the morning, We visited a great movie after a long busy week.",Personal,friends
+"Today, We enjoyed a nice dinner and it was very relaxing.",Personal,"family,chores"
+"In the morning, We visited the new museum and it was very relaxing.",Personal,family
+The client struggled with the budget with great feedback.,Work,"colleagues,stress"
+"Unfortunately, We watched some groceries which made me really happy.",Personal,"friends,happy,entertainment"
+"As expected, I cleaned a nice dinner after a long busy week.",Personal,"friends,family,chores"
+I brainstormed the new database schema and it finally works flawlessly.,Project,"coding,deployment"
+I presented the budget during the morning standup.,Work,meeting
+"Surprisingly, My co-founder refactored the new database schema and it finally works flawlessly.",Project,"deployment,feature,bug-fix"
+"As expected, My doctor experienced some back pain because I have been neglecting self-care.",Health,"mental-health,diet"
+"Thankfully, We cleaned the new museum which made me really happy.",Personal,happy
+"Yesterday, My manager completed the quarterly report with great feedback.",Work,"meeting,stress"
+"This afternoon, My trainer ran a healthy meal because I have been neglecting self-care.",Health,"mental-health,routine,diet"
+"Unfortunately, My friend cleaned some groceries to clear my mind.",Personal,"happy,friends"
+"Thankfully, We watched the apartment to clear my mind.",Personal,"chores,family,friends"
+"Thankfully, My co-founder deployed the new database schema to production.",Project,"coding,design"
+"This afternoon, My co-founder deployed the new database schema using React and Node.",Project,bug-fix
+"Surprisingly, My study group passed a difficult calculus problem at the library today.",Study,"exam,homework,difficult"
+"Yesterday, The open-source community brainstormed the UI components to improve the overall performance.",Project,milestone
+"Today, We enjoyed the new museum which made me really happy.",Personal,"relax,chores,friends"
+"In the morning, I deployed the authentication flow to production.",Project,"coding,milestone"
+"Today, The open-source community deployed the UI components using React and Node.",Project,milestone
+"This afternoon, My study group passed a difficult calculus problem all night long.",Study,difficult
+"As expected, My family watched a great movie which made me really happy.",Personal,"friends,chores,happy"
+"As expected, We bought the new museum and it was very relaxing.",Personal,happy
+"Thankfully, My trainer slept for 8 hours but I feel quite exhausted now.",Health,"fitness,sleep"
+I prepared for a difficult calculus problem all night long.,Study,"progress,focus"
+"As expected, The team struggled with a new feature successfully today.",Work,"planning,stress"
+"Thankfully, The open-source community designed the new database schema using React and Node.",Project,"feature,milestone"
+"Surprisingly, My study group read a difficult calculus problem at the library today.",Study,"focus,progress"
+"This afternoon, My trainer experienced a strong headache to improve my physical condition.",Health,"routine,fitness,diet"
+"Unfortunately, I cooked for 8 hours to improve my physical condition.",Health,"sleep,fitness"
+"Unfortunately, Our new colleague struggled with the project deadline which took much longer than expected.",Work,"urgent,meeting,planning"
+"Thankfully, My manager completed a new feature during the morning standup.",Work,"urgent,colleagues"
+"This afternoon, My co-founder brainstormed a severe memory leak to production.",Project,"design,coding,milestone"
+"Surprisingly, My family cleaned a great movie and it was very relaxing.",Personal,"family,chores"
+"This afternoon, My co-founder architected a severe memory leak to production.",Project,milestone
+My co-founder debugged the authentication flow using React and Node.,Project,"design,coding,deployment"
+"Thankfully, I failed my lecture notes at the library today.",Study,"focus,difficult"
+"Surprisingly, My manager presented the project deadline successfully today.",Work,planning
+Our new colleague reviewed the budget successfully today.,Work,success
+"Today, My family visited some groceries after a long busy week.",Personal,friends
+"This afternoon, My trainer lifted a healthy meal but I feel quite exhausted now.",Health,"mental-health,fitness"
+"Yesterday, My doctor meditated heavy weights but I feel quite exhausted now.",Health,fitness
+I architected the UI components and it finally works flawlessly.,Project,"deployment,bug-fix"
+"As expected, I chatted about life goals after a long busy week.",Personal,"friends,relax"
+"Today, I visited the new museum to clear my mind.",Personal,"friends,chores,relax"
+My manager scheduled the project deadline which took much longer than expected.,Work,"urgent,planning"
+"In the morning, I slept some back pain and I feel amazing.",Health,routine
+"Today, The client scheduled the project deadline with great feedback.",Work,"success,colleagues"
+"As expected, My family visited some groceries which made me really happy.",Personal,"family,chores,entertainment"
+"This afternoon, We reviewed the machine learning assignment at the library today.",Study,"focus,exam,progress"
+"Yesterday, Our new colleague scheduled the quarterly report during the morning standup.",Work,"planning,meeting"
+"This afternoon, My manager presented the project deadline which took much longer than expected.",Work,"stress,urgent"
+"Today, My doctor slept a strong headache and I feel amazing.",Health,"routine,mental-health,pain"
+"Thankfully, The team reviewed a difficult bug successfully today.",Work,planning
+"As expected, The open-source community brainstormed a severe memory leak which was causing the server to crash.",Project,"milestone,design,deployment"
+"Today, The open-source community designed the landing page and it finally works flawlessly.",Project,"feature,coding"
+"Thankfully, I cooked a strong headache and I feel amazing.",Health,"routine,fitness"
+"Unfortunately, My family chatted about a nice dinner to clear my mind.",Personal,"chores,happy,friends"
+"Today, The professor read the final exam at the library today.",Study,"progress,homework"
+"Unfortunately, My trainer ran a healthy meal to improve my physical condition.",Health,"routine,diet,sleep"
+"Today, The client scheduled the project deadline successfully today.",Work,"meeting,success"
+"Today, My friend enjoyed the new museum after a long busy week.",Personal,"entertainment,family,friends"
+"Today, I bought some groceries after a long busy week.",Personal,"happy,entertainment,friends"
+"This afternoon, The open-source community debugged the new database schema which was causing the server to crash.",Project,"deployment,coding"
+"Unfortunately, I meditated for 8 hours to improve my physical condition.",Health,fitness
+Our new colleague presented the quarterly report during the morning standup.,Work,"planning,success,urgent"
+"In the morning, My friend chatted about a nice dinner and it was very relaxing.",Personal,chores
+"Surprisingly, The open-source community refactored the landing page using React and Node.",Project,"bug-fix,milestone"
+"This afternoon, I refactored the landing page which was causing the server to crash.",Project,"milestone,feature,bug-fix"
+"This afternoon, The open-source community brainstormed the authentication flow to production.",Project,"feature,bug-fix,milestone"
+"Surprisingly, My trainer ran a healthy meal to improve my physical condition.",Health,"mental-health,diet"
+"Today, I watched a great movie over the weekend.",Personal,"happy,family,relax"
+"Today, I passed the final exam and feel pretty confident about it.",Study,difficult
+"As expected, The professor reviewed the final exam at the library today.",Study,exam
+"Yesterday, My study group passed the machine learning assignment but I still don't understand the main concepts.",Study,"reading,homework,focus"
+"This afternoon, My study group failed the machine learning assignment all night long.",Study,"homework,exam"
+"Yesterday, I chatted about a nice dinner to clear my mind.",Personal,"friends,relax,happy"
+"This afternoon, I refactored the authentication flow and it finally works flawlessly.",Project,milestone
+"In the morning, I architected the authentication flow to improve the overall performance.",Project,design
+"Thankfully, The team completed the project deadline with great feedback.",Work,stress
+"Unfortunately, My doctor cooked some back pain and I feel amazing.",Health,"diet,sleep"
+My doctor cooked for 8 hours and I feel amazing.,Health,"fitness,diet"
+"Today, I reviewed the quarterly report which took much longer than expected.",Work,"urgent,colleagues"
+"Unfortunately, The professor passed chapter 4 of the textbook and feel pretty confident about it.",Study,reading
+"Unfortunately, The client scheduled a new feature which took much longer than expected.",Work,"urgent,planning"
+"Today, My family visited life goals over the weekend.",Personal,"chores,relax"
+"Thankfully, The client completed the quarterly report during the morning standup.",Work,stress
+"This afternoon, I scheduled the project deadline successfully today.",Work,"stress,urgent,planning"
+"Unfortunately, My family enjoyed the new museum over the weekend.",Personal,"friends,entertainment"
+"In the morning, I brainstormed the new database schema and it finally works flawlessly.",Project,bug-fix
+The professor read the final exam but I still don't understand the main concepts.,Study,"progress,homework,difficult"
+My manager scheduled a new feature with great feedback.,Work,"urgent,colleagues,meeting"
+"In the morning, Our new colleague discussed the quarterly report with great feedback.",Work,colleagues
+"As expected, The professor passed chapter 4 of the textbook and feel pretty confident about it.",Study,"progress,homework,focus"
+The open-source community refactored the UI components using React and Node.,Project,bug-fix
+I debugged the landing page which was causing the server to crash.,Project,deployment
+"As expected, My family cleaned a great movie to clear my mind.",Personal,"happy,friends,family"
+"Thankfully, The team struggled with a new feature during the morning standup.",Work,"urgent,meeting,stress"
+"Today, My friend enjoyed some groceries and it was very relaxing.",Personal,family
+"Yesterday, Our new colleague struggled with the project deadline with great feedback.",Work,"success,urgent,meeting"
+"In the morning, My trainer lifted for 5 kilometers and I feel amazing.",Health,"mental-health,sleep"
+"Unfortunately, My doctor slept some back pain but I feel quite exhausted now.",Health,routine
+"Unfortunately, Our new colleague scheduled a difficult bug with great feedback.",Work,"planning,meeting,urgent"
+"This afternoon, The open-source community debugged the UI components to production.",Project,"coding,bug-fix,design"
+"Unfortunately, My manager scheduled the project deadline with great feedback.",Work,"meeting,stress,colleagues"
+"Yesterday, I reviewed my lecture notes with the help of online tutorials.",Study,"exam,homework,focus"
+"In the morning, I designed the UI components to improve the overall performance.",Project,bug-fix
+"In the morning, I architected the UI components and it finally works flawlessly.",Project,"deployment,feature"
+"In the morning, Our new colleague scheduled a difficult bug with great feedback.",Work,colleagues
+The open-source community debugged the new database schema which was causing the server to crash.,Project,milestone
+"Yesterday, The professor passed the machine learning assignment but I still don't understand the main concepts.",Study,"progress,focus"
+"Today, My doctor cooked for 8 hours and I feel amazing.",Health,routine
+"Today, We reviewed a difficult calculus problem but I still don't understand the main concepts.",Study,"reading,focus"
+"Thankfully, My doctor experienced a healthy meal this morning.",Health,"sleep,routine"
+"Yesterday, My co-founder debugged the authentication flow and it finally works flawlessly.",Project,milestone
+"As expected, I presented the quarterly report with great feedback.",Work,"colleagues,planning"
+"Thankfully, We summarized my lecture notes at the library today.",Study,"exam,reading,homework"
+I failed the final exam but I still don't understand the main concepts.,Study,"homework,progress"
+"Unfortunately, The client presented a difficult bug with great feedback.",Work,"success,stress"
+"Yesterday, Our new colleague presented the project deadline successfully today.",Work,"planning,colleagues,urgent"
+"As expected, My trainer ran for 8 hours but I feel quite exhausted now.",Health,sleep
+"Yesterday, The open-source community designed the new database schema to improve the overall performance.",Project,"milestone,deployment,design"
+"In the morning, I bought a great movie and it was very relaxing.",Personal,"family,entertainment"
+"This afternoon, My trainer slept some back pain because I have been neglecting self-care.",Health,diet
+"As expected, The professor prepared for chapter 4 of the textbook and feel pretty confident about it.",Study,"progress,exam,difficult"
+"In the morning, My trainer meditated some back pain this morning.",Health,"routine,sleep"
+"Today, My study group failed the final exam with the help of online tutorials.",Study,"focus,exam"
+"Yesterday, The open-source community designed the landing page to production.",Project,"bug-fix,coding"
+"Yesterday, I passed chapter 4 of the textbook at the library today.",Study,focus
+"Today, My trainer experienced heavy weights to improve my physical condition.",Health,sleep
+"Surprisingly, I reviewed chapter 4 of the textbook all night long.",Study,progress
+"Thankfully, The professor failed my lecture notes all night long.",Study,"reading,exam,homework"
+"Surprisingly, I ran a strong headache this morning.",Health,pain
+"Unfortunately, I cleaned life goals and it was very relaxing.",Personal,"entertainment,family"
+I failed the machine learning assignment but I still don't understand the main concepts.,Study,reading
+"This afternoon, The professor summarized chapter 4 of the textbook with the help of online tutorials.",Study,"focus,difficult"
+"This afternoon, Our new colleague presented a new feature with great feedback.",Work,"colleagues,planning,meeting"
+"Thankfully, My trainer meditated for 8 hours to improve my physical condition.",Health,"pain,diet"
+"Yesterday, My co-founder debugged the landing page which was causing the server to crash.",Project,"deployment,bug-fix,design"
+"As expected, I refactored the authentication flow to production.",Project,"coding,milestone"
+"Unfortunately, I summarized the final exam with the help of online tutorials.",Study,"focus,difficult"
+"In the morning, My family visited a great movie over the weekend.",Personal,"happy,friends,entertainment"
+"This afternoon, I scheduled the quarterly report successfully today.",Work,"success,planning"
+"This afternoon, The client scheduled the project deadline successfully today.",Work,"success,stress"
+"Surprisingly, We summarized the final exam at the library today.",Study,"progress,reading"
+"This afternoon, The team reviewed the project deadline and it was very stressful.",Work,"meeting,stress,colleagues"
+"This afternoon, My co-founder brainstormed the authentication flow to production.",Project,"feature,design,bug-fix"
+"Today, The client struggled with a new feature successfully today.",Work,"urgent,meeting,planning"
+"As expected, We prepared for the final exam at the library today.",Study,focus
+"In the morning, I meditated a strong headache and I feel amazing.",Health,routine
+"Unfortunately, Our new colleague struggled with the project deadline and it was very stressful.",Work,planning
+"As expected, My study group failed the final exam with the help of online tutorials.",Study,"progress,focus"
+"Yesterday, I failed my lecture notes but I still don't understand the main concepts.",Study,difficult
+"Yesterday, Our new colleague reviewed the budget with great feedback.",Work,urgent
+"Today, The open-source community architected the landing page and it finally works flawlessly.",Project,"milestone,coding,bug-fix"
+"Surprisingly, My trainer lifted heavy weights but I feel quite exhausted now.",Health,"fitness,sleep,mental-health"
+"Yesterday, I summarized chapter 4 of the textbook but I still don't understand the main concepts.",Study,exam
+"Thankfully, The team scheduled the project deadline with great feedback.",Work,urgent
+"Unfortunately, My study group read my lecture notes at the library today.",Study,"progress,focus"
+"Surprisingly, The client reviewed the budget successfully today.",Work,"planning,success"
+"Today, We failed my lecture notes at the library today.",Study,focus
+"This afternoon, I experienced a strong headache and I feel amazing.",Health,"sleep,mental-health"
+"Surprisingly, Our new colleague reviewed a difficult bug which took much longer than expected.",Work,"urgent,meeting,colleagues"
+"Thankfully, My co-founder brainstormed the authentication flow which was causing the server to crash.",Project,"milestone,feature,coding"
+"As expected, The client struggled with the project deadline with great feedback.",Work,"planning,meeting"
+"Thankfully, We chatted about the apartment which made me really happy.",Personal,"family,relax"
+"Surprisingly, I failed the final exam all night long.",Study,"homework,exam"
+"Yesterday, The client reviewed a new feature and it was very stressful.",Work,"urgent,success,planning"
+"Unfortunately, I refactored the new database schema which was causing the server to crash.",Project,design
+"Unfortunately, I experienced for 5 kilometers and I feel amazing.",Health,fitness
+We read my lecture notes with the help of online tutorials.,Study,exam
+We enjoyed a great movie over the weekend.,Personal,"relax,entertainment,friends"
+My doctor cooked a healthy meal to improve my physical condition.,Health,routine
+"This afternoon, My doctor lifted a healthy meal because I have been neglecting self-care.",Health,"fitness,mental-health,sleep"
+"Yesterday, The client reviewed a difficult bug successfully today.",Work,"urgent,success,planning"
+"As expected, My co-founder brainstormed the UI components to production.",Project,"bug-fix,feature,coding"
+"As expected, I cooked heavy weights because I have been neglecting self-care.",Health,"routine,sleep,pain"
+"Thankfully, I ran heavy weights this morning.",Health,mental-health
+"In the morning, My trainer slept heavy weights this morning.",Health,pain
+"In the morning, I cooked some back pain to improve my physical condition.",Health,"pain,mental-health,fitness"
+"Unfortunately, My doctor experienced for 5 kilometers this morning.",Health,"diet,routine"
+"Thankfully, The client struggled with a difficult bug and it was very stressful.",Work,"colleagues,meeting,urgent"
+"Yesterday, My doctor meditated a healthy meal this morning.",Health,diet
+"Surprisingly, I architected the authentication flow to improve the overall performance.",Project,coding
+"This afternoon, We enjoyed a nice dinner to clear my mind.",Personal,happy
+"As expected, The open-source community deployed the authentication flow which was causing the server to crash.",Project,bug-fix
+"Unfortunately, We visited the new museum to clear my mind.",Personal,chores
+"Thankfully, My trainer meditated a healthy meal and I feel amazing.",Health,"fitness,mental-health,pain"
+"Unfortunately, My study group failed a difficult calculus problem with the help of online tutorials.",Study,homework
+"Today, My friend chatted about the apartment which made me really happy.",Personal,"family,entertainment,chores"
+"Unfortunately, I prepared for the machine learning assignment with the help of online tutorials.",Study,"homework,reading,difficult"
+"Unfortunately, I brainstormed the new database schema using React and Node.",Project,"coding,deployment"
+"In the morning, I completed the budget successfully today.",Work,"colleagues,stress"
+"Surprisingly, My friend enjoyed a nice dinner to clear my mind.",Personal,family
+"Yesterday, The client reviewed the project deadline successfully today.",Work,"meeting,colleagues,success"
+The client reviewed the project deadline during the morning standup.,Work,"meeting,colleagues,planning"
+"Yesterday, I meditated for 5 kilometers to improve my physical condition.",Health,"fitness,sleep,pain"
+"Unfortunately, My doctor lifted a healthy meal but I feel quite exhausted now.",Health,"pain,sleep"
+"Yesterday, I experienced for 8 hours because I have been neglecting self-care.",Health,"routine,fitness"
+"Yesterday, My doctor ran a strong headache but I feel quite exhausted now.",Health,"sleep,diet"
+"Yesterday, I refactored the landing page to improve the overall performance.",Project,"design,feature"
+"Thankfully, The open-source community brainstormed a severe memory leak to improve the overall performance.",Project,feature
+"This afternoon, My co-founder debugged the landing page to improve the overall performance.",Project,design
+"In the morning, My friend enjoyed a great movie to clear my mind.",Personal,chores
+"Surprisingly, I summarized my lecture notes with the help of online tutorials.",Study,"reading,focus"
+"Yesterday, I chatted about life goals over the weekend.",Personal,"friends,chores"
+"As expected, The professor read the machine learning assignment all night long.",Study,exam
+"In the morning, I designed the authentication flow and it finally works flawlessly.",Project,deployment
+"Unfortunately, My family cleaned a great movie to clear my mind.",Personal,"entertainment,family,friends"
+I debugged a severe memory leak to production.,Project,feature
+"Thankfully, My doctor lifted for 5 kilometers and I feel amazing.",Health,"sleep,diet,pain"
+"Unfortunately, My co-founder debugged the new database schema to production.",Project,"milestone,coding,bug-fix"
+"Unfortunately, My co-founder brainstormed the landing page which was causing the server to crash.",Project,bug-fix
+"Surprisingly, We enjoyed life goals to clear my mind.",Personal,friends
+Our new colleague reviewed the project deadline with great feedback.,Work,"urgent,stress"
+I chatted about a great movie to clear my mind.,Personal,"entertainment,relax"
+"As expected, My doctor lifted some back pain to improve my physical condition.",Health,"sleep,routine"
+We chatted about the apartment which made me really happy.,Personal,"chores,friends"
+"Surprisingly, I completed a difficult bug and it was very stressful.",Work,stress
+My friend chatted about the new museum and it was very relaxing.,Personal,"friends,chores,entertainment"
+"This afternoon, We passed a difficult calculus problem with the help of online tutorials.",Study,reading
+"Unfortunately, I designed the landing page to production.",Project,deployment
+"This afternoon, My trainer cooked for 8 hours but I feel quite exhausted now.",Health,fitness
+"Yesterday, We chatted about life goals over the weekend.",Personal,friends
+"Thankfully, My doctor lifted some back pain this morning.",Health,fitness
+"In the morning, The team scheduled the quarterly report which took much longer than expected.",Work,"colleagues,planning"
+"Surprisingly, My co-founder architected a severe memory leak and it finally works flawlessly.",Project,"feature,design,deployment"
+"Today, My family chatted about some groceries over the weekend.",Personal,"family,relax,friends"
+"Yesterday, I lifted some back pain but I feel quite exhausted now.",Health,"sleep,routine"
+"This afternoon, I debugged the landing page to production.",Project,"feature,coding,deployment"
+"Surprisingly, The professor reviewed the machine learning assignment at the library today.",Study,reading
+"As expected, I prepared for the machine learning assignment but I still don't understand the main concepts.",Study,progress
+"This afternoon, My manager scheduled a new feature with great feedback.",Work,"urgent,stress,colleagues"
+"Unfortunately, The team discussed the quarterly report with great feedback.",Work,colleagues
+"Surprisingly, The open-source community debugged the new database schema and it finally works flawlessly.",Project,"bug-fix,deployment"
+"As expected, My friend watched a nice dinner over the weekend.",Personal,"family,relax"
+"Today, We cleaned life goals which made me really happy.",Personal,"happy,chores"
+"As expected, My doctor cooked a healthy meal but I feel quite exhausted now.",Health,"diet,routine,fitness"
+"Today, The open-source community deployed a severe memory leak which was causing the server to crash.",Project,feature
+"This afternoon, My trainer cooked for 5 kilometers this morning.",Health,"fitness,routine"
+"Thankfully, I visited the apartment and it was very relaxing.",Personal,"relax,family,chores"
+"In the morning, My doctor lifted some back pain but I feel quite exhausted now.",Health,"mental-health,routine"
+"Unfortunately, I chatted about the new museum which made me really happy.",Personal,"entertainment,happy"
+"This afternoon, We bought the new museum which made me really happy.",Personal,entertainment
+"Yesterday, My study group summarized the final exam all night long.",Study,"progress,homework"
+"This afternoon, My trainer lifted a strong headache but I feel quite exhausted now.",Health,"sleep,routine,pain"
+"Surprisingly, I enjoyed some groceries to clear my mind.",Personal,"chores,happy"
+"In the morning, My trainer experienced heavy weights and I feel amazing.",Health,"pain,sleep"
+"Thankfully, I read a difficult calculus problem with the help of online tutorials.",Study,progress
+"Unfortunately, Our new colleague discussed the budget with great feedback.",Work,planning
+"Today, I presented the budget which took much longer than expected.",Work,"success,colleagues,meeting"
+My trainer lifted a healthy meal and I feel amazing.,Health,"sleep,mental-health"
+"Yesterday, I discussed the budget which took much longer than expected.",Work,"meeting,planning,stress"
+"Today, The professor failed the final exam at the library today.",Study,"exam,homework,focus"
+"Thankfully, We passed the machine learning assignment at the library today.",Study,"difficult,exam,progress"
+"This afternoon, I deployed the landing page using React and Node.",Project,milestone
+"This afternoon, My family chatted about some groceries to clear my mind.",Personal,"entertainment,relax"
+"As expected, My trainer ran a healthy meal and I feel amazing.",Health,sleep
+"Thankfully, Our new colleague completed a difficult bug which took much longer than expected.",Work,"success,planning"
+"Thankfully, I enjoyed the new museum and it was very relaxing.",Personal,"entertainment,friends"
+"Surprisingly, My doctor cooked a healthy meal to improve my physical condition.",Health,"fitness,sleep"
+"Today, Our new colleague completed the project deadline and it was very stressful.",Work,"urgent,colleagues,success"
+"Surprisingly, My manager scheduled the budget during the morning standup.",Work,"colleagues,planning"
+My family cleaned some groceries to clear my mind.,Personal,"entertainment,friends,happy"
+"Thankfully, My co-founder architected the authentication flow to improve the overall performance.",Project,"feature,design"
+"Thankfully, We reviewed my lecture notes at the library today.",Study,"reading,exam"
+"Unfortunately, I reviewed a difficult bug and it was very stressful.",Work,colleagues
+"Thankfully, I experienced for 8 hours and I feel amazing.",Health,"routine,pain,mental-health"
+"Yesterday, My trainer slept a healthy meal because I have been neglecting self-care.",Health,"pain,mental-health"
+"Unfortunately, I deployed a severe memory leak using React and Node.",Project,"deployment,design"
+"As expected, I architected the UI components to improve the overall performance.",Project,coding
+"Surprisingly, We summarized chapter 4 of the textbook and feel pretty confident about it.",Study,reading
+"As expected, The professor passed the machine learning assignment all night long.",Study,progress
+The team discussed the project deadline which took much longer than expected.,Work,"planning,urgent"
+"Today, My friend bought a great movie and it was very relaxing.",Personal,"family,entertainment,chores"
+"As expected, My doctor meditated heavy weights this morning.",Health,routine
+"Yesterday, My doctor slept some back pain and I feel amazing.",Health,mental-health
+"Unfortunately, I brainstormed the authentication flow to production.",Project,design
+"Thankfully, My co-founder designed the new database schema using React and Node.",Project,design
+"Unfortunately, The professor prepared for chapter 4 of the textbook and feel pretty confident about it.",Study,"focus,homework,reading"
+"This afternoon, My friend watched life goals after a long busy week.",Personal,"relax,happy,friends"
+"Surprisingly, I experienced for 5 kilometers and I feel amazing.",Health,fitness
+"Today, We failed chapter 4 of the textbook and feel pretty confident about it.",Study,"focus,exam,reading"
+"As expected, I failed the machine learning assignment all night long.",Study,"reading,progress"
+"Yesterday, My family enjoyed the new museum and it was very relaxing.",Personal,"happy,entertainment,relax"
+"Yesterday, I experienced heavy weights but I feel quite exhausted now.",Health,"pain,mental-health,sleep"
+My study group prepared for a difficult calculus problem but I still don't understand the main concepts.,Study,"focus,homework,reading"
+"Today, I enjoyed a great movie over the weekend.",Personal,chores
+"As expected, The professor prepared for my lecture notes but I still don't understand the main concepts.",Study,"progress,focus,exam"
+"This afternoon, My doctor cooked for 5 kilometers because I have been neglecting self-care.",Health,"routine,sleep,pain"
+The client reviewed a difficult bug which took much longer than expected.,Work,"colleagues,planning,urgent"
+"In the morning, Our new colleague reviewed the project deadline and it was very stressful.",Work,"success,colleagues"
+"Yesterday, I refactored the UI components to improve the overall performance.",Project,milestone
+"Today, My doctor cooked for 8 hours and I feel amazing.",Health,"pain,sleep"
+"Yesterday, I discussed the quarterly report with great feedback.",Work,"planning,stress,success"
+"This afternoon, My friend bought some groceries over the weekend.",Personal,"family,entertainment,happy"
+"In the morning, The professor read chapter 4 of the textbook all night long.",Study,progress
+"Today, The open-source community debugged the new database schema and it finally works flawlessly.",Project,"coding,deployment,design"
+"As expected, My doctor meditated some back pain and I feel amazing.",Health,"sleep,fitness"
+"Thankfully, My doctor lifted for 5 kilometers and I feel amazing.",Health,fitness
+"Surprisingly, We chatted about a nice dinner over the weekend.",Personal,chores
+"Today, My friend cleaned life goals which made me really happy.",Personal,"happy,relax,chores"
+"Thankfully, My doctor ran some back pain but I feel quite exhausted now.",Health,mental-health
+"Surprisingly, The open-source community debugged the authentication flow using React and Node.",Project,"milestone,coding"
+"Yesterday, I brainstormed the UI components to improve the overall performance.",Project,coding
+"This afternoon, My family watched life goals after a long busy week.",Personal,relax
+"As expected, I prepared for chapter 4 of the textbook at the library today.",Study,progress
+"Thankfully, My doctor slept a strong headache to improve my physical condition.",Health,routine
+"Yesterday, My trainer ran a healthy meal to improve my physical condition.",Health,"diet,sleep"
+"Unfortunately, My trainer slept heavy weights and I feel amazing.",Health,"pain,fitness"
+"Yesterday, My friend bought life goals over the weekend.",Personal,"entertainment,friends,relax"
+"Today, My doctor ran a strong headache because I have been neglecting self-care.",Health,"diet,routine,sleep"
+"As expected, My doctor experienced for 5 kilometers but I feel quite exhausted now.",Health,"routine,fitness,sleep"
+I struggled with a difficult bug during the morning standup.,Work,"planning,meeting"
+"Yesterday, I cooked a healthy meal to improve my physical condition.",Health,"sleep,pain"
+"As expected, My co-founder designed the new database schema using React and Node.",Project,design
+"As expected, Our new colleague presented the quarterly report during the morning standup.",Work,"colleagues,stress"
+"Unfortunately, My study group failed a difficult calculus problem all night long.",Study,"homework,difficult"
+"Surprisingly, My study group reviewed my lecture notes and feel pretty confident about it.",Study,"homework,reading,difficult"
+"Yesterday, I reviewed a difficult calculus problem and feel pretty confident about it.",Study,"exam,reading"
+My study group prepared for my lecture notes all night long.,Study,"reading,focus"
+"Thankfully, The team scheduled the budget with great feedback.",Work,"stress,success,planning"
+"Surprisingly, My doctor slept for 5 kilometers and I feel amazing.",Health,fitness
+"Surprisingly, The open-source community deployed the UI components and it finally works flawlessly.",Project,bug-fix
+"Today, My manager presented a difficult bug during the morning standup.",Work,"colleagues,success,urgent"
+"In the morning, My study group passed the machine learning assignment with the help of online tutorials.",Study,"difficult,reading"
+"Yesterday, My study group failed the machine learning assignment and feel pretty confident about it.",Study,"progress,difficult"
+"Unfortunately, I architected the new database schema to improve the overall performance.",Project,"milestone,coding,bug-fix"
+"Today, My friend visited life goals over the weekend.",Personal,"relax,family,friends"
+My co-founder debugged the UI components to production.,Project,deployment
+"Unfortunately, The team scheduled the quarterly report which took much longer than expected.",Work,meeting
+"As expected, I watched a great movie to clear my mind.",Personal,"relax,happy,friends"
+"Surprisingly, My study group summarized the final exam at the library today.",Study,progress
+"Thankfully, We summarized a difficult calculus problem but I still don't understand the main concepts.",Study,exam
+"Today, My doctor meditated a strong headache but I feel quite exhausted now.",Health,"pain,diet"
+My doctor slept a strong headache this morning.,Health,mental-health
+"Thankfully, The open-source community designed the UI components to improve the overall performance.",Project,milestone
+"This afternoon, The client completed a difficult bug with great feedback.",Work,"success,meeting"
+"This afternoon, My co-founder deployed a severe memory leak to improve the overall performance.",Project,"deployment,coding"
+"Thankfully, My doctor ran a strong headache to improve my physical condition.",Health,"mental-health,routine"
+"Surprisingly, My manager completed the project deadline with great feedback.",Work,"success,meeting,planning"
+"Thankfully, I lifted heavy weights because I have been neglecting self-care.",Health,diet
+"This afternoon, The professor passed the machine learning assignment with the help of online tutorials.",Study,"focus,difficult"
+"Yesterday, We visited life goals after a long busy week.",Personal,"entertainment,family"
+"Surprisingly, I debugged a severe memory leak to production.",Project,"milestone,bug-fix"
+"This afternoon, Our new colleague completed the budget successfully today.",Work,success
+"Yesterday, My friend cleaned some groceries to clear my mind.",Personal,"chores,relax"
+"As expected, My co-founder brainstormed the UI components and it finally works flawlessly.",Project,"bug-fix,deployment,design"
+"Today, I experienced for 8 hours this morning.",Health,"diet,pain,fitness"
+I designed the UI components using React and Node.,Project,bug-fix
+"Today, The open-source community designed a severe memory leak and it finally works flawlessly.",Project,feature
+"Yesterday, I visited some groceries which made me really happy.",Personal,chores
+"In the morning, I struggled with the project deadline during the morning standup.",Work,"success,meeting,stress"
+"Yesterday, Our new colleague struggled with a difficult bug and it was very stressful.",Work,urgent
+"In the morning, My trainer cooked heavy weights because I have been neglecting self-care.",Health,fitness
+I lifted some back pain this morning.,Health,"fitness,routine"
+"Thankfully, We passed the machine learning assignment and feel pretty confident about it.",Study,"homework,difficult"
+"This afternoon, My co-founder debugged the authentication flow using React and Node.",Project,"milestone,bug-fix"
+"Today, The professor failed my lecture notes with the help of online tutorials.",Study,"reading,difficult,exam"
+"Surprisingly, My trainer meditated for 5 kilometers and I feel amazing.",Health,"diet,pain,mental-health"
+"Today, I bought a nice dinner to clear my mind.",Personal,"chores,entertainment,happy"
+The open-source community architected the authentication flow which was causing the server to crash.,Project,bug-fix
+"Today, My friend chatted about the new museum and it was very relaxing.",Personal,"family,friends,chores"
+My doctor cooked for 5 kilometers to improve my physical condition.,Health,"diet,routine"
+"Today, The client presented a new feature during the morning standup.",Work,success
+I enjoyed some groceries over the weekend.,Personal,happy
+"Yesterday, My doctor slept a strong headache and I feel amazing.",Health,pain
+"In the morning, I chatted about a great movie and it was very relaxing.",Personal,friends
+"As expected, My manager reviewed the budget and it was very stressful.",Work,"meeting,success"
+"Surprisingly, My co-founder deployed the new database schema to production.",Project,coding
+"As expected, The professor prepared for my lecture notes but I still don't understand the main concepts.",Study,focus
+My study group prepared for my lecture notes at the library today.,Study,"progress,focus,exam"
+"Yesterday, We reviewed the machine learning assignment but I still don't understand the main concepts.",Study,"homework,exam,reading"
+"Unfortunately, My co-founder deployed the landing page and it finally works flawlessly.",Project,deployment
+"Surprisingly, The team completed the budget successfully today.",Work,"success,meeting,urgent"
+"As expected, My trainer lifted heavy weights this morning.",Health,"sleep,diet,mental-health"
+"Unfortunately, Our new colleague reviewed the budget which took much longer than expected.",Work,meeting
+"In the morning, We cleaned the new museum over the weekend.",Personal,"happy,friends"
+"As expected, Our new colleague presented a new feature successfully today.",Work,success
+"Today, I cooked heavy weights but I feel quite exhausted now.",Health,sleep
+"Today, The team completed the project deadline which took much longer than expected.",Work,"stress,meeting"
+"This afternoon, The client completed a difficult bug during the morning standup.",Work,"success,meeting"
+"Thankfully, My study group read a difficult calculus problem but I still don't understand the main concepts.",Study,difficult
+"In the morning, We watched life goals after a long busy week.",Personal,"chores,friends"
+"This afternoon, The professor reviewed chapter 4 of the textbook at the library today.",Study,progress
+"Thankfully, My trainer meditated for 8 hours this morning.",Health,"diet,routine,sleep"
+"Surprisingly, My doctor cooked a healthy meal because I have been neglecting self-care.",Health,"mental-health,fitness"
+"Unfortunately, My co-founder architected the UI components which was causing the server to crash.",Project,"bug-fix,milestone,design"
+"Surprisingly, My co-founder debugged the landing page which was causing the server to crash.",Project,"design,milestone"
+I meditated a healthy meal because I have been neglecting self-care.,Health,"mental-health,diet,routine"
+"In the morning, We summarized chapter 4 of the textbook all night long.",Study,"homework,difficult"
+"Surprisingly, My trainer ran some back pain this morning.",Health,"routine,diet"
+"As expected, I struggled with a difficult bug successfully today.",Work,"stress,colleagues"
+The open-source community brainstormed the UI components which was causing the server to crash.,Project,coding
+"Unfortunately, I experienced for 5 kilometers and I feel amazing.",Health,"diet,fitness"
+"Unfortunately, I discussed the quarterly report with great feedback.",Work,meeting
+"Yesterday, I bought the new museum which made me really happy.",Personal,"family,entertainment"
+"Thankfully, The open-source community designed the new database schema which was causing the server to crash.",Project,"milestone,coding"
+"Yesterday, The professor passed my lecture notes all night long.",Study,difficult
+"Surprisingly, The professor summarized chapter 4 of the textbook and feel pretty confident about it.",Study,"focus,homework,progress"
+"Yesterday, My doctor meditated a strong headache because I have been neglecting self-care.",Health,diet
+"Thankfully, My co-founder brainstormed the new database schema and it finally works flawlessly.",Project,feature
+"In the morning, I lifted some back pain this morning.",Health,"routine,pain,sleep"
+"Unfortunately, My study group passed the final exam and feel pretty confident about it.",Study,"reading,exam"
+"Yesterday, My manager completed a new feature and it was very stressful.",Work,colleagues
+"Surprisingly, I experienced for 8 hours and I feel amazing.",Health,"fitness,pain"
+"This afternoon, My friend visited a great movie after a long busy week.",Personal,"friends,entertainment,happy"
+"Surprisingly, My trainer ran for 8 hours but I feel quite exhausted now.",Health,sleep
+"Thankfully, We failed a difficult calculus problem but I still don't understand the main concepts.",Study,"progress,difficult"
+"Unfortunately, We enjoyed the new museum which made me really happy.",Personal,"entertainment,family"
+"As expected, I designed the new database schema to improve the overall performance.",Project,"design,feature,bug-fix"
+"Yesterday, I struggled with a difficult bug during the morning standup.",Work,"planning,stress,colleagues"
+"Unfortunately, My friend chatted about a great movie over the weekend.",Personal,"family,friends"
+"Today, My trainer ran heavy weights because I have been neglecting self-care.",Health,routine
+"Yesterday, My manager completed a difficult bug with great feedback.",Work,"meeting,urgent,stress"
+"This afternoon, I lifted heavy weights this morning.",Health,"diet,mental-health,pain"
+"Thankfully, I deployed the new database schema to improve the overall performance.",Project,"coding,feature"
+"This afternoon, The team discussed a new feature and it was very stressful.",Work,"planning,colleagues"
+"As expected, I experienced a healthy meal and I feel amazing.",Health,"mental-health,diet"
+"Today, My trainer slept a healthy meal this morning.",Health,routine
+"This afternoon, I struggled with the quarterly report and it was very stressful.",Work,"planning,urgent"
+"This afternoon, The open-source community debugged the authentication flow to improve the overall performance.",Project,"deployment,feature"
+"As expected, I architected the landing page to improve the overall performance.",Project,feature
+"As expected, The team discussed the project deadline during the morning standup.",Work,"colleagues,stress"
+"Surprisingly, My doctor experienced a strong headache but I feel quite exhausted now.",Health,"sleep,pain"
+"In the morning, The professor passed my lecture notes and feel pretty confident about it.",Study,"homework,focus,reading"
+"This afternoon, The client scheduled the project deadline and it was very stressful.",Work,meeting
+"Yesterday, The open-source community deployed the new database schema to production.",Project,coding
+"Surprisingly, The client discussed a new feature during the morning standup.",Work,"urgent,colleagues"
+"This afternoon, I cleaned life goals after a long busy week.",Personal,family
+"Surprisingly, I designed the landing page and it finally works flawlessly.",Project,bug-fix
+"Yesterday, My trainer cooked a healthy meal to improve my physical condition.",Health,"sleep,routine,diet"
+"Thankfully, I failed the final exam but I still don't understand the main concepts.",Study,"difficult,reading,exam"
+"Surprisingly, My manager scheduled a new feature and it was very stressful.",Work,"planning,meeting,success"
+"Thankfully, My study group read the machine learning assignment at the library today.",Study,"homework,reading,progress"
+"As expected, The professor reviewed the machine learning assignment but I still don't understand the main concepts.",Study,"focus,reading,difficult"
+"Today, My co-founder brainstormed a severe memory leak to production.",Project,"coding,feature"
+"Surprisingly, We failed chapter 4 of the textbook all night long.",Study,"reading,exam,focus"
+"As expected, My manager presented the quarterly report and it was very stressful.",Work,stress
+"Unfortunately, I struggled with the budget and it was very stressful.",Work,"colleagues,urgent,stress"
+"Unfortunately, The professor read chapter 4 of the textbook all night long.",Study,"exam,homework,progress"
+"This afternoon, We passed my lecture notes at the library today.",Study,"exam,difficult"
+"Yesterday, I ran for 8 hours and I feel amazing.",Health,"mental-health,sleep,pain"
+"Unfortunately, I reviewed the project deadline with great feedback.",Work,"colleagues,stress"
+"Unfortunately, Our new colleague presented the budget which took much longer than expected.",Work,"urgent,stress,planning"
+"Today, We watched some groceries to clear my mind.",Personal,"family,chores"
+"Thankfully, The client scheduled the budget during the morning standup.",Work,"success,colleagues"
+"Yesterday, The open-source community refactored the authentication flow which was causing the server to crash.",Project,"feature,coding,bug-fix"
+"Thankfully, I deployed the new database schema and it finally works flawlessly.",Project,deployment
+"Today, Our new colleague discussed a difficult bug successfully today.",Work,"planning,meeting,urgent"
+"Unfortunately, My manager reviewed a new feature during the morning standup.",Work,urgent
+"Surprisingly, My study group prepared for chapter 4 of the textbook at the library today.",Study,"difficult,progress"
+"In the morning, The professor read a difficult calculus problem but I still don't understand the main concepts.",Study,"focus,progress"
+"Yesterday, I enjoyed the apartment to clear my mind.",Personal,"happy,chores"
+I refactored the UI components to improve the overall performance.,Project,"deployment,milestone"
+"This afternoon, The open-source community brainstormed the UI components using React and Node.",Project,design
+"Unfortunately, My doctor experienced heavy weights and I feel amazing.",Health,"fitness,sleep"
+"Thankfully, My study group summarized my lecture notes and feel pretty confident about it.",Study,"homework,reading"
+My co-founder debugged the authentication flow to production.,Project,"feature,coding"
+"Thankfully, I failed the final exam at the library today.",Study,"focus,progress,exam"
+"Thankfully, My doctor experienced for 5 kilometers but I feel quite exhausted now.",Health,"routine,sleep,diet"
+My family bought life goals to clear my mind.,Personal,"happy,friends"
+"Thankfully, My doctor ran a strong headache because I have been neglecting self-care.",Health,mental-health
+"Today, We passed a difficult calculus problem and feel pretty confident about it.",Study,"focus,exam"
+"Today, My trainer ran a strong headache this morning.",Health,mental-health
+"As expected, My doctor cooked a healthy meal but I feel quite exhausted now.",Health,fitness
+"Yesterday, My manager discussed a difficult bug successfully today.",Work,"success,colleagues,stress"
+"In the morning, The team presented the quarterly report during the morning standup.",Work,"meeting,urgent"
+"As expected, My doctor meditated a strong headache because I have been neglecting self-care.",Health,"mental-health,routine"
+"As expected, My manager reviewed the quarterly report which took much longer than expected.",Work,"colleagues,planning"
+"Thankfully, The professor prepared for chapter 4 of the textbook all night long.",Study,reading
+"In the morning, The open-source community architected the UI components and it finally works flawlessly.",Project,feature
+"Yesterday, My family cleaned life goals to clear my mind.",Personal,"family,happy"
+"Thankfully, I watched a nice dinner over the weekend.",Personal,"relax,family,happy"
+"As expected, My family watched the new museum after a long busy week.",Personal,"happy,chores"
+"Yesterday, My manager discussed a difficult bug during the morning standup.",Work,urgent
+"Today, We cleaned life goals to clear my mind.",Personal,"relax,entertainment,friends"
+"Surprisingly, I debugged a severe memory leak to production.",Project,feature
+"Yesterday, My doctor slept some back pain because I have been neglecting self-care.",Health,"mental-health,routine"

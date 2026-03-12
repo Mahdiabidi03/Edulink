@@ -96,6 +96,10 @@ class FaceIdController extends AbstractController
         return new JsonResponse(['error' => 'Face not recognized'], 401);
     }
 
+    /**
+     * @param array<int, float> $a
+     * @param array<int, float> $b
+     */
     private function euclideanDistance(array $a, array $b): float
     {
         if (count($a) !== count($b)) {

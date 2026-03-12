@@ -1,0 +1,34 @@
+separate terminal:
+
+Terminal 1 — ML API (port 5000):
+
+powershell
+cd "c:\Users\dali\Downloads\edulink5.0\edulink keml\ml"
+python api.py
+Terminal 2 — Sentiment API (port 5001):
+
+powershell
+cd "c:\Users\dali\Downloads\edulink5.0\edulink keml\sentiment_api"
+python app.py
+Terminal 3 — Study Advisor API (port 5002):
+
+powershell
+cd "c:\Users\dali\Downloads\edulink5.0\edulink keml\study_advisor_api"
+python app.py
+Terminal 4 — Symfony (port 8000):
+
+powershell
+cd "c:\Users\dali\Downloads\edulink5.0\edulink keml"
+symfony server:start --no-tls
+
+# 1. Copy the entire mahdi/ folder (including models/)
+# 2. Install dependencies
+pip install -r mahdi/requirements.txt
+
+# 3. Start the server (from project root)
+uvicorn mahdi.main:app --reload --port 8000
+
+# OR from inside the mahdi/ folder:
+cd mahdi
+uvicorn main:app --reload --port 8000
+python -m uvicorn mahdi.main:app --host 127.0.0.1 --port 8001
